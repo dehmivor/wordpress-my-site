@@ -7,30 +7,22 @@ on:
 
 jobs:
   web-deploy:
-    name: Deploy to Server via FTP
+    name: Deploy to Server via SFTP/SSH
     runs-on: ubuntu-latest
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
       
-      - name: 📂 Sync files to Server
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.3
+      - name: 📂 Sync files to Server via SCP
+        uses: appleboy/scp-action@master
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          host: ${{ secrets.SSH_HOST }}         # Phải thiết lập trong Github Secrets (VD: 116.125.141.61)
+          username: ${{ secrets.SSH_USERNAME }} # Phải thiết lập trong Github Secrets (VD: root)
+          password: ${{ secrets.SSH_PASSWORD }} # Phải thiết lập trong Github Secrets (VD: dE839640)
+          port: 22
           
-          # CHỈ ĐỊNH ĐÚNG THƯ MỤC CẦN ĐẨY LÊN (VÍ DỤ: THEME ASTRA-CHILD)
-          # local-dir là thư mục trên GitHub/máy tính của bạn
-          local-dir: ./wp-content/themes/astra-child/
+          # Chỉ định file/thư mục trên Github của bạn muốn đẩy lên
+          source: "wp-content/themes/astra-child"
           
-          # server-dir là thư mục tương ứng trên InfinityFree
-          server-dir: /htdocs/wp-content/themes/astra-child/
-          
-          # Bỏ qua không đồng bộ những file này lên server
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            .gitignore
-            README.md
+          # Thư mục gốc chứa web trên Server
+          target: "/home/wp-home/"
