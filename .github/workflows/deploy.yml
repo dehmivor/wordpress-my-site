@@ -19,7 +19,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # server-dir: /public_html/ # Bỏ comment và sửa nếu thư mục web của bạn không ở gốc
+          server-dir: /htdocs/
           # Bỏ qua không đồng bộ những file này lên server
           exclude: |
             **/.git*
