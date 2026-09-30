@@ -16,9 +16,9 @@ jobs:
       - name: 📂 Sync files to Server via SCP
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}         # Phải thiết lập trong Github Secrets (VD: 116.125.141.61)
-          username: ${{ secrets.SSH_USERNAME }} # Phải thiết lập trong Github Secrets (VD: root)
-          password: ${{ secrets.SSH_PASSWORD }} # Phải thiết lập trong Github Secrets (VD: dE839640)
+          host: ${{ secrets.SSH_HOST }}         # Thiết lập trong Github Secrets
+          username: ${{ secrets.SSH_USERNAME }} # Thiết lập trong Github Secrets
+          password: ${{ secrets.SSH_PASSWORD }} # Thiết lập trong Github Secrets
           port: 22
           
           # Chỉ định file/thư mục trên Github của bạn muốn đẩy lên
