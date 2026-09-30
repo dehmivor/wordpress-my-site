@@ -1,0 +1,14 @@
+.edd-tax-rates-dialog {
+	&__content {
+		.edd-select-chosen {
+			width: 100% !important;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 10px;
+		margin-top: 1em;
+	}
+}

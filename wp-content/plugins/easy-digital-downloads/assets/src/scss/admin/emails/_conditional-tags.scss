@@ -1,0 +1,88 @@
+/**
+ * Conditional tags modal UI in the email editor.
+ */
+@use "../../variables/colors";
+
+.edd-modal--conditional-tags {
+	max-width: 850px;
+	overflow: visible;
+
+	.edd-modal__content {
+		overflow: visible;
+	}
+
+	.edd-form-row {
+		align-items: flex-start;
+	}
+
+	.edd-select-chosen {
+		width: 300px;
+	}
+}
+
+.edd-modal--conditional-tags .edd-modal__footer {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 20px 16px;
+	border-top: 1px solid #ddd;
+}
+
+.edd-ct__notice--error {
+	width: 100%;
+	margin: 0 0 8px !important;
+}
+
+.edd-ct__conjunction {
+	min-width: 65px;
+}
+
+.edd-ct__value {
+	flex: 1;
+	input,
+	select {
+		width: 100%;
+		box-sizing: border-box;
+	}
+}
+
+.edd-ct__remove {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+
+	.button-link-delete {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0;
+
+		.dashicons {
+			line-height: normal;
+		}
+	}
+}
+
+.edd-ct__if-label {
+	display: block;
+	box-sizing: border-box;
+	border: 1px solid colors.$wp-input-border-2;
+	border-radius: 2px;
+	background: colors.$wp-alternate;
+	color: colors.$wp-input-text;
+	font-weight: 600;
+	min-height: 40px;
+	line-height: 38px;
+	padding: 0 12px;
+	text-align: center;
+	cursor: default;
+	width: 100%;
+
+	body[class*="branch-6"] & {
+		border-radius: 4px;
+		min-height: 30px;
+		line-height: 28px;
+		padding: 0 8px;
+	}
+}

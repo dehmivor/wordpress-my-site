@@ -1,0 +1,13 @@
+
+:root {
+	--edd-light-gray: #f4f7fa; // from our brand assets.
+	--edd-very-light-gray: #e8e8e8;
+	--edd-blue-gray: #35495c; // from our brand assets.
+	--edd-light-blue: #01b7ff; // from our brand assets.
+	--edd-alert-red: #d63638;
+	--edd-alert-red-hover: #b60012;
+	--edd-notice-green: #1da867;
+	--edd-notice-green-hover: #199155;
+	--edd-wp-admin-theme-color: var(--wp-admin-theme-color, #007cba); // remove when WP minimum is 6.9
+	--edd-wp-admin-theme-color-darker-10: var(--wp-admin-theme-color-darker-10, #006ba1);
+}

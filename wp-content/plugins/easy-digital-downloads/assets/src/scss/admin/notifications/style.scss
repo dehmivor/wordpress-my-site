@@ -1,0 +1,155 @@
+@use "../../variables/colors" as colors;
+
+/* Notifications
+-------------------------------------------------------------- */
+dialog#edd-notifications-panel {
+	background-color: white;
+	border: none;
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	width: 100%;
+	max-height: none;
+	max-width: 570px;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+	transition: transform .3s ease;
+	transform: translateX(100%);
+
+	&.edd-panel--open {
+		transform: translateX(0%);
+	}
+
+	&::backdrop {
+		background-color: #141b38;
+		opacity: .5;
+	}
+}
+body.admin-bar dialog#edd-notifications-panel {
+	top: 32px;
+}
+@media screen and (max-width: 600px) {
+	body.admin-bar dialog#edd-notifications-panel {
+		top: 46px;
+	}
+}
+
+#edd-notifications-header {
+	display: flex;
+	align-items: center;
+	padding: 0 30px;
+	color: #fff;
+	background-color: var(--edd-light-blue);
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+#edd-notifications-header h3 {
+	color: #fff;
+	flex: 1;
+}
+#edd-notifications-header .edd-notifications-view-toggle {
+	background: none;
+	border: none;
+	color: #fff;
+	cursor: pointer;
+	font-size: 13px;
+	padding: 5px 10px;
+	text-decoration: underline;
+	white-space: nowrap;
+}
+#edd-notifications-header .edd-notifications-view-toggle:hover {
+	text-decoration: none;
+}
+#edd-notifications-header .edd-close {
+	background: none;
+	border: none;
+	color: #fff;
+	cursor: pointer;
+}
+
+#edd-notifications-body {
+	padding: 30px;
+}
+
+.edd-notification {
+	display: flex;
+	gap: 20px;
+	margin-bottom: 20px;
+}
+.edd-notification--icon {
+	color: #00aa63;
+}
+.edd-notification--icon.edd-notification--icon-info {
+	color: #005ae0;
+}
+.edd-notification--icon.edd-notification--icon-warning {
+	color: colors.$warning;
+}
+.edd-notification--icon.edd-notification--icon-error {
+	color: #df2a4a;
+}
+.edd-notification--body {
+	flex: 1;
+	min-width: 0;
+}
+.edd-notification--content img {
+	max-width: 100%;
+	height: auto;
+}
+.edd-notification--header {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	gap: 5px;
+	margin-bottom: 7px;
+}
+.edd-notification--title {
+	color: #141b38;
+	flex: 1;
+	font-size: 16px;
+	font-weight: 600;
+	margin: 0;
+}
+.edd-notification--date {
+	color: #71747e;
+	font-size: 12px;
+}
+.edd-notification--actions {
+	flex-wrap: wrap;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 10px;
+}
+.edd-notification--dismiss {
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #71747e !important;
+	cursor: pointer;
+	padding: 0 10px;
+	text-decoration: underline;
+}
+.edd-notification--dismiss:hover {
+	text-decoration: none;
+}
+
+/* Hide the flyout when the notification panel is open. */
+.edd-notifications-open #edd-flyout {
+	display: none;
+}
+
+/* Dismissed notifications */
+.edd-notification--dismissed {
+	opacity: .65;
+
+	.edd-notification--dismiss {
+		display: none;
+	}
+}

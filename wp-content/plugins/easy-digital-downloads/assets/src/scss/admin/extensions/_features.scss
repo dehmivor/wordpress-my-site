@@ -1,0 +1,14 @@
+@use "../../variables/colors" as colors;
+
+.edd-extension-manager__features {
+	ul {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		text-align: left;
+	}
+
+	.dashicons-yes {
+		color: colors.$wp-green-50;
+		margin-right: .25em;
+	}
+}

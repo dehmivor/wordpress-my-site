@@ -1,0 +1,554 @@
+/**
+ * Checkout Templates Browser Styles
+ *
+ * @package EDD
+ * @since   3.7.0 */
+
+@use "../variables/mixins" as mixins;
+@use "../variables/colors";
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+
+// Accessibility: Reduce motion for users who prefer it.
+@media (prefers-reduced-motion: reduce) {
+	.edd-checkout-templates__card,
+	.edd-checkout-templates-modal,
+	.edd-checkout-templates__import-dialog,
+	.edd-checkout-templates__upgrade-prompt {
+		transition: none !important;
+		animation: none !important;
+		transform: none !important;
+	}
+
+	// Disable hover transform.
+	.edd-checkout-templates__card:hover {
+		transform: none !important;
+	}
+}
+
+// Self-sufficient custom-property fallbacks. Elementor's editor strips WP admin
+// stylesheets (including edd-admin, where these vars are normally defined in
+// admin/general/_root.scss), so the feature declares its own values here. This
+// keeps the Elementor editor and the settings-screen surface converged on the
+// same colors instead of the editor falling back to browser/theme defaults.
+[class*="edd-checkout-templates"] {
+	--edd-notice-green: #1da867;
+	--edd-notice-green-hover: #199155;
+
+	// Notice status colors — version-independent, scoped to our UI only.
+	// WordPress 6.8 ships `.components-notice.is-info` unstyled, so a non-error
+	// notice can render in the error color. Define the left-border + background for
+	// all four statuses so notices read correctly and consistently on 6.8 and 7.x.
+	// Scoped under the feature class prefix so global notices are untouched.
+	.components-notice {
+		&.is-info {
+			border-left: 4px solid colors.$wp-blue-500;
+			background-color: #f0f6fc;
+		}
+
+		&.is-success {
+			border-left: 4px solid colors.$alert-green;
+			background-color: #edfaef;
+		}
+
+		&.is-warning {
+			border-left: 4px solid colors.$alert-yellow;
+			background-color: #fcf9e8;
+		}
+
+		&.is-error {
+			border-left: 4px solid colors.$alert-red;
+			background-color: #fcf0f1;
+		}
+	}
+}
+
+// Main container.
+.edd-checkout-templates {
+	// Loading state.
+	&__loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: 200px;
+		gap: 1em;
+
+		.components-spinner {
+			margin: 0;
+		}
+
+		p {
+			margin: 0;
+			color: colors.$wp-gray-600;
+		}
+	}
+
+	// Empty state.
+	&__empty {
+		text-align: center;
+		padding: 40px 20px;
+		background: colors.$wp-alternate;
+		border: 1px solid colors.$wp-input-border;
+		border-radius: 4px;
+
+		p {
+			margin: 0;
+			color: colors.$wp-gray-600;
+		}
+	}
+}
+
+// Grid wrapper.
+.edd-checkout-templates__grid-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+// Filters.
+.edd-checkout-templates__filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 16px;
+	padding: 16px;
+	background: colors.$wp-alternate;
+	border: 1px solid colors.$wp-input-border;
+	border-radius: 4px;
+
+	.components-search-control {
+		flex: 1;
+		min-width: 200px;
+	}
+
+	.components-select-control {
+		min-width: 150px;
+	}
+
+	@media only screen and (max-width: wp-breakpoints.$break-small) {
+		.components-search-control,
+		.components-select-control {
+			width: 100%;
+			min-width: 0;
+		}
+	}
+}
+
+// Template grid.
+.edd-checkout-templates__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 24px;
+}
+
+// Template card.
+.edd-checkout-templates__card {
+	display: flex;
+	flex-direction: column;
+	background: #fff;
+	border: 1px solid colors.$wp-input-border;
+	border-radius: 8px;
+	overflow: hidden;
+	transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+	&:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		transform: translateY(-2px);
+	}
+
+	// Focus-within for keyboard navigation - highlight card when any child is focused.
+	&:focus-within {
+		outline: 2px solid #3858e9;
+		outline-offset: 2px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	}
+
+	&-thumbnail {
+		position: relative;
+		aspect-ratio: 16 / 10;
+		background: colors.$wp-alternate;
+		overflow: hidden;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: top;
+		}
+	}
+
+	&-placeholder {
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(135deg, colors.$wp-alternate 0%, colors.$wp-gray-5 100%);
+	}
+
+	&-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 16px;
+	}
+
+	&-title {
+		margin: 0 0 8px;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.3;
+	}
+
+	&-description {
+		margin: 0 0 12px;
+		font-size: 13px;
+		color: colors.$wp-gray-700;
+		line-height: 1.5;
+	}
+
+	&-meta {
+		display: flex;
+		gap: 8px;
+		margin-top: auto;
+	}
+
+	&-unavailable {
+		margin: 8px 0 20px;
+		padding: 6px 10px;
+		// Match the feature's `.components-notice.is-info` info treatment.
+		border-left: 4px solid colors.$wp-blue-500;
+		background-color: #f0f6fc; // Light info background, same literal as .is-info.
+		font-size: 12px;
+		color: colors.$wp-gray-900;
+		line-height: 1.4;
+	}
+
+	&-editor {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 8px;
+		background: colors.$wp-alternate;
+		font-size: 11px;
+		border-radius: 4px;
+
+		.dashicons {
+			width: 12px;
+			height: 12px;
+			font-size: 12px;
+		}
+	}
+
+	&-actions {
+		display: flex;
+		gap: 8px;
+		padding: 12px 16px;
+		border-top: 1px solid colors.$wp-input-border;
+		background: colors.$wp-alternate;
+
+		.components-button {
+			flex: 1;
+			justify-content: center;
+		}
+	}
+}
+
+// Modal styles.
+.edd-checkout-templates-modal {
+	&.components-modal__frame {
+		max-width: 1200px;
+		max-height: 95vh;
+		width: 100%;
+		height: 100%;
+
+		@media only screen and (max-width: wp-breakpoints.$break-small) {
+			max-width: calc(100vw - 32px);
+			max-height: calc(100vh - 80px);
+			margin: 40px auto 0;
+			left: 0;
+			right: 0;
+		}
+	}
+
+	// Flex column: the modal content bounds the layout so the scrollable body
+	// (.edd-checkout-templates) can scroll and footer panels stay pinned.
+	.components-modal__content {
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	// The WP Modal children wrapper must be a bounded flex column so the
+	// template grid scrolls and the footer panels stay pinned. Target the
+	// stable component class, plus a version-agnostic positional fallback
+	// for older WP versions that don't emit that class on the wrapper.
+	.components-modal__children-container,
+	.components-modal__content > div:not(.components-modal__header) {
+		flex: 1;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	.components-modal__header {
+		padding: 16px 24px;
+		border-bottom: 1px solid colors.$wp-input-border;
+		flex-shrink: 0;
+	}
+
+	.edd-checkout-templates {
+		padding: 24px;
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		max-width: none;
+		margin: 0;
+	}
+}
+
+// Footer panel base styles — pins import/result/upgrade panels to the bottom of the modal.
+// Only applies when rendered as inline <section> (not Modal).
+section.edd-checkout-templates__import-dialog,
+section.edd-checkout-templates__result-dialog,
+section.edd-checkout-templates__upgrade-prompt {
+	flex-shrink: 0;
+	margin: 0;
+	border-top: 1px solid colors.$wp-input-border;
+	padding: 18px 24px 20px;
+	max-width: none;
+}
+
+// Footer panel title.
+.edd-checkout-templates__footer-panel-title {
+	font-size: 14px;
+	font-weight: 600;
+	color: colors.$wp-gray-900;
+	margin-bottom: 10px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+// Disabled Import button styles.
+.edd-checkout-templates__card-actions {
+	.components-button[disabled],
+	.components-button:disabled,
+	.components-button[aria-disabled="true"] {
+		opacity: 0.6;
+		cursor: default;
+	}
+
+	.components-button[disabled],
+	.components-button:disabled {
+		pointer-events: none;
+	}
+}
+
+// Trigger button.
+.edd-checkout-templates__trigger {
+	margin-top: 8px;
+}
+
+// Dialog notices — shared spacing for the import and result dialog wrappers.
+.edd-checkout-templates__import-dialog-content .components-notice,
+.edd-checkout-templates__result-dialog-content .components-notice {
+	margin: 0 0 16px;
+}
+
+// Import dialog.
+.edd-checkout-templates__import-dialog {
+	&-template {
+		margin: 0 0 12px;
+		font-size: 14px;
+	}
+
+	&-revision {
+		margin: 0 0 20px;
+		padding: 12px;
+		background: colors.$wp-alternate;
+		border-radius: 4px;
+		font-size: 13px;
+		line-height: 1.5;
+	}
+
+	// Rendered as <fieldset> for a11y grouping; reset the UA border/padding/margins.
+	&-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin: 0;
+		padding: 16px 0 0;
+		border: 0;
+		border-top: 1px solid colors.$wp-input-border;
+		min-inline-size: 0;
+	}
+}
+
+// Fixed (non-scheme) focus ring for the feature's modal buttons. WP buttons render
+// focus via box-shadow, so a bare outline would not visually replace it.
+.edd-checkout-templates-modal .components-button:focus,
+.edd-checkout-templates-modal .components-button:focus-visible {
+	box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) #3858e9;
+	outline: 2px solid transparent;
+}
+
+// Upgrade prompt — constrain width only for the nested Modal variant (class is on the frame).
+.components-modal__frame.edd-checkout-templates__upgrade-prompt {
+	max-width: 450px;
+}
+
+// Upgrade prompt.
+.edd-checkout-templates__upgrade-prompt {
+	.components-modal__content {
+		padding: 16px 24px 24px;
+	}
+
+	// Inline (Lite) variant renders the message directly inside the section.
+	// Give it the same breathing room as the modal variant so it does not
+	// crowd against the actions divider.
+	> p {
+		margin: 0 0 20px;
+		font-size: 14px;
+		line-height: 1.6;
+	}
+
+	&-content {
+		p {
+			margin: 0 0 20px;
+			font-size: 14px;
+			line-height: 1.6;
+		}
+	}
+
+	// Inline variant renders the message and its action button together inside
+	// the Notice; lay them out in a single row instead of stacking.
+	.components-notice__content {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+
+		p {
+			margin: 0;
+		}
+	}
+
+	// WP always renders this element even when it has no children; hide it so it
+	// does not misalign the upgrade/renew button.
+	.components-notice__actions:empty {
+		display: none;
+	}
+
+	// Rendered as <fieldset> for a11y grouping; reset the UA border/padding/margins.
+	&-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin: 0;
+		padding: 16px 0 0;
+		border: 0;
+		border-top: 1px solid colors.$wp-input-border;
+		min-inline-size: 0;
+	}
+
+	// Render the prompt's primary CTAs (Upgrade / Manage License / Renew) in EDD green.
+	.edd-checkout-templates__upgrade-cta.is-primary {
+		background: var(--edd-notice-green, #1da867);
+		border-color: var(--edd-notice-green, #1da867);
+
+		&:hover,
+		&:active,
+		&:focus {
+			background: var(--edd-notice-green-hover, #199155);
+			border-color: var(--edd-notice-green-hover, #199155);
+		}
+
+		// Beat the WP admin-color scheme's :focus box-shadow with the feature's fixed ring.
+		&:focus {
+			box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) #3858e9;
+		}
+	}
+}
+
+// Result dialog.
+.edd-checkout-templates__result-dialog {
+	&-content {
+		p {
+			margin: 0 0 12px;
+		}
+	}
+
+	// Rendered as <fieldset> for a11y grouping; reset the UA border/padding/margins.
+	&-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin: 0;
+		padding: 16px 0 0;
+		border: 0;
+		border-top: 1px solid colors.$wp-input-border;
+		min-inline-size: 0;
+	}
+
+	&-confirm {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+	}
+}
+
+// Compact notice variant — collapses vertical padding for inline success messages.
+.edd-checkout-templates__notice--compact {
+	&.components-notice {
+		padding-top: 8px;
+		padding-bottom: 8px;
+		margin-bottom: 16px;
+
+		.components-notice__content {
+			margin: 0;
+		}
+	}
+}
+
+// Notice actions.
+.edd-checkout-templates__notice-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin-top: 8px;
+
+	.components-button {
+		text-decoration: none;
+
+		&.is-secondary {
+			min-height: 28px;
+			padding: 4px 12px;
+		}
+	}
+
+	a {
+		color: colors.$wp-gray-600;
+		text-decoration: underline;
+
+		&:hover,
+		&:focus {
+			color: colors.$wp-gray-900;
+		}
+	}
+}
+
+// License notice.
+.edd-checkout-templates__license-notice {
+	max-width: 600px;
+	margin: 40px auto;
+
+	.components-notice {
+		margin: 0;
+
+		p {
+			margin: 0 0 12px;
+		}
+	}
+}

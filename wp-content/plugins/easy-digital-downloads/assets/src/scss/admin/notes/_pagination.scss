@@ -1,0 +1,21 @@
+.edd-note-pagination {
+	float: right;
+	margin: -35px 5px 15px 5px;
+
+	a,
+	span.page-numbers {
+		padding: 5px 8px;
+		margin: 2px;
+		text-decoration: none;
+	}
+
+	a {
+		border: 1px solid #e5e5e5;
+		background: #fcfcfc;
+	}
+
+	a:last-child,
+	span.page-numbers:last-child {
+		margin-right: 0;
+	}
+}

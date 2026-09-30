@@ -1,0 +1,19 @@
+.edd-login-link {
+    border-radius: 2px;
+    border: 1px solid #bce8f1;
+    background-color: #d9edf7;
+    color: #31708f;
+    padding: 10px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+
+    &[hidden] {
+        display: none;
+    }
+
+    &__message {
+        margin: 0;
+    }
+}

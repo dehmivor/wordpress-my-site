@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "edd/profile-editor",
+	"version": "2.0.0",
+	"title": "EDD Profile Editor",
+	"category": "easy-digital-downloads",
+	"icon": "id-alt",
+	"description": "Profile editor form for Easy Digital Downloads.",
+	"keywords": [ "easy digital downloads", "edd", "profile", "account" ],
+	"supports": {
+		"html": false
+	},
+	"textdomain": "easy-digital-downloads",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"attributes": {
+		"show_address_line1":       { "type": "boolean", "default": true },
+		"show_address_line2":       { "type": "boolean", "default": true },
+		"show_address_city":        { "type": "boolean", "default": true },
+		"show_address_postal_code": { "type": "boolean", "default": true },
+		"show_address_country":     { "type": "boolean", "default": true },
+		"show_address_state":       { "type": "boolean", "default": true },
+		"show_company":             { "type": "boolean", "default": false },
+		"show_phone":               { "type": "boolean", "default": false },
+		"field_order":              { "type": "array", "default": [ "country", "line1", "line2", "city", "postal_code", "state", "company", "phone" ] }
+	},
+	"example": {
+		"attributes": {}
+	}
+}

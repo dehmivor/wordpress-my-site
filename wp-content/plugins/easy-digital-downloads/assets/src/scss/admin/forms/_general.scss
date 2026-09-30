@@ -1,0 +1,7 @@
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+
+@media screen and (max-width: wp-breakpoints.$break-mobile) {
+	.regular-text {
+		width: 100%;
+	}
+}

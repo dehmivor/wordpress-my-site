@@ -1,0 +1,8 @@
+.wp-block-edd-checkout-discount-form {
+	// This is super specific to override the default EDD styles.
+	#edd_discount_code.edd-blocks-cart__discount #edd_show_discount {
+		background: none;
+		border: none;
+		margin-bottom: 1rem;
+	}
+}

@@ -1,0 +1,76 @@
+/**
+ * PayPal Admin Styles
+ *
+ * Styles for the PayPal Commerce gateway settings, including the Payment
+ * Methods toggle grid that mirrors the EDD Stripe pattern.
+ *
+ * @package EDD\Gateways\PayPal
+ * @since   3.6.9
+ */
+
+@use "../variables/colors" as colors;
+
+.edd-paypal-payment-methods__description {
+    margin-bottom: 20px;
+
+    p {
+        margin: 0 0 10px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.edd_settingspaypal_payment_methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1em;
+
+    .edd-form-group__control--wrap {
+        background-color: #fff;
+        border: 1px solid colors.$wp-gray-10;
+        border-radius: 4px;
+        padding: 20px;
+        margin: 0;
+        justify-content: space-between;
+
+        .edd-toggle {
+            gap: 8px;
+            margin-bottom: 0;
+        }
+
+        .edd-form-group__control__label {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: space-between;
+
+            label {
+                flex-grow: 1;
+            }
+        }
+
+        .description {
+            flex-basis: 100%;
+            margin: 10px 0 0;
+            color: colors.$wp-gray-60;
+        }
+
+        .edd-icon__placeholder,
+        > .edd-form-group__control > svg {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        input[type="checkbox"] {
+            order: 100;
+        }
+
+        input[type="checkbox"]:disabled:not(:checked) {
+            background-color: rgba(colors.$wp-red-50, 0.5);
+        }
+    }
+}

@@ -1,0 +1,334 @@
+@import "~@wordpress/base-styles/breakpoints";
+@import "../scss/cart";
+@import "../scss/buttons";
+
+.wp-block-edd-checkout {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: 1fr; // Mobile-first: single column
+
+	// Default grid behavior for all child elements
+	> * {
+		grid-column: 1 / -1;
+	}
+
+	#edd_purchase_form {
+		// A grid item floors at its min-content width; without this the widest control can scroll a phone sideways.
+		min-width: 0;
+
+		@import "../scss/forms";
+
+		select {
+			padding: 4px 6px;
+		}
+
+		.edd-card-vat-wrap {
+			grid-column: span 2;
+		}
+	}
+
+	.edd-blocks-form__cart,
+	.edd-blocks-form__purchase {
+		padding: 0;
+		border: none;
+	}
+
+	#edd_discount_code {
+		background: none;
+		margin: 0;
+	}
+
+	.edd-blocks__cart #edd-discount-code-wrap,
+	.edd-blocks__cart #edd_show_discount {
+		padding: 0 !important;
+		border: none !important;
+		background: transparent !important;
+		margin: 0;
+	}
+
+	#edd-payment-mode-wrap {
+		display: flex;
+		gap: 0.5rem;
+		clear: both;
+		flex-wrap: wrap;
+
+		label.edd-gateway-option {
+			display: flex !important;
+			margin: 0 !important;
+			padding: 0.5rem 1rem;
+			border: 1px solid;
+			flex-grow: 1;
+			text-align: center;
+			border-radius: 3px;
+			position: relative;
+			justify-content: center;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 1rem;
+
+			&.edd-gateway-option-selected,
+			&:hover {
+				background-color: var(--edd-blocks-light-grey);
+			}
+
+			&:hover {
+				cursor: pointer;
+				transform: translateY(-1px);
+			}
+		}
+
+		input {
+			position: absolute;
+			height: 1em;
+			width: 1em;
+			opacity: 0;
+			margin: 0;
+		}
+
+		.edd-payment-icons {
+			display: flex;
+			margin: 0;
+			gap: 0.25rem;
+			align-items: center;
+
+			.payment-icon {
+				max-height: 1rem;
+				width: auto;
+				margin: 0;
+
+				&.icon-paypal {
+					max-height: 1.5rem;
+				}
+			}
+		}
+	}
+
+	.edd-discount-code-field-wrap {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		flex-wrap: wrap;
+
+		input {
+			display: block !important;
+			margin: 0 !important;
+			// Let the input shrink below its intrinsic width so the flex row can too.
+			min-width: 0;
+		}
+	}
+
+	.edd-loading-ajax.edd-loading {
+		margin: 0 auto;
+		display: block;
+		opacity: 1;
+	}
+
+	.edd-blocks-form__group--card-expiration select {
+		display: inline-block !important;
+		width: 50px !important;
+	}
+}
+
+#edd_checkout_form_wrap.wp-block-edd-checkout > p {
+	margin-bottom: 0;
+}
+
+.edd-blocks-form__cart {
+	.edd-blocks-cart__discount {
+		text-align: left;
+	}
+
+	#edd_checkout_cart .edd_discount {
+		display: inline-flex;
+		margin-left: 0.5rem;
+		align-items: center;
+		gap: 0.25rem;
+	}
+}
+
+.edd-blocks__checkout-user {
+	margin-bottom: 2rem;
+	position: relative;
+
+	fieldset.edd-blocks-form {
+		margin-bottom: 0;
+	}
+}
+
+.edd-blocks__checkout-forms {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+	justify-content: center;
+
+	button {
+		padding: 0.5rem 1rem;
+
+		&:disabled {
+			display: none;
+		}
+	}
+
+	&--inline {
+		@media (min-width: $break-small) {
+			margin-bottom: 0;
+			position: absolute;
+			right: 2rem;
+			z-index: 99;
+		}
+	}
+}
+
+.edd-blocks-cart__row-buttons {
+	justify-content: flex-end;
+}
+
+.edd-blocks-form.cc-address {
+	grid-template-columns: 1fr 1fr;
+
+	legend,
+	> div {
+		grid-column: span 2;
+	}
+
+	// The grid items are the field wrappers, so the span goes on the wrapper, not the field.
+	&.cc-address--state-zip {
+		> div.edd-blocks-form__group-state,
+		> div.edd-blocks-form__group-zip {
+			grid-column: span 1;
+		}
+	}
+
+	&.cc-address--country-zip {
+		legend,
+		> div {
+			grid-column: span 1;
+		}
+	}
+
+	.iti {
+		display: block;
+	}
+}
+
+// Layout variations
+@media (min-width: $break-medium) {
+	.wp-block-edd-checkout {
+		&:not(.edd-checkout__layout--full) {
+			.edd-blocks__logged-in {
+				order: -20;
+				grid-column: 1 / -1 !important;
+			}
+
+			.edd-blocks__cart {
+				order: -10;
+			}
+
+			.edd-blocks__purchase-form {
+				order: 10;
+			}
+
+			> .edd-alert {
+				order: 20;
+			}
+		}
+
+		&.edd-checkout__layout--half,
+		&.edd-checkout__layout--two-thirds,
+		&.edd-checkout__layout--four-fifths {
+			grid-template-columns: 1fr 1fr;
+
+			.edd-blocks__cart {
+				grid-column: 2;
+			}
+
+			.edd-blocks__purchase-form {
+				grid-row: 1;
+				order: -5;
+			}
+
+			&.edd-blocks__checkout--logged-in {
+				.edd-blocks__purchase-form {
+					grid-row: 2;
+				}
+			}
+
+			> *:not(.edd-blocks__cart) {
+				grid-column: 1;
+			}
+		}
+
+		&.edd-checkout__layout--two-thirds {
+			grid-template-columns: 2fr 1fr;
+		}
+
+		&.edd-checkout__layout--four-fifths {
+			grid-template-columns: 4fr 1fr;
+		}
+
+		&.edd-checkout__layout--half-bottom,
+		&.edd-checkout__layout--two-thirds-bottom {
+			grid-template-columns: 1fr 1fr;
+
+			.edd-blocks__cart {
+				grid-column: 1 / -1;
+			}
+
+			#edd_purchase_form {
+				grid-column: 1 / -1;
+				order: 99;
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 20px;
+				align-items: start;
+			}
+		}
+
+		&.edd-checkout__layout--two-thirds-bottom {
+			grid-template-columns: 2fr 1fr;
+
+			#edd_purchase_form {
+				display: grid;
+				grid-template-columns: 2fr 1fr;
+			}
+		}
+	}
+}
+
+// The box fires the form top/bottom hooks inside itself, so hook output is a sibling of the box's
+// columns and would compete for width in a row layout; make it span the row instead. No inset: the
+// slot sits at the box's content edge, so a centred box's hook output lines up without one.
+.edd-checkout-box__slot {
+	flex: 0 1 auto;
+}
+
+// The personal-info section controls style the wrapper (the only element common to the guest, log in
+// and register forms), so the fieldset's own default box draws a second panel inside the card. Zero
+// it, scoped to the Elementor layer — on a plain block checkout that box IS the card.
+.edd-checkout--elementor #edd_purchase_form .edd-checkout-block__personal-info > fieldset.edd-blocks-form {
+	border: none;
+	padding: 0;
+}
+
+// Gate the full-width span on the wrap it needs: forcing a slot to 100% in a non-wrapping container
+// squeezes the columns instead of dropping below them, so only wrap when a slot printed. The slot's
+// flex parent is `.e-con` on a full-width box but `.e-con-inner` on a boxed one, so match either.
+// Set Elementor's own property, not the resolved `flex-wrap`: on a boxed box that longhand ties with
+// `.e-con.e-flex > .e-con-inner` and loses on load order, leaving the slot to squeeze the columns.
+.edd-checkout--elementor :is(.e-con, .e-con-inner):has(> .edd-checkout-box__slot) {
+	--flex-wrap: wrap;
+
+	> .edd-checkout-box__slot {
+		flex: 1 1 100%;
+		min-width: 100%;
+	}
+}
+
+// Logged-in notice: mute it and separate it from the form so it reads as an intentional line rather
+// than a bold, heading-like block orphaned at the top of the box. Composable checkout only; the block
+// checkout keeps its treatment.
+.edd-checkout--elementor .edd-blocks__logged-in {
+	margin: 1.5rem 0;
+	font-size: 0.9375rem;
+	opacity: 0.7;
+}

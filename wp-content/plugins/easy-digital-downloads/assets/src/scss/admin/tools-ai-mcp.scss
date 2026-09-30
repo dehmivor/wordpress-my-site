@@ -1,0 +1,398 @@
+/* AI MCP Tools Tab
+------------------------------------------------------------- */
+
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+@use "../variables/colors";
+
+$hero-bg: #1d2327;
+$hero-text: #ffffff;
+$hero-muted: rgba( 255, 255, 255, 0.75 );
+$hero-faint: rgba( 255, 255, 255, 0.5 );
+$hero-pill: rgba( 255, 255, 255, 0.07 );
+$accent: var(--edd-wp-admin-theme-color);
+$accent-soft: #f0f6fc;
+
+.edd-ai-mcp {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+
+	/* Hero
+	--------------------------------------------------------- */
+	&__hero {
+		display: flex;
+		flex-direction: column;
+		gap: 25px;
+		align-items: flex-start;
+		background: $hero-bg;
+		padding: 25px;
+		border-radius: 9px;
+
+		@media screen and (min-width: wp-breakpoints.$break-medium) {
+			flex-direction: row;
+			gap: 90px;
+		}
+	}
+
+	&__copy {
+		flex: 1 0 0;
+		min-width: 0;
+	}
+
+	&__eyebrow {
+		font-size: 13px;
+		font-weight: 700;
+		line-height: 1.5;
+		letter-spacing: 0.65px;
+		text-transform: uppercase;
+		color: $hero-faint;
+		margin: 0;
+	}
+
+	&__title {
+		font-size: 24px;
+		font-weight: 700;
+		line-height: 1.5;
+		color: $hero-text;
+		margin: 0;
+	}
+
+	&__lede {
+		font-size: 15px;
+		line-height: 1.5;
+		color: $hero-muted;
+		margin: 5px 0 0;
+		max-width: 70ch;
+
+		a {
+			color: inherit;
+			text-decoration: underline;
+
+			&:hover,
+			&:focus {
+				color: $hero-text;
+			}
+		}
+	}
+
+	/* Call to action row
+	--------------------------------------------------------- */
+	&__cta {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 20px;
+		margin-top: 30px;
+
+		@media screen and (min-width: wp-breakpoints.$break-medium) {
+			flex-direction: row;
+			align-items: center;
+			gap: 30px;
+		}
+
+		/* The extension manager wrappers are layout-only here. */
+		.edd-extension-manager__actions,
+		.edd-extension-manager__step {
+			margin: 0;
+		}
+
+		.button {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			min-height: 44px;
+			padding: 11px 17px;
+			font-size: 16px;
+			font-weight: 500;
+			border-radius: 4px;
+		}
+
+		/**
+		 * The extension manager drops its result notice inside the hero, where the
+		 * default light admin notice fights the dark surface.
+		 */
+		.notice {
+			margin: 0 0 10px;
+			padding: 6px 10px;
+			background: rgba( 255, 255, 255, 0.07 );
+			border: 0;
+			border-inline-start: 3px solid colors.$wp-green-30;
+			box-shadow: none;
+
+			&.notice-warning {
+				border-inline-start-color: colors.$warning;
+			}
+
+			p {
+				margin: 0;
+				padding: 0;
+				font-size: 13px;
+				line-height: 1.5;
+				color: $hero-muted;
+			}
+		}
+	}
+
+	/**
+	 * The WPVibe mark on the install/activate/set up button. Drawn as a mask so it
+	 * takes the button's own text color instead of shipping one SVG per button state.
+	 */
+	&__wpvibe::before {
+		content: "";
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		flex-shrink: 0;
+		background-color: currentColor;
+		mask: url( "../../../images/ai-mcp/wpvibe.svg" ) no-repeat center / contain;
+		-webkit-mask: url( "../../../images/ai-mcp/wpvibe.svg" ) no-repeat center / contain;
+	}
+
+	&__toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+
+		.edd-form-group,
+		.edd-form-group__control {
+			margin: 0;
+			padding: 0;
+		}
+
+		label {
+			font-size: 12px;
+			font-weight: 500;
+			line-height: 17px;
+			text-transform: uppercase;
+			color: $hero-muted;
+			cursor: pointer;
+		}
+	}
+
+	&__connected {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		font-size: 16px;
+		font-weight: 500;
+		color: $hero-text;
+
+		.dashicons {
+			color: colors.$wp-green-30;
+		}
+	}
+
+	&__note {
+		font-size: 13px;
+		line-height: 1.5;
+		color: $hero-faint;
+		margin: 10px 0 0;
+	}
+
+	/* AI client pills
+	--------------------------------------------------------- */
+	&__clients {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		width: 100%;
+		flex-shrink: 0;
+
+		@media screen and (min-width: wp-breakpoints.$break-medium) {
+			width: 150px;
+		}
+	}
+
+	&__client {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		background: $hero-pill;
+		padding: 10px;
+		border-radius: 6px;
+	}
+
+	&__client-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		background: $hero-text;
+		border-radius: 4px;
+		overflow: hidden;
+
+		img {
+			width: 16px;
+			height: 16px;
+		}
+	}
+
+	&__client-label {
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 1.5;
+		color: #f6f7f7;
+	}
+
+	&__clients-note {
+		text-align: center;
+		font-size: 13px;
+		line-height: 1.5;
+		color: $hero-faint;
+		margin: 0;
+	}
+
+	/* Capability cards
+	--------------------------------------------------------- */
+	&__capabilities {
+		background: #ffffff;
+		border: 1px solid colors.$wp-gray-10;
+		border-radius: 9px;
+		padding: 25px;
+		box-shadow: 0 2px 2px rgba( 0, 0, 0, 0.07 );
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	&__capabilities-head {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 10px;
+
+		@media screen and (min-width: wp-breakpoints.$break-medium) {
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+		}
+	}
+
+	&__capabilities-title {
+		font-size: 16px;
+		font-weight: 500;
+		line-height: 20px;
+		color: #2c3338;
+		margin: 0;
+		text-align: center;
+
+		@media screen and (min-width: wp-breakpoints.$break-medium) {
+			text-align: start;
+		}
+	}
+
+	&__docs {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		line-height: 1.5;
+	}
+
+	&__disclosure {
+		border-top: 1px solid colors.$wp-gray-10;
+		padding-top: 20px;
+		font-size: 13px;
+		line-height: 1.6;
+		color: colors.$wp-gray-700;
+
+		h4 {
+			font-size: 13px;
+			font-weight: 600;
+			color: #2c3338;
+			margin: 0 0 6px;
+		}
+
+		p {
+			margin: 0 0 6px;
+			max-width: 90ch;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	&__cards {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 15px;
+
+		@media screen and (min-width: wp-breakpoints.$break-medium) {
+			grid-template-columns: repeat( auto-fit, minmax( 220px, 1fr ) );
+		}
+	}
+
+	&__card {
+		background: #ffffff;
+		border: 1px solid colors.$wp-gray-5;
+		border-radius: 6px;
+		padding: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	&__card-head {
+		display: flex;
+		align-items: center;
+		gap: 15px;
+	}
+
+	&__card-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		background: $accent-soft;
+		color: $accent;
+		border-radius: 4px;
+		flex-shrink: 0;
+	}
+
+	&__card-title {
+		font-size: 16px;
+		font-weight: 500;
+		line-height: 1.5;
+		color: #2c3338;
+		margin: 0;
+	}
+
+	&__card-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+
+		li {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin: 0;
+			padding: 10px 0 0;
+			border-top: 1px solid colors.$wp-gray-5;
+			font-size: 13px;
+			line-height: 1.5;
+			color: colors.$wp-gray-600;
+
+			&:first-child {
+				padding-top: 0;
+				border-top: 0;
+			}
+		}
+	}
+
+	&__card-dot {
+		display: inline-block;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: $accent;
+		flex-shrink: 0;
+	}
+}

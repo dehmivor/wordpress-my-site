@@ -1,0 +1,28 @@
+@use "../../variables/colors" as colors;
+
+.edd-pro-upgrade,
+.edd-pro-upgrade:hover {
+	color: var(--edd-notice-green);
+	font-weight: 600;
+	text-decoration: none;
+
+	&.button-link,
+	&.button-link:hover {
+		color: var(--edd-notice-green) !important;
+		text-decoration: none !important;
+	}
+}
+
+.button.edd-pro-upgrade,
+.button.edd-pro-upgrade:hover {
+	background-color: var(--edd-notice-green);
+	color: #fff;
+	border-color: var(--edd-notice-green);
+}
+
+.edd-settings-content {
+	.edd-pro-upgrade,
+	.edd-pro-upgrade:hover {
+		text-decoration: underline !important;
+	}
+}

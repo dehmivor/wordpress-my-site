@@ -1,0 +1,232 @@
+/**
+ * PayPal Checkout Styles
+ *
+ * Styles for the PayPal Commerce checkout experience: Fastlane card form,
+ * "Or pay with" divider between Fastlane and the standard PayPal Smart Buttons,
+ * and Pay Later messaging.
+ *
+ * Note: the Fastlane card fields themselves are PayPal SDK iframes — they
+ * cannot be styled from this stylesheet. Only the surrounding chrome (submit
+ * button, watermark, divider, messages) is ours.
+ *
+ * @package EDD\Gateways\PayPal
+ * @since   3.6.9
+ */
+
+/*
+ * Maximum width of the PayPal payment column.
+ *
+ * PayPal's Smart Buttons cap their own rendered width (~600px) and left-align
+ * inside their iframe when given a wider container, but the Apple Pay / Google
+ * Pay wallet buttons and our own card submit buttons stretch to 100%. Keeping
+ * the whole stack below PayPal's own limit lets PayPal fill the column instead
+ * of left-aligning, so every button lines up at the same width.
+ */
+$edd-paypal-checkout-max-width: 575px;
+
+/* Fastlane wrapper. */
+#edd-fastlane-container {
+    margin: 20px 0;
+}
+
+/*
+ * Pay Now submit button.
+ *
+ * Markup applies `.edd-submit .button {color-class}` (color comes from
+ * `edd_get_button_color_class()`), which gives it the same look as the
+ * standard EDD purchase button under the configured checkout button color.
+ * We only override the layout here — full width, top margin, centered.
+ */
+#edd-fastlane-submit.edd-submit,
+#edd-paypal-unbranded-card-submit.edd-submit {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* Loading spinner shown while submitting. */
+#edd-fastlane-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 12px 0;
+}
+
+/* Watermark / branding badge rendered by the Fastlane SDK. */
+#edd-fastlane-watermark {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+/*
+ * Divider ("Or pay with") that breaks a card form apart from the PayPal Smart
+ * Buttons — used above the Fastlane form and the unbranded card fields.
+ */
+.edd-fastlane-divider,
+.edd-paypal-card-divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0 16px;
+    text-align: center;
+
+    &::before,
+    &::after {
+        content: "";
+        flex: 1;
+        border-top: 1px solid #ddd;
+    }
+
+    span {
+        padding: 0 12px;
+        color: #6c7781;
+        font-size: 0.9em;
+        text-transform: lowercase;
+        letter-spacing: 0.02em;
+    }
+}
+
+// PayPal renders a capitalized "Or" above the card fields — don't lowercase it.
+.edd-paypal-card-divider span {
+    text-transform: none;
+}
+
+/*
+ * Unbranded card (Advanced Card Processing) on-checkout fields. Each field is
+ * a PayPal-hosted iframe; style the wrappers to read as standard inputs and
+ * place expiry + CVV side by side.
+ */
+.edd-paypal-unbranded-card {
+    // The CardFields iframes render their own input chrome (border + focus /
+    // validation states), so the wrapper only handles spacing — adding a
+    // border here would double up with PayPal's.
+    .edd-paypal-card-field {
+        margin-bottom: 12px;
+    }
+
+    .edd-paypal-card-row {
+        display: flex;
+        gap: 12px;
+
+        .edd-paypal-card-field {
+            flex: 1;
+        }
+    }
+}
+
+/*
+ * Apple Pay / Google Pay container styling. Each renders a button via the
+ * respective SDK (Apple Pay's `<apple-pay-button>` element or Google's
+ * PaymentsClient button), so we only style the wrapper + nudge the inner
+ * button to match the PayPal Smart Button stack height (55px) so the three
+ * buttons read as a cohesive payment-method group.
+ *
+ * Selector includes `#edd_checkout_form_wrap` so it beats EDD core's
+ * `#edd_checkout_form_wrap fieldset > div { margin: 0 0 21px }` rule —
+ * otherwise the wallet buttons get a 21px gap that breaks the stack.
+ */
+#edd_checkout_form_wrap .edd-paypal-wallet-container,
+.edd-paypal-wallet-container {
+    /* Match the visual gap PayPal's vertical Smart Button stack uses
+     * between adjacent buttons (the SDK renders ~8px between iframes). */
+    margin: 0 0 8px;
+
+    /* Apple Pay — uses CSS custom properties exposed by the
+     * `<apple-pay-button>` web component (see Apple Pay JS docs). */
+    apple-pay-button {
+        --apple-pay-button-width: 100%;
+        --apple-pay-button-height: 55px;
+        --apple-pay-button-border-radius: 4px;
+        width: 100%;
+        display: block;
+    }
+
+    /*
+     * Google Pay — PaymentsClient.createButton() emits a wrapper div with
+     * `.gpay-card-info-container-fill` containing a `<button>` whose internal
+     * iframe holds Google's artwork. The artwork inside the iframe is a
+     * fixed bitmap-style size set by Google; we can't stretch it without
+     * distortion. Match Google's natural button height (~48px) and keep
+     * width 100%. The small height delta from PayPal's 55px Smart Button is
+     * unavoidable without distorting Google's branded artwork.
+     */
+    .gpay-card-info-container-fill,
+    .gpay-card-info-container-fill > button {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 4px !important;
+    }
+}
+
+/*
+ * Processing state for the payment-button stack.
+ *
+ * Applied to the purchase-submit wrapper by the wallet modules
+ * (Apple Pay / Google Pay) after the buyer authorizes payment in the
+ * native sheet, while the server round-trip (createOrder → confirmOrder
+ * → capture → redirect) is in flight. Locks every button in the stack
+ * so the buyer can't mash PayPal/Card/Apple/Google during the wait, and
+ * dims the whole region so it's visually obvious the form is busy.
+ *
+ * The `#edd-paypal-spinner` child stays interactive (re-enabled
+ * pointer-events) so spinner CSS animations continue.
+ */
+.edd-paypal-processing {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.55;
+    transition: opacity 0.15s ease;
+
+    /* Keep the spinner above the dimmed buttons and interactive. */
+    #edd-paypal-spinner {
+        display: block;
+        pointer-events: auto;
+        opacity: 1;
+    }
+}
+
+/* Pay Later messaging block — centered under the buttons. */
+#edd-paypal-messages {
+    margin-top: 12px;
+    text-align: center;
+
+    /* PayPal renders its messaging inside an iframe; center the iframe itself. */
+    iframe {
+        margin: 0 auto;
+    }
+}
+
+/*
+ * Constrain and center the entire PayPal payment stack.
+ *
+ * On a wide checkout (e.g. an FSE block template with a full-width content
+ * area) the wallet buttons would otherwise render much wider than the PayPal
+ * Smart Buttons, which cap themselves at ~600px and left-align — leaving the
+ * group mismatched and pushed to one side. Capping the stack to a shared width
+ * below PayPal's own limit lets PayPal fill the column instead of left-aligning,
+ * and centering it keeps the buttons, dividers, and card fields as one tidy,
+ * aligned column.
+ *
+ * Scoped to `#edd_purchase_submit` (the checkout submit fieldset that wraps this
+ * markup in both the classic and block checkout) so the horizontal centering
+ * beats core's `#edd_checkout_form_wrap fieldset > div` margin reset. Placed last
+ * so it also wins the specificity tie with the wallet container's own margin
+ * rule above. Only `max-width` and the horizontal margins are set here, so each
+ * element keeps the vertical spacing defined in its own rule. Narrow checkouts
+ * are unaffected — `max-width` never forces an element wider than its container.
+ */
+#edd_purchase_submit {
+    #edd-fastlane-container,
+    .edd-fastlane-divider,
+    .edd-paypal-wallet-container,
+    #edd-paypal-container,
+    #edd-paypal-messages,
+    .edd-paypal-card-divider,
+    .edd-paypal-unbranded-card {
+        max-width: $edd-paypal-checkout-max-width;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}

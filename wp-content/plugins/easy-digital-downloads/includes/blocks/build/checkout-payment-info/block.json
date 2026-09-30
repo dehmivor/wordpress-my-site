@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "edd/checkout-payment-info",
+  "version": "1.0.0",
+  "title": "EDD Payment Info",
+  "category": "easy-digital-downloads",
+  "icon": "money-alt",
+  "description": "Payment gateway selection and credit card form for checkout.",
+  "keywords": [
+    "easy digital downloads",
+    "edd",
+    "payment",
+    "gateway",
+    "credit card"
+  ],
+  "ancestor": [
+    "edd/checkout"
+  ],
+  "usesContext": [
+    "edd/previewMode",
+    "edd/previewDownload"
+  ],
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "textdomain": "easy-digital-downloads",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css"
+}

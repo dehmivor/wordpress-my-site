@@ -1,0 +1,1 @@
+wp.domReady((()=>{wp.apiFetch.use(((e,t)=>{const a=wp.data.select("core").getEntityConfig("postType","download"),n=e?.path;if(a&&n&&0===n.indexOf(a.baseURL)){const t=e?.data?.meta||{};if(Object.keys(t).length){const a={};for(const[e,n]of Object.entries(t))0!==e.indexOf("_edd")&&(a[e]=n);e.data.meta=a}}return t(e)}))}));

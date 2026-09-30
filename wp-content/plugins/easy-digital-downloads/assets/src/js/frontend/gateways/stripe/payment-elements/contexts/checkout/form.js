@@ -1,0 +1,455 @@
+/* global $, edd_stripe_vars, edd_global_vars, eddStripe */
+
+/**
+ * Internal dependencies
+ */
+import {
+	createAndMountElement,
+	getBillingDetails,
+} from '../..'; // eslint-disable-line @wordpress/dependency-group
+
+import { apiRequest, generateNotice, consoleOutput } from 'utils'; // eslint-disable-line @wordpress/dependency-group
+import { beginLoading, endLoading } from '@easy-digital-downloads/cart-loading'; // eslint-disable-line @wordpress/dependency-group
+
+// Token for the shared checkout loading overlay while a payment is processing.
+let loadingToken = null;
+
+/**
+ * Binds Payment submission functionality.
+ *
+ * Resets before rebinding to avoid duplicate events
+ * during gateway switching.
+ */
+export function paymentForm() {
+	// Mount Elements.
+	createAndMountElement();
+
+	if ( false === window.eddStripe.elementMounted ) {
+		return;
+	}
+
+	// Set some default intent-based values so we can store and use them later.
+	window.eddStripe.intentFingerprint = '';
+	window.eddStripe.intentType = '';
+	window.eddStripe.intentId = '';
+
+	disableForm();
+
+	// Try and prevent any other listeners from happening first. This has to be jQuery.
+	$( document ).off( 'click', '#edd_purchase_form #edd_purchase_submit [type=submit]' );
+
+	const purchaseButton = document.getElementById( 'edd-purchase-button' );
+	const events = [ 'click', 'keydown' ];
+	events.forEach( ( event ) => {
+		purchaseButton.addEventListener( event, triggerPurchaseButton );
+	} );
+}
+
+async function triggerPurchaseButton ( event ) {
+	// Ensure we are dealing with the Stripe gateway.
+	if ( ! isStripeSelectedGateway() ) {
+		return;
+	}
+
+	// if the event.key isdefined and not Enter, we don't want to continue.
+	if ( event.key && 'Enter' !== event.key ) {
+		return;
+	}
+
+	if ( ! purchaseformValid() ) {
+		return false;
+	}
+
+	updateForm( false );
+
+	try {
+		// Create a payment method.
+		let billingDetails = getBillingDetails( document.getElementById( 'edd_purchase_form' ) );
+		const { paymentMethod: paymentMethod } = await getPaymentMethod( billingDetails );
+
+		// If we don't have a payment method, we can't continue.
+		if ( ! paymentMethod ) {
+			// The getPaymentMethod handles the error output, so we can just return here.
+			return false;
+		}
+
+		/**
+		 * Run the modified `_edds_process_purchase_form` and create an Intent.
+		 *
+		 * We should always create intents at the server, to prevent modification client-side.
+		 */
+		let {
+			token: refreshedNonce,
+			client_secret: clientSecret,
+			intent_type: intentType,
+			intent_fingerprint: intentFingerprint,
+			intent_id: intentId,
+			intent_paid: intentPaid,
+		} = await processForm( paymentMethod );
+
+		// Store these so we can use them later to not create different payment intents.
+		window.eddStripe.intentType = intentType;
+		window.eddStripe.intentFingerprint = intentFingerprint;
+		window.eddStripe.intentId = intentId;
+
+		const nonceField = document.getElementById( 'edd-process-checkout-nonce' );
+		nonceField.value = refreshedNonce;
+
+		// This intent was paid on an earlier attempt, so recover it into an order instead of charging again.
+		if ( intentPaid ) {
+			await completeOrder();
+			return;
+		}
+
+		/**
+		 * Our last action of processing the form returned us a Payment Intent, which
+		 * gave us a client secret. We can update the payment element with this now.
+		 */
+		const confirmFunc = 'PaymentIntent' === intentType ? 'confirmPayment' : 'confirmSetup';
+
+		const confirmArgs = {
+			clientSecret: clientSecret,
+			confirmParams: {
+				return_url: edd_stripe_vars.successPageUri + '?payment_intent=' + intentId + '&redirect_status=processing',
+				payment_method: paymentMethod.id,
+			},
+			redirect: 'if_required',
+		}
+
+		/**
+		 * Now confirm the payment.
+		 */
+		const { error } = await window.eddStripe[ confirmFunc ]( confirmArgs );
+
+		if ( error ) {
+			// Stripe reports errors for payments it has already taken, so complete those instead of surfacing an error.
+			if ( isIntentPaid( error.payment_intent || error.setup_intent ) ) {
+				await completeOrder();
+				return;
+			}
+
+			handleException( error );
+			enableForm();
+			return false;
+		}
+
+		await completeOrder();
+	} catch ( error ) {
+		handleException( error );
+		enableForm();
+		return false;
+	}
+}
+
+/**
+ * Completes the order after a successful payment.
+ */
+async function completeOrder () {
+	const { intent, status, order_id } = await createAndCompleteOrder();
+	var redirect;
+
+	switch ( intent.status ) {
+		case 'succeeded':
+			redirect = edd_stripe_vars.successPageUri;
+			break;
+		case 'processing':
+			redirect = edd_stripe_vars.successPageUri + '?payment_intent=' + intent.id + '&redirect_status=' + status;
+			break;
+
+		default:
+			redirect = edd_stripe_vars.failurePageUri;
+			if ( order_id ) {
+				redirect += '?order_id=' + order_id;
+			}
+			break;
+	}
+
+	window.location.replace( redirect );
+}
+
+/**
+ * Processes the purchase form.
+ *
+ * Generates purchase data for the current session and
+ * uses the PaymentMethod to generate an Intent based on data.
+ *
+ * @return {Promise} jQuery Promise.
+ */
+export async function processForm( paymentMethod ) {
+	let tokenInput = $( '#edd-process-stripe-token' );
+
+	return apiRequest( 'edds_process_purchase_form', {
+		// Send available form data.
+		form_data: new FormData( document.getElementById( 'edd_purchase_form' ) ),
+		timestamp: tokenInput.length ? tokenInput.data( 'timestamp' ) : '',
+		token: tokenInput.length ? tokenInput.data( 'token' ) : '',
+		intent_type: window.eddStripe.intentType,
+		intent_id: window.eddStripe.intentId,
+		intent_fingerprint: window.eddStripe.intentFingerprint,
+		payment_method: paymentMethod,
+	} );
+}
+
+/**
+ * Complete a Payment in EDD.
+ *
+ * @param {object} intent Intent.
+ * @return {Promise} jQuery Promise.
+ */
+export function createAndCompleteOrder() {
+	const formEl = document.getElementById( 'edd_purchase_form' ),
+		tokenInput = $( '#edd-process-stripe-token' );
+
+	let formData;
+
+	if ( formEl ) {
+		formData = new FormData( formEl );
+	} else {
+		// Attempt to find the Checkout nonce directly.
+		formData = new FormData();
+		formData.append( 'edd-process-checkout-nonce', $( '#edd-process-checkout-nonce' ).val() );
+	}
+
+	return apiRequest( 'edds_create_and_complete_order', {
+		form_data: formData,
+		timestamp: tokenInput.length ? tokenInput.data( 'timestamp' ) : '',
+		token: tokenInput.length ? tokenInput.data( 'token' ) : '',
+		intent_id: window.eddStripe.intentId,
+		intent_type: window.eddStripe.intentType,
+	} );
+}
+
+export function updateForm ( remove_spinner = true ) {
+	window.eddStripe.paymentElement.update( {
+		readOnly: true,
+	} );
+
+	maybeAddSpinner();
+
+	let purchaseButton = $('#edd-purchase-button');
+	purchaseButton.attr( 'data-edd-button-state', 'updating' );
+
+	purchaseButton.prop( 'disabled', 'disabled' );
+	purchaseButton.prop( 'readonly', 'readonly' );
+
+	$( '.edd_errors.edd-alert-error' ).remove();
+	$( '.edd-error' ).hide();
+	$( '#edd-stripe-payment-errors' ).remove();
+	$( '.edd-stripe-alert' ).remove();
+
+	if ( remove_spinner ) {
+		endLoading( loadingToken );
+		loadingToken = null;
+	}
+}
+
+export function disableForm ( hide_errors = false ) {
+
+	window.eddStripe.paymentElement.update( {
+		readOnly: false,
+	} );
+
+	let purchaseButton = $('#edd-purchase-button');
+
+	purchaseButton.attr( 'data-edd-button-state', 'disabled' );
+
+	purchaseButton.prop( 'disabled', 'disabled' );
+	purchaseButton.prop( 'readonly', 'readonly' );
+
+	endLoading( loadingToken );
+	loadingToken = null;
+
+	if ( hide_errors ) {
+		$( '.edd_errors.edd-alert-error' ).remove();
+		$( '.edd-error' ).hide();
+		$( '#edd-stripe-payment-errors' ).remove();
+		$( '.edd-stripe-alert' ).remove();
+	}
+}
+
+/**
+ * Enables the Checkout form for further submissions.
+ */
+export function enableForm() {
+	/**
+	 * If we're at the failure limit, we don't want to enable the form.
+	 */
+	if ( window.eddStripe.isAtFailureLimit ) {
+		return;
+	}
+
+	window.eddStripe.paymentElement.update( {
+		readOnly: false,
+	} );
+
+	let purchaseButton = $('#edd-purchase-button');
+
+	purchaseButton.attr( 'data-edd-button-state', 'ready' );
+
+	purchaseButton.prop( 'disabled', '' );
+	purchaseButton.prop( 'readonly', '' );
+
+	// Enable form.
+	endLoading( loadingToken );
+	loadingToken = null;
+	$( '.edd_errors.edd-alert-error' ).remove();
+	$( '.edd-error' ).hide();
+}
+
+function maybeAddSpinner() {
+	// The shared checkout overlay provides the spinner; the button stays disabled by updateForm().
+	if ( ! loadingToken ) {
+		loadingToken = beginLoading( 'stripe-pe' );
+	}
+}
+
+/**
+ * Handles error output for stripe.js promises, or jQuery AJAX promises.
+ *
+ * @link https://github.com/easydigitaldownloads/easy-digital-downloads/blob/master/assets/js/edd-ajax.js#L390
+ *
+ * @param {Object} error Error data.
+ */
+async function handleException( error ) {
+	consoleOutput( 'Error', error );
+	let { code, message, type } = error;
+	const { elementsCustomizations: { i18n: { errorMessages } } } = window.edd_stripe_vars;
+
+	if ( ! message ) {
+		message = edd_stripe_vars.generic_error;
+	}
+
+	const localizedMessage = code && errorMessages[code] ? errorMessages[code] : message,
+		  notice = generateNotice( localizedMessage );
+
+
+	/**
+	 * We only want to tick the error handler if we got an failed payment attempt.
+	 * Errors like the currency being incorrect shouldn't tick a user's counter.
+	 *
+	 * With non-card payments there is also an incomplete code that we need to account for, that shouln't tick.
+	 */
+	if ( code && 'incomplete' !== code ) {
+		let { is_at_limit: isAtLimit, message: errorMessage } = await apiRequest( 'edds_payment_elements_rate_limit_tick', error );
+
+		// If we're at the limit, disable the form.
+		if ( isAtLimit ) {
+			formErrorLimitReached( errorMessage );
+			return;
+		}
+	}
+
+	// Hide previous messages.
+	// @todo These should all be in a container, but that's not how core works.
+	$( '.edd-stripe-alert' ).remove();
+	$( edd_global_vars.checkout_error_anchor ).before( notice );
+	$( document.body ).trigger( 'edd_checkout_error', [ error ] );
+
+	// If this is an incomplete code, make it a warning, not an error.
+	if ( 'incomplete' === code ) {
+		$( '.edd-stripe-alert' ).removeClass( 'edd-alert-error' ).addClass( 'edd-alert-warn' );
+	}
+
+	if ( window.console && error.responseText ) {
+		window.console.error( error.responseText );
+	}
+}
+
+/**
+ * Determines whether a Stripe intent has already been paid.
+ *
+ * @param {Object} intent PaymentIntent or SetupIntent from a Stripe response.
+ * @return {boolean} Whether the intent has been paid.
+ */
+function isIntentPaid( intent ) {
+	return !! intent && [ 'succeeded', 'requires_capture' ].includes( intent.status );
+}
+
+export function purchaseformValid() {
+	let formIsValid = true;
+	const eddPurchaseForm = document.getElementById( 'edd_purchase_form' );
+	const requiredInputs = eddPurchaseForm.querySelectorAll( '[required]' );
+
+	// Loop through the targtedInputs
+	requiredInputs.forEach( ( input ) => {
+		// And add an event listener to run the udpateElementBillingDetails function.
+		if ( false === input.checkValidity() ) {
+			input.reportValidity();
+			formIsValid = false;
+		}
+	} );
+
+	return formIsValid;
+}
+
+function getPaymentMethod( billingDetails ) {
+	// Create a PaymentMethod using the Element data.
+	return window.eddStripe
+		.createPaymentMethod(
+			{
+				elements: window.eddStripe.configuredElement,
+				params: {
+					billing_details: billingDetails,
+				}
+			}
+		)
+		.then( function ( {
+			error: error,
+			paymentMethod: paymentMethod,
+		} ) {
+			if ( error ) {
+				handleException( error );
+				enableForm();
+				return false;
+			}
+
+			return { paymentMethod: paymentMethod };
+		} )
+		.catch( ( error ) => {
+			handleException( error );
+			enableForm();
+			return false;
+		} );
+}
+
+function formErrorLimitReached( errorMessage = '') {
+	window.eddStripe.isAtFailureLimit = true;
+
+	/**
+	 * While we could just set the readOnly property to true, we need to unmount the element
+	 * for the safest approach.
+	 */
+	window.eddStripe.paymentElement.unmount();
+
+	/**
+	 * Now we can just remove the entire wrapper for the card fields,
+	 */
+	$( '#edd_cc_fields' ).slideUp().remove();
+
+	let purchaseButton = $('#edd-purchase-button');
+	purchaseButton.remove();
+
+	let notice = generateNotice( errorMessage, 'error' );
+
+	// Hide previous messages.
+	// @todo These should all be in a container, but that's not how core works.
+	$( '.edd-stripe-alert' ).remove();
+	$( edd_global_vars.checkout_error_anchor ).before( notice );
+}
+
+export function isStripeSelectedGateway () {
+	let StripeGateway = document.getElementById( 'edd-process-stripe-token' );
+
+	if ( ! StripeGateway ) {
+		StripeGateway = document.getElementById( 'edd-stripe-payment-element' );
+		if ( StripeGateway && edd_global_vars.showStoreErrors ) {
+			console.warn( 'Please update your custom checkout to use edds_get_tokenizer_input() for a more secure checkout.' );
+		}
+	}
+
+	if ( ! StripeGateway ) {
+		return false;
+	}
+
+	return document.querySelector( '.edd_cart_total .edd_cart_amount' ).dataset.total > 0;
+}

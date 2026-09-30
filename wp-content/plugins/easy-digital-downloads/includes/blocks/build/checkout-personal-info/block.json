@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "edd/checkout-personal-info",
+  "version": "1.0.0",
+  "title": "EDD Personal Info & Billing",
+  "category": "easy-digital-downloads",
+  "icon": "admin-users",
+  "description": "Personal information, login forms, and billing address for checkout.",
+  "keywords": [
+    "easy digital downloads",
+    "edd",
+    "login",
+    "register",
+    "personal",
+    "billing",
+    "address"
+  ],
+  "ancestor": [
+    "edd/checkout"
+  ],
+  "usesContext": [
+    "edd/previewMode",
+    "edd/previewDownload"
+  ],
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "textdomain": "easy-digital-downloads",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "attributes": {
+    "name_single_line": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

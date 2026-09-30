@@ -1,0 +1,1452 @@
+<?php
+
+namespace Essential_Addons_Elementor\Elements;
+
+// If this file is called directly, abort.
+if ( !defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+use \Elementor\Controls_Manager;
+use \Elementor\Group_Control_Border;
+use \Elementor\Group_Control_Box_Shadow;
+use \Elementor\Group_Control_Typography;
+use \Elementor\Plugin;
+use \Elementor\Widget_Base;
+use \Elementor\Repeater;
+
+
+use \Essential_Addons_Elementor\Classes\Helper;
+use Essential_Addons_Elementor\Traits\Helper as HelperTrait;
+
+class Image_Accordion extends Widget_Base {
+    use HelperTrait;
+    public function get_name() {
+        return 'eael-image-accordion';
+    }
+
+    public function get_title() {
+        return esc_html__( 'Image Accordion', 'essential-addons-for-elementor-lite' );
+    }
+
+    public function get_icon() {
+        return 'eaicon-image-accrodion';
+    }
+
+    public function get_categories() {
+        return [ 'essential-addons-elementor' ];
+    }
+
+    public function get_keywords() {
+        return [
+            'image',
+            'ea image accordion',
+            'image effect',
+            'hover effect',
+            'creative image',
+            'gallery',
+            'ea',
+            'essential addons',
+            'Glassmorphism',
+            'Liquid Glass Effect',
+            'Frost Effect',
+        ];
+    }
+
+    protected function is_dynamic_content():bool {
+        if ( Plugin::$instance->editor->is_edit_mode() ) {
+            return false;
+        }
+
+        $settings = $this->get_data( 'settings' );
+
+        if ( empty( $settings ) || ! is_array( $settings ) ) {
+            return false;
+        }
+
+        // ACF Repeater pulls per-post data — treat as dynamic so it is not statically cached.
+        if ( 'acf_repeater' === ( $settings['eael_ia_data_source'] ?? 'custom' ) ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function has_widget_inner_wrapper(): bool {
+        return ! Helper::eael_e_optimized_markup();
+    }
+
+    public function get_custom_help_url() {
+        return 'https://essential-addons.com/elementor/docs/image-accordion/';
+    }
+
+    /**
+     * Registers ACF Repeater data-source controls for Image Accordion (Lite-native).
+     * Minimal field set: Background Image, Title, Content, Title Link.
+     */
+    protected function eael_register_acf_controls() {
+        $this->start_controls_section(
+            'eael_ia_section_data_source',
+            [
+                'label' => esc_html__( 'Data Source', 'essential-addons-for-elementor-lite' ),
+            ]
+        );
+
+        $this->add_control(
+            'eael_ia_data_source',
+            [
+                'label'   => esc_html__( 'Source', 'essential-addons-for-elementor-lite' ),
+                'type'    => Controls_Manager::SELECT,
+                'default' => 'custom',
+                'options' => [
+                    'custom'       => esc_html__( 'Custom (Manual)', 'essential-addons-for-elementor-lite' ),
+                    'acf_repeater' => esc_html__( 'ACF Repeater Field', 'essential-addons-for-elementor-lite' ),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'eael_ia_acf_repeater_field',
+            [
+                'label'     => esc_html__( 'Repeater Field', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::SELECT,
+                'default'   => '',
+                'options'   => Helper::eael_get_acf_repeater_options(),
+                'condition' => [ 'eael_ia_data_source' => 'acf_repeater' ],
+            ]
+        );
+
+        // ACF inactive notice (no-op when ACF is active).
+        Helper::eael_acf_notice_controls( $this, [ 'eael_ia_data_source' => 'acf_repeater' ] );
+
+        // Per-repeater sub-field mapping.
+        $acf_sub_fields_by_repeater = Helper::eael_get_acf_repeater_sub_fields();
+
+        foreach ( $acf_sub_fields_by_repeater as $repeater_name => $sub_field_options ) {
+            $repeater_condition = [
+                'eael_ia_data_source'        => 'acf_repeater',
+                'eael_ia_acf_repeater_field' => $repeater_name,
+            ];
+
+            $this->add_control(
+                'eael_ia_acf_fields_heading_' . $repeater_name,
+                [
+                    'label'     => esc_html__( 'Field Mapping', 'essential-addons-for-elementor-lite' ),
+                    'type'      => Controls_Manager::HEADING,
+                    'separator' => 'before',
+                    'condition' => $repeater_condition,
+                ]
+            );
+
+            $this->add_control(
+                'eael_ia_acf_repeater_image_' . $repeater_name,
+                [
+                    'label'       => esc_html__( 'Background Image', 'essential-addons-for-elementor-lite' ),
+                    'description' => esc_html__( 'Map an ACF Image field used as the accordion item background.', 'essential-addons-for-elementor-lite' ),
+                    'type'        => Controls_Manager::SELECT,
+                    'default'     => '',
+                    'options'     => $sub_field_options,
+                    'condition'   => $repeater_condition,
+                ]
+            );
+
+            $this->add_control(
+                'eael_ia_acf_repeater_title_' . $repeater_name,
+                [
+                    'label'     => esc_html__( 'Title', 'essential-addons-for-elementor-lite' ),
+                    'type'      => Controls_Manager::SELECT,
+                    'default'   => '',
+                    'options'   => $sub_field_options,
+                    'condition' => $repeater_condition,
+                ]
+            );
+
+            $this->add_control(
+                'eael_ia_acf_repeater_content_' . $repeater_name,
+                [
+                    'label'       => esc_html__( 'Content', 'essential-addons-for-elementor-lite' ),
+                    'description' => esc_html__( 'Map a Text, Textarea, or WYSIWYG ACF field.', 'essential-addons-for-elementor-lite' ),
+                    'type'        => Controls_Manager::SELECT,
+                    'default'     => '',
+                    'options'     => $sub_field_options,
+                    'condition'   => $repeater_condition,
+                ]
+            );
+
+            $this->add_control(
+                'eael_ia_acf_repeater_link_' . $repeater_name,
+                [
+                    'label'       => esc_html__( 'Title Link', 'essential-addons-for-elementor-lite' ),
+                    'description' => esc_html__( 'Map an ACF URL, Link, or Page Link field. The title links only when the row has a value.', 'essential-addons-for-elementor-lite' ),
+                    'type'        => Controls_Manager::SELECT,
+                    'default'     => '',
+                    'options'     => $sub_field_options,
+                    'condition'   => $repeater_condition,
+                ]
+            );
+
+            $extra_field_options = $sub_field_options;
+            unset( $extra_field_options[''] );
+            $this->add_control(
+                'eael_ia_acf_repeater_extras_' . $repeater_name,
+                [
+                    'label'       => esc_html__( 'Additional Fields', 'essential-addons-for-elementor-lite' ),
+                    'description' => esc_html__( 'Select extra sub-fields to display below each item content.', 'essential-addons-for-elementor-lite' ),
+                    'type'        => Controls_Manager::SELECT2,
+                    'multiple'    => true,
+                    'default'     => [],
+                    'options'     => $extra_field_options,
+                    'label_block' => true,
+                    'condition'   => $repeater_condition,
+                ]
+            );
+        }
+
+        $this->end_controls_section();
+    }
+
+    /**
+     * Returns the accordion items to render.
+     *
+     * Custom mode returns the manual repeater unchanged. ACF mode maps the selected
+     * ACF Repeater field's rows into the item shape the render loop consumes.
+     *
+     * @param array $settings Widget settings from get_settings_for_display().
+     * @return array
+     */
+    protected function get_image_accordion_items( $settings ) {
+        if ( 'acf_repeater' !== ( $settings['eael_ia_data_source'] ?? 'custom' ) ) {
+            return is_array( $settings['eael_img_accordions'] ?? null ) ? $settings['eael_img_accordions'] : [];
+        }
+
+        $field_name = sanitize_text_field( $settings['eael_ia_acf_repeater_field'] ?? '' );
+        if ( empty( $field_name ) || ! function_exists( 'get_field' ) ) {
+            return [];
+        }
+
+        $image_key   = sanitize_text_field( $settings[ 'eael_ia_acf_repeater_image_' . $field_name ] ?? '' );
+        $title_key   = sanitize_text_field( $settings[ 'eael_ia_acf_repeater_title_' . $field_name ] ?? '' );
+        $content_key = sanitize_text_field( $settings[ 'eael_ia_acf_repeater_content_' . $field_name ] ?? '' );
+        $link_key    = sanitize_text_field( $settings[ 'eael_ia_acf_repeater_link_' . $field_name ] ?? '' );
+        $extra_keys  = ( isset( $settings[ 'eael_ia_acf_repeater_extras_' . $field_name ] ) && is_array( $settings[ 'eael_ia_acf_repeater_extras_' . $field_name ] ) )
+            ? $settings[ 'eael_ia_acf_repeater_extras_' . $field_name ]
+            : [];
+
+        // Resolve sub-field labels once for the selected additional fields.
+        $sub_field_labels = [];
+        if ( ! empty( $extra_keys ) && function_exists( 'acf_get_field' ) ) {
+            $repeater_field = acf_get_field( $field_name );
+            if ( ! empty( $repeater_field['sub_fields'] ) ) {
+                foreach ( $repeater_field['sub_fields'] as $sf ) {
+                    $sub_field_labels[ $sf['name'] ] = $sf['label'];
+                }
+            }
+        }
+
+        $object_id = get_the_ID() ?: get_queried_object_id();
+        $rows      = get_field( $field_name, $object_id );
+
+        if ( empty( $rows ) || ! is_array( $rows ) ) {
+            return [];
+        }
+
+        $items = [];
+        foreach ( $rows as $row ) {
+            if ( ! is_array( $row ) ) {
+                continue;
+            }
+
+            // Title / content kept raw; render escapes (wp_kses + parse_text_editor).
+            $title   = ( $title_key && is_scalar( $row[ $title_key ] ?? null ) ) ? (string) $row[ $title_key ] : '';
+            $content = ( $content_key && is_scalar( $row[ $content_key ] ?? null ) ) ? (string) $row[ $content_key ] : '';
+
+            // Background image: ACF image array, attachment ID, or URL string.
+            $image = [ 'url' => '', 'id' => 0 ];
+            if ( $image_key ) {
+                $raw_image = $row[ $image_key ] ?? '';
+                if ( is_array( $raw_image ) ) {
+                    $image['url'] = $raw_image['url'] ?? '';
+                    $image['id']  = (int) ( $raw_image['ID'] ?? ( $raw_image['id'] ?? 0 ) );
+                } elseif ( is_numeric( $raw_image ) ) {
+                    $image['id']  = (int) $raw_image;
+                    $image['url'] = (string) wp_get_attachment_url( $image['id'] );
+                } elseif ( is_string( $raw_image ) && '' !== $raw_image ) {
+                    $image['url'] = $raw_image;
+                }
+            }
+
+            // Link: ACF Link array, or a plain URL / page-link string.
+            $link = [ 'url' => '', 'is_external' => '', 'nofollow' => '' ];
+            if ( $link_key ) {
+                $raw_link = $row[ $link_key ] ?? '';
+                if ( is_array( $raw_link ) ) {
+                    $link['url']         = $raw_link['url'] ?? '';
+                    $link['is_external'] = ( ! empty( $raw_link['target'] ) && '_blank' === $raw_link['target'] ) ? 'on' : '';
+                } elseif ( is_string( $raw_link ) && '' !== $raw_link ) {
+                    $link['url'] = $raw_link;
+                }
+            }
+
+            // Additional fields: [ [ 'label' => ..., 'value' => ... ], ... ].
+            $extras = [];
+            foreach ( $extra_keys as $ekey ) {
+                $val = $row[ $ekey ] ?? '';
+                if ( '' === $val || null === $val || [] === $val ) {
+                    continue;
+                }
+                $extras[] = [
+                    'label' => $sub_field_labels[ $ekey ] ?? $ekey,
+                    'value' => is_scalar( $val ) ? (string) $val : '',
+                ];
+            }
+
+            $items[] = [
+                'eael_accordion_is_active'         => 'no',
+                'eael_accordion_bg'                => $image,
+                'eael_accordion_tittle'            => $title,
+                'eael_accordion_content'           => $content,
+                // Always "yes": the render also requires a non-empty, non-"#" URL,
+                // so an unmapped or empty ACF link simply renders no anchor.
+                'eael_accordion_enable_title_link' => 'yes',
+                'eael_accordion_title_link'        => $link,
+                'eael_ia_extras'                   => $extras,
+                '_id'                              => uniqid( 'ia_', false ),
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Style controls for the ACF "Additional Fields" output (Style tab).
+     * Only shown when the data source is an ACF Repeater.
+     */
+    protected function eael_acf_extra_data_controls_style() {
+        $this->start_controls_section(
+            'eael_ia_section_extra_data_style',
+            [
+                'label'     => esc_html__( 'Additional Fields', 'essential-addons-for-elementor-lite' ),
+                'tab'       => Controls_Manager::TAB_STYLE,
+                'condition' => [
+                    'eael_ia_data_source' => 'acf_repeater',
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'eael_ia_extra_data_text_color',
+            [
+                'label'     => esc_html__( 'Color', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => [
+                    '{{WRAPPER}} .eael-img-accordion-extras .eael-img-accordion-extra-value' => 'color: {{VALUE}}',
+                ],
+            ]
+        );
+
+        $this->add_group_control(
+            Group_Control_Typography::get_type(),
+            [
+                'name'     => 'eael_ia_extra_data_text_typography',
+                'selector' => '{{WRAPPER}} .eael-img-accordion-extras .eael-img-accordion-extra-value',
+            ]
+        );
+
+        $this->add_control(
+            'eael_ia_extra_data_text_margin',
+            [
+                'label'      => esc_html__( 'Margin', 'essential-addons-for-elementor-lite' ),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => [ 'px', '%', 'em', 'rem', 'custom' ],
+                'selectors'  => [
+                    '{{WRAPPER}} .eael-img-accordion-extras .eael-img-accordion-extra' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'eael_ia_extra_data_text_padding',
+            [
+                'label'      => esc_html__( 'Padding', 'essential-addons-for-elementor-lite' ),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => [ 'px', '%', 'em', 'rem', 'custom' ],
+                'selectors'  => [
+                    '{{WRAPPER}} .eael-img-accordion-extras .eael-img-accordion-extra' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $this->end_controls_section();
+    }
+
+    protected function register_controls() {
+        $this->eael_register_acf_controls();
+
+        /**
+         * Image accordion Content Settings
+         */
+        $this->start_controls_section(
+            'eael_section_img_accordion_settings',
+            [
+                'label' => esc_html__( 'General', 'essential-addons-for-elementor-lite' ),
+            ]
+        );
+
+        $this->add_control(
+            'eael_img_accordion_type',
+            [
+                'label'       => esc_html__( 'Accordion Style', 'essential-addons-for-elementor-lite' ),
+                'type'        => Controls_Manager::SELECT,
+                'default'     => 'on-hover',
+                'label_block' => false,
+                'options'     => [
+                    'on-hover' => esc_html__( 'On Hover', 'essential-addons-for-elementor-lite' ),
+                    'on-click' => esc_html__( 'On Click', 'essential-addons-for-elementor-lite' ),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'eael_img_accordion_direction',
+            [
+                'label'       => esc_html__( 'Direction', 'essential-addons-for-elementor-lite' ),
+                'type'        => Controls_Manager::SELECT,
+                'default'     => 'on-hover',
+                'label_block' => false,
+                'options'     => [
+                    'accordion-direction-horizontal' => esc_html__( 'Horizontal', 'essential-addons-for-elementor-lite' ),
+                    'accordion-direction-vertical'   => esc_html__( 'Vertical', 'essential-addons-for-elementor-lite' ),
+                ],
+                'default'     => 'accordion-direction-horizontal',
+            ]
+        );
+
+        $this->add_control(
+            'eael_img_accordion_content_heading',
+            [
+                'label' => __( 'Content', 'essential-addons-for-elementor-lite' ),
+                'type'  => \Elementor\Controls_Manager::HEADING,
+            ]
+        );
+
+        $this->add_control(
+            'eael_img_accordion_content_horizontal_align',
+            [
+                'label'   => __( 'Horizontal Alignment', 'essential-addons-for-elementor-lite' ),
+                'type'    => \Elementor\Controls_Manager::CHOOSE,
+                'options' => [
+                    'left'   => [
+                        'title' => __( 'Left', 'essential-addons-for-elementor-lite' ),
+                        'icon'  => 'eicon-text-align-left',
+                    ],
+                    'center' => [
+                        'title' => __( 'Center', 'essential-addons-for-elementor-lite' ),
+                        'icon'  => 'eicon-text-align-center',
+                    ],
+                    'right'  => [
+                        'title' => __( 'Right', 'essential-addons-for-elementor-lite' ),
+                        'icon'  => 'eicon-text-align-right',
+                    ],
+                ],
+                'default' => 'center',
+                'toggle'  => true,
+            ]
+        );
+        $this->add_control(
+            'eael_img_accordion_content_vertical_align',
+            [
+                'label'   => __( 'Vertical Alignment', 'essential-addons-for-elementor-lite' ),
+                'type'    => \Elementor\Controls_Manager::CHOOSE,
+                'options' => [
+                    'top'    => [
+                        'title' => __( 'Top', 'essential-addons-for-elementor-lite' ),
+                        'icon'  => 'fa fa-arrow-circle-up',
+                    ],
+                    'center' => [
+                        'title' => __( 'Center', 'essential-addons-for-elementor-lite' ),
+                        'icon'  => 'eicon-text-align-center',
+                    ],
+                    'bottom' => [
+                        'title' => __( 'Bottom', 'essential-addons-for-elementor-lite' ),
+                        'icon'  => 'fa fa-arrow-circle-down',
+                    ],
+                ],
+                'default' => 'center',
+                'toggle'  => true,
+            ]
+        );
+
+        $this->add_control(
+            'title_tag',
+            [
+                'label'   => __( 'Select Tag', 'essential-addons-for-elementor-lite' ),
+                'type'    => Controls_Manager::SELECT,
+                'default' => 'h2',
+                'options' => [
+                    'h1'   => __( 'H1', 'essential-addons-for-elementor-lite' ),
+                    'h2'   => __( 'H2', 'essential-addons-for-elementor-lite' ),
+                    'h3'   => __( 'H3', 'essential-addons-for-elementor-lite' ),
+                    'h4'   => __( 'H4', 'essential-addons-for-elementor-lite' ),
+                    'h5'   => __( 'H5', 'essential-addons-for-elementor-lite' ),
+                    'h6'   => __( 'H6', 'essential-addons-for-elementor-lite' ),
+                    'span' => __( 'Span', 'essential-addons-for-elementor-lite' ),
+                    'p'    => __( 'P', 'essential-addons-for-elementor-lite' ),
+                    'div'  => __( 'Div', 'essential-addons-for-elementor-lite' ),
+                ],
+            ]
+        );
+
+        $repeater = new Repeater();
+
+        $repeater->add_control(
+            'eael_accordion_is_active',
+            [
+                'label'        => __( 'Make it active?', 'essential-addons-for-elementor-lite' ),
+                'type'         => Controls_Manager::SWITCHER,
+                'label_on'     => __( 'Yes', 'essential-addons-for-elementor-lite' ),
+                'label_off'    => __( 'No', 'essential-addons-for-elementor-lite' ),
+                'return_value' => 'yes',
+            ]
+        );
+
+        $repeater->add_control(
+            'eael_accordion_bg',
+            [
+                'label'       => esc_html__( 'Background Image', 'essential-addons-for-elementor-lite' ),
+                'type'        => Controls_Manager::MEDIA,
+                'label_block' => true,
+                'default'     => [
+                    'url' => EAEL_PLUGIN_URL . '/assets/front-end/img/accordion.png',
+                ],
+                'ai' => [
+                    'active' => false,
+                ],
+            ]
+        );
+
+        $repeater->add_control(
+            'eael_accordion_tittle',
+            [
+                'label'       => esc_html__( 'Title', 'essential-addons-for-elementor-lite' ),
+                'type'        => Controls_Manager::TEXT,
+                'label_block' => true,
+                'default'     => esc_html__( 'Accordion item title', 'essential-addons-for-elementor-lite' ),
+                'dynamic'     => [ 'active' => true ],
+                'ai' => [
+					'active' => true,
+				],
+            ]
+        );
+
+        $repeater->add_control(
+            'eael_accordion_content',
+            [
+                'label'       => esc_html__( 'Content', 'essential-addons-for-elementor-lite' ),
+                'type'        => Controls_Manager::WYSIWYG,
+                'label_block' => true,
+                'default'     => esc_html__( 'Accordion content goes here!', 'essential-addons-for-elementor-lite' ),
+            ]
+        );
+
+        $repeater->add_control(
+            'eael_accordion_enable_title_link',
+            [
+                'label'        => esc_html__( 'Enable Title Link', 'essential-addons-for-elementor-lite' ),
+                'type'         => Controls_Manager::SWITCHER,
+                'label_on'     => __( 'Show', 'essential-addons-for-elementor-lite' ),
+                'label_off'    => __( 'Hide', 'essential-addons-for-elementor-lite' ),
+                'return_value' => 'yes',
+                'default'      => 'yes',
+            ]
+        );
+
+        $repeater->add_control(
+            'eael_accordion_title_link',
+            [
+                'name'          => 'eael_accordion_title_link',
+                'label'         => esc_html__( 'Title Link', 'essential-addons-for-elementor-lite' ),
+                'type'          => Controls_Manager::URL,
+                'dynamic'       => [ 'active' => true ],
+                'label_block'   => true,
+                'default'       => [
+                    'url'         => '#',
+                    'is_external' => '',
+                ],
+                'show_external' => true,
+                'condition'     => [
+                    'eael_accordion_enable_title_link' => 'yes',
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'eael_img_accordions',
+            [
+                'type'        => Controls_Manager::REPEATER,
+                'seperator'   => 'before',
+                'default'     => [
+                    [
+                        'eael_accordion_tittle'  => esc_html__( 'Image Accordion #1', 'essential-addons-for-elementor-lite' ),
+                        'eael_accordion_content' => esc_html__( 'Image Accordion Content Goes Here! Click edit button to change this text.', 'essential-addons-for-elementor-lite' ),
+                        'eael_accordion_bg'      => [
+                            'url' => EAEL_PLUGIN_URL . '/assets/front-end/img/accordion.png',
+                        ]
+                    ],
+                    [
+                        'eael_accordion_tittle'  => esc_html__( 'Image Accordion #2', 'essential-addons-for-elementor-lite' ),
+                        'eael_accordion_content' => esc_html__( 'Image Accordion Content Goes Here! Click edit button to change this text.', 'essential-addons-for-elementor-lite' ),
+                        'eael_accordion_bg'      => [
+                            'url' => EAEL_PLUGIN_URL . '/assets/front-end/img/accordion.png',
+                        ]
+                    ],
+                    [
+                        'eael_accordion_tittle'  => esc_html__( 'Image Accordion #3', 'essential-addons-for-elementor-lite' ),
+                        'eael_accordion_content' => esc_html__( 'Image Accordion Content Goes Here! Click edit button to change this text.', 'essential-addons-for-elementor-lite' ),
+                        'eael_accordion_bg'      => [
+                            'url' => EAEL_PLUGIN_URL . '/assets/front-end/img/accordion.png',
+                        ]
+                    ],
+                    [
+                        'eael_accordion_tittle'  => esc_html__( 'Image Accordion #4', 'essential-addons-for-elementor-lite' ),
+                        'eael_accordion_content' => esc_html__( 'Image Accordion Content Goes Here! Click edit button to change this text.', 'essential-addons-for-elementor-lite' ),
+                        'eael_accordion_bg'      => [
+                            'url' => EAEL_PLUGIN_URL . '/assets/front-end/img/accordion.png',
+                        ]
+                    ],
+                ],
+                'fields'      => $repeater->get_controls(),
+                'title_field' => '{{eael_accordion_tittle}}',
+                'condition'   => [ 'eael_ia_data_source' => 'custom' ],
+            ]
+        );
+
+        $this->add_control(
+            'eael_wd_liquid_glass_effect_switch',
+            [
+                'label' => __( 'Enable Liquid Glass Effects', 'essential-addons-for-elementor-lite' ),
+                'type'  => Controls_Manager::SWITCHER
+            ]
+        );
+
+        $this->end_controls_section();
+
+        /**
+         * -------------------------------------------
+         * Tab Style (Image accordion)
+         * -------------------------------------------
+         */
+        $this->start_controls_section(
+            'eael_section_img_accordion_style_settings',
+            [
+                'label' => esc_html__( 'General', 'essential-addons-for-elementor-lite' ),
+                'tab'   => Controls_Manager::TAB_STYLE,
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_height',
+            [
+                'label'       => esc_html__( 'Height', 'essential-addons-for-elementor-lite' ),
+                'type'        => Controls_Manager::TEXT,
+                'default'     => '400',
+                'description' => 'Unit in px',
+                'selectors'   => [
+                    '{{WRAPPER}} .eael-img-accordion ' => 'height: {{VALUE}}px;',
+                ],
+                'ai' => [
+					'active' => true,
+				],
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_bg_color',
+            [
+                'label'     => esc_html__( 'Background Color', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::COLOR,
+                'default'   => '',
+                'selectors' => [
+                    '{{WRAPPER}} .eael-img-accordion' => 'background-color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $this->add_responsive_control(
+            'eael_accordion_container_padding',
+            [
+                'label'      => esc_html__( 'Padding', 'essential-addons-for-elementor-lite' ),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => [ 'px', 'em', '%' ],
+                'selectors'  => [
+                    '{{WRAPPER}} .eael-img-accordion' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $this->add_responsive_control(
+            'eael_accordion_container_margin',
+            [
+                'label'      => esc_html__( 'Margin', 'essential-addons-for-elementor-lite' ),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => [ 'px', 'em', '%' ],
+                'selectors'  => [
+                    '{{WRAPPER}} .eael-img-accordion' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+
+        $this->add_group_control(
+            Group_Control_Border::get_type(),
+            [
+                'name'     => 'eael_accordion_border',
+                'label'    => esc_html__( 'Border', 'essential-addons-for-elementor-lite' ),
+                'selector' => '{{WRAPPER}} .eael-img-accordion',
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_border_radius',
+            [
+                'label'     => esc_html__( 'Border Radius', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::SLIDER,
+                'default'   => [
+                    'size' => 4,
+                ],
+                'range'     => [
+                    'px' => [
+                        'max' => 500,
+                    ],
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .eael-img-accordion'               => 'border-radius: {{SIZE}}px;',
+                    '{{WRAPPER}} .eael-img-accordion a:first-child' => 'border-radius: {{SIZE}}px 0 0 {{SIZE}}px;',
+                    '{{WRAPPER}} .eael-img-accordion a:last-child'  => 'border-radius: 0 {{SIZE}}px {{SIZE}}px 0;',
+                ],
+            ]
+        );
+
+        $this->add_group_control(
+            Group_Control_Box_Shadow::get_type(),
+            [
+                'name'     => 'eael_accordion_shadow',
+                'selector' => '{{WRAPPER}} .eael-img-accordion',
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_img_overlay_color',
+            [
+                'label'     => esc_html__( 'Overlay Color', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::COLOR,
+                'default'   => 'rgba(0, 0, 0, .3)',
+                'selectors' => [
+	                '{{WRAPPER}} .eael-img-accordion .eael-image-accordion-hover:before' => 'background-color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_img_hover_color',
+            [
+                'label'     => esc_html__( 'Hover Overlay Color', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::COLOR,
+                'default'   => 'rgba(0, 0, 0, .5)',
+                'selectors' => [
+                    '{{WRAPPER}} .eael-img-accordion .eael-image-accordion-hover:hover::before'         => 'background-color: {{VALUE}};',
+                    '{{WRAPPER}} .eael-img-accordion .eael-image-accordion-hover.overlay-active:hover::before' => 'background-color: {{VALUE}};',
+                    '{{WRAPPER}} .eael-img-accordion .eael-image-accordion-hover.overlay-active:before' => 'background-color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $this->end_controls_section();
+        /**
+         * -------------------------------------------
+         * Tab Style (Thumbnail Style)
+         * -------------------------------------------
+         */
+        $this->start_controls_section(
+            'eael_section_img_accordion_thumbnail_style_settings',
+            [
+                'label' => esc_html__( 'Thumbnail', 'essential-addons-for-elementor-lite' ),
+                'tab'   => Controls_Manager::TAB_STYLE,
+            ]
+        );
+
+        $this->add_control(
+            'eael_image_accordion_thumbnail_margin',
+            [
+                'label'      => __( 'Margin', 'essential-addons-for-elementor-lite' ),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => [ 'px', '%', 'em' ],
+                'selectors'  => [
+                    '{{WRAPPER}} .eael-img-accordion .eael-image-accordion-item' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+        $this->add_control(
+            'eael_image_accordion_thumbnail_padding',
+            [
+                'label'      => __( 'Padding', 'essential-addons-for-elementor-lite' ),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => [ 'px', '%', 'em' ],
+                'selectors'  => [
+                    '{{WRAPPER}} .eael-img-accordion .eael-image-accordion-item' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+        $this->add_control(
+            'eael_image_accordion_thumbnail_radius',
+            [
+                'label'      => __( 'Border Radius', 'essential-addons-for-elementor-lite' ),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => [ 'px', '%', 'em' ],
+                'selectors'  => [
+                    '{{WRAPPER}} .eael-img-accordion .eael-image-accordion-item' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}}!important;',
+                ],
+            ]
+        );
+        $this->add_group_control(
+            \Elementor\Group_Control_Border::get_type(),
+            [
+                'name'     => 'eael_image_accordion_thumbnail_border',
+                'label'    => __( 'Border', 'essential-addons-for-elementor-lite' ),
+                'selector' => '{{WRAPPER}} .eael-img-accordion .eael-image-accordion-item',
+            ]
+        );
+
+        $this->end_controls_section();
+
+        /**
+         * -------------------------------------------
+         * Tab Style (Image accordion Content Style)
+         * -------------------------------------------
+         */
+        $this->start_controls_section(
+            'eael_section_img_accordion_typography_settings',
+            [
+                'label' => esc_html__( 'Color &amp; Typography', 'essential-addons-for-elementor-lite' ),
+                'tab'   => Controls_Manager::TAB_STYLE,
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_title_text',
+            [
+                'label'     => esc_html__( 'Title', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::HEADING,
+                'separator' => 'before',
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_title_color',
+            [
+                'label'     => esc_html__( 'Color', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::COLOR,
+                'default'   => '#fff',
+                'selectors' => [
+                    '{{WRAPPER}} .eael-img-accordion .overlay .img-accordion-title' => 'color: {{VALUE}} !important;',
+                ],
+            ]
+        );
+
+        $this->add_group_control(
+            Group_Control_Typography::get_type(),
+            [
+                'name'     => 'eael_accordion_title_typography',
+                'selector' => '{{WRAPPER}} .eael-img-accordion .overlay .img-accordion-title',
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_content_text',
+            [
+                'label'     => esc_html__( 'Content', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::HEADING,
+                'separator' => 'before',
+            ]
+        );
+
+        $this->add_control(
+            'eael_accordion_content_color',
+            [
+                'label'     => esc_html__( 'Color', 'essential-addons-for-elementor-lite' ),
+                'type'      => Controls_Manager::COLOR,
+                'default'   => '#fff',
+                'selectors' => [
+                    '{{WRAPPER}} .eael-img-accordion .overlay p' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $this->add_group_control(
+            Group_Control_Typography::get_type(),
+            [
+                'name'     => 'eael_accordion_content_typography',
+                'selector' => '{{WRAPPER}} .eael-img-accordion .overlay p',
+            ]
+        );
+
+        $this->end_controls_section();
+
+        $this->start_controls_section(
+			'eael_wd_liquid_glass_effect_section',
+			[
+				'label' => esc_html__( 'Liquid Glass Effects', 'essential-addons-for-elementor-lite' ),
+				'tab' => Controls_Manager::TAB_STYLE,
+                'condition' => [
+                    'eael_wd_liquid_glass_effect_switch' => 'yes'
+                ]
+			]
+		);
+
+        // Liquid Glass Effects
+        $this->eael_liquid_glass_effects();
+
+        //  Liquid Glass Shadow Effects
+        $this->eael_liquid_glass_shadow_effects();
+
+        $this->end_controls_section();
+
+        $this->eael_acf_extra_data_controls_style();
+    }
+
+    /**
+     * Controller Summary of eael_liquid_glass_effects
+     */
+    public function eael_pro_lock_icon() {
+		if ( !apply_filters('eael/pro_enabled', false ) ) {
+			$html = '<span class="e-control-motion-effects-promotion__lock-wrapper"><i class="eicon-lock"></i></span>';
+			return $html;
+		}
+		return;
+	}
+
+    public function eael_teaser_template($texts) {
+		$html = '<div class="ea-nerd-box">
+			<div class="ea-nerd-box-message">' . $texts['messages'] . '</div>
+			<a class="ea-nerd-box-link elementor-button elementor-button-default" href="https://wpdeveloper.com/upgrade/ea-pro" target="_blank">
+			' . __('Upgrade to EA PRO', 'essential-addons-for-elementor-lite') . '
+			</a>
+		</div>';
+
+		return $html;
+    }
+    protected function eael_liquid_glass_effects() {
+        $this->add_control(
+            'eael_wd_liquid_glass_effect_notice',
+            [
+                'type'        => Controls_Manager::ALERT,
+                'alert_type'  => 'info',
+                'content'     => esc_html__( 'Liquid glass effect is only visible when a semi-transparent background color is applied.', 'essential-addons-for-elementor-lite' ) . '<a href="https://essential-addons.com/docs/ea-liquid-glass-effects/" target="_blank">' . esc_html__( 'Learn More', 'essential-addons-for-elementor-lite' ) . '</a>',
+                'condition'   => [
+                    'eael_wd_liquid_glass_effect_switch' => 'yes',
+                ]
+            ]
+        );
+
+        $eael_liquid_glass_effect = apply_filters(
+			'eael_liquid_glass_effect_filter',
+			[
+					'styles' => [
+						'effect1' => esc_html__( 'Heavy Frost', 'essential-addons-for-elementor-lite' ),
+						'effect2' => esc_html__( 'Soft Mist', 'essential-addons-for-elementor-lite' ),
+						'effect4' => esc_html__( 'Light Frost', 'essential-addons-for-elementor-lite' ),
+						'effect5' => esc_html__( 'Grain Frost', 'essential-addons-for-elementor-lite' ),
+						'effect6' => esc_html__( 'Fine Frost', 'essential-addons-for-elementor-lite' ),
+				],
+			]
+        );
+
+        $this->add_control(
+            'eael_wd_liquid_glass_effect',
+            [
+				'label'       => esc_html__( 'Liquid Glass Presets', 'essential-addons-for-elementor-lite' ),
+				'type'        => Controls_Manager::CHOOSE,
+				'label_block' => true,
+				'options'     => [
+					'effect1' => [
+						'title' => esc_html( $eael_liquid_glass_effect['styles']['effect1'] ),
+						'text'  => esc_html( $eael_liquid_glass_effect['styles']['effect1'] ),
+					],
+					'effect2' => [
+						'title' => esc_html( $eael_liquid_glass_effect['styles']['effect2'] ),
+						'text'  => esc_html( $eael_liquid_glass_effect['styles']['effect2'] ),
+					],
+					'effect4' => [
+						'title' => esc_html( $eael_liquid_glass_effect['styles']['effect4'] ),
+						'text'  => esc_html( $eael_liquid_glass_effect['styles']['effect4'] )  . $this->eael_pro_lock_icon(),
+					],
+					'effect5' => [
+						'title' => esc_html( $eael_liquid_glass_effect['styles']['effect5'] ),
+						'text'  => esc_html( $eael_liquid_glass_effect['styles']['effect5'] )  . $this->eael_pro_lock_icon(),
+					],
+					'effect6' => [
+						'title' => esc_html( $eael_liquid_glass_effect['styles']['effect6'] ),
+						'text'  => esc_html( $eael_liquid_glass_effect['styles']['effect6'] )  . $this->eael_pro_lock_icon(),
+					],
+				],
+				'prefix_class' => 'eael_wd_liquid_glass-',
+				'condition' => [
+					'eael_wd_liquid_glass_effect_switch' => 'yes',
+				],
+				'default' => 'effect1',
+				'multiline' => true,
+			]
+        );
+
+        if ( !apply_filters('eael/pro_enabled', false ) ) {
+			$this->add_control(
+				'eael_wd_liquid_glass_effect_pro_alert',
+				[
+					'type' => Controls_Manager::RAW_HTML,
+					'raw'  => $this->eael_teaser_template( [
+						'messages' => __( "To use this Liquid glass preset, Upgrade to Essential Addons Pro", 'essential-addons-for-elementor-lite' ),
+					] ),
+					'condition' => [
+						'eael_wd_liquid_glass_effect_switch' => 'yes',
+						'eael_wd_liquid_glass_effect'        => ['effect4', 'effect5', 'effect6'],
+					]
+				]
+			);
+		} else {
+			$this->add_control(
+				'eael_wd_liquid_glass_effect_settings',
+				[
+					'label'     => esc_html__( 'Liquid Glass Settings', 'essential-addons-for-elementor-lite' ),
+					'type'      => Controls_Manager::HEADING,
+					'separator' => 'before',
+					'condition' => [
+						'eael_wd_liquid_glass_effect_switch' => 'yes',
+					]
+				]
+			);
+		}
+
+        // Background Color Controls
+        $this->eael_wd_liquid_glass_effect_bg_color_effect( $this, 'effect1', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay' );
+        $this->eael_wd_liquid_glass_effect_bg_color_effect( $this, 'effect2', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay' );
+
+        do_action( 'eael_wd_liquid_glass_effect_bg_color_effect4', $this, 'effect4', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay' );
+        do_action( 'eael_wd_liquid_glass_effect_bg_color_effect5', $this, 'effect5', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay' );
+        do_action( 'eael_wd_liquid_glass_effect_bg_color_effect6', $this, 'effect6', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay' );
+
+        // Backdrop Filter Controls
+        $this->eael_wd_liquid_glass_effect_backdrop_filter_effect( $this, 'effect1', '24', '.eael-img-accordion .overlay-active .overlay' );
+        $this->eael_wd_liquid_glass_effect_backdrop_filter_effect( $this, 'effect2', '20', '.eael-img-accordion .overlay-active .overlay' );
+
+        // Brightness Effect Controls
+		$this->add_control(
+			'eael_wd_liquid_glass_effect_brightness_effect2',
+			[
+				'label' => esc_html__( 'Brightness', 'essential-addons-for-elementor-lite' ),
+				'type'  => Controls_Manager::SLIDER,
+				'range' => [
+					'px' => [
+						'min'  => 0,
+						'max'  => 5,
+						'step' => .1,
+					],
+				],
+				'default' => [
+					'size' => 1,
+				],
+				'selectors' => [
+					'{{WRAPPER}}.eael_wd_liquid_glass-effect2 .eael-img-accordion .overlay-active .overlay' => 'backdrop-filter: blur({{eael_wd_liquid_glass_effect_backdrop_filter_effect2.SIZE}}px) brightness({{SIZE}});',
+				],
+				'condition'    => [
+					'eael_wd_liquid_glass_effect_switch' => 'yes',
+					'eael_wd_liquid_glass_effect'        => 'effect2',
+				]
+			]
+		);
+
+        do_action( 'eael_wd_liquid_glass_effect_backdrop_filter_effect4', $this, 'effect4', '', '.eael-img-accordion .overlay-active .overlay' );
+        do_action( 'eael_wd_liquid_glass_effect_backdrop_filter_effect5', $this, 'effect5', '', '.eael-img-accordion .overlay-active .overlay' );
+        do_action( 'eael_wd_liquid_glass_effect_backdrop_filter_effect6', $this, 'effect6', '', '.eael-img-accordion .overlay-active .overlay' );
+
+        // Noise Distortion Settings (Pro)
+		do_action( 'eael_wd_liquid_glass_effect_noise_action', $this );
+    }
+
+    /**
+     * Summary of eael_liquid_glass_shadow_effects
+     */
+    protected function eael_liquid_glass_shadow_effects() {
+        if ( !apply_filters('eael/pro_enabled', false ) ) {
+            $this->add_control(
+                'eael_wd_liquid_glass_shadow_effect',
+                [
+                    'label'     => esc_html__( 'Shadow Effects', 'essential-addons-for-elementor-lite' ),
+                    'type'      => Controls_Manager::SELECT2,
+                    'default'   => 'effect1',
+                    'separator' => 'before',
+                    'options'   => [
+                        '' 		 => esc_html__( 'None', 'essential-addons-for-elementor-lite' ),
+                        'effect1' => esc_html__( 'Effect 1', 'essential-addons-for-elementor-lite' ),
+                        'effect2' => esc_html__( 'Effect 2', 'essential-addons-for-elementor-lite' ),
+                        'effect3' => esc_html__( 'Effect 3', 'essential-addons-for-elementor-lite' ),
+                        'effect4' => esc_html__( 'Effect 4', 'essential-addons-for-elementor-lite' ),
+                    ],
+                    'prefix_class' => 'eael_wd_liquid_glass_shadow-',
+                    'condition'    => [
+                        'eael_wd_liquid_glass_effect_switch' => 'yes',
+                        'eael_wd_liquid_glass_effect'        => ['effect1', 'effect2'],
+                    ]
+                ]
+            );
+
+            $this->add_control(
+                'eael_wd_liquid_glass_shadow_inner',
+                [
+                    'label'     => esc_html__( 'Shadow Settings', 'essential-addons-for-elementor-lite' ),
+                    'type'      => Controls_Manager::HEADING,
+                    'separator' => 'before',
+                    'condition' => [
+                        'eael_wd_liquid_glass_effect_switch'  => 'yes',
+                        'eael_wd_liquid_glass_shadow_effect!' => '',
+                        'eael_wd_liquid_glass_effect'         => ['effect1', 'effect2'],
+                    ],
+                ]
+            );
+
+            // Liquid Glass Border Effects
+            $this->eael_wd_liquid_glass_border_effect( $this, 'effect1', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay', ['effect1', 'effect2'] );
+            $this->eael_wd_liquid_glass_border_effect( $this, 'effect2', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay', ['effect1', 'effect2'] );
+            $this->eael_wd_liquid_glass_border_effect( $this, 'effect3', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay', ['effect1', 'effect2'] );
+            $this->eael_wd_liquid_glass_border_effect( $this, 'effect4', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay', ['effect1', 'effect2'] );
+
+            // Liquid Glass Border Radius Effects
+            $this->eael_wd_liquid_glass_border_radius_effect($this, 'effect1', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'top' 	  => 24,
+                    'right'    => 24,
+                    'bottom'   => 24,
+                    'left'     => 24,
+                    'unit'     => 'px',
+                    'isLinked' => true,
+                ],
+                ['effect1', 'effect2']
+            );
+
+            $this->eael_wd_liquid_glass_border_radius_effect($this, 'effect2', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'top' 	  => 16,
+                    'right'    => 16,
+                    'bottom'   => 16,
+                    'left'     => 16,
+                    'unit'     => 'px',
+                    'isLinked' => true,
+                ],
+                ['effect1', 'effect2']
+            );
+
+            $this->eael_wd_liquid_glass_border_radius_effect($this, 'effect3', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'top' 	  => 8,
+                    'bottom'   => 8,
+                    'left'     => 8,
+                    'right'    => 8,
+                    'unit'     => 'px',
+                    'isLinked' => true,
+                ],
+                ['effect1', 'effect2']
+            );
+
+            $this->eael_wd_liquid_glass_border_radius_effect($this, 'effect4', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'top' 	  => 24,
+                    'bottom'   => 24,
+                    'left'     => 24,
+                    'right'    => 24,
+                    'unit'     => 'px',
+                    'isLinked' => true,
+                ],
+                ['effect1', 'effect2']
+            );
+
+            // Liquid Glass Shadow Effects
+            $this->eael_wd_liquid_glass_shadow_effect($this, 'effect1', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'color'      => 'rgba(0,0,0,0.78)',
+                    'horizontal' => 0,
+                    'vertical'   => 19,
+                    'blur'       => 26,
+                    'spread'     => 1,
+                ],
+                ['effect1', 'effect2']
+            );
+
+            $this->eael_wd_liquid_glass_shadow_effect($this, 'effect2', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'color'      => '#383C65',
+                    'horizontal' => 0,
+                    'vertical'   => 0,
+                    'blur'       => 33,
+                    'spread'     => -2,
+                ],
+                ['effect1', 'effect2']
+            );
+
+            $this->eael_wd_liquid_glass_shadow_effect($this, 'effect3', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'color'      => 'rgba(255, 255, 255, 0.4)',
+                    'horizontal' => 1,
+                    'vertical'   => 1,
+                    'blur'       => 10,
+                    'spread'     => 5,
+                ],
+                ['effect1', 'effect2']
+            );
+
+            $this->eael_wd_liquid_glass_shadow_effect($this, 'effect4', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'color'      => '#00000040',
+                    'horizontal' => 0,
+                    'vertical'   => 9,
+                    'blur'       => 21,
+                    'spread'     => 0,
+                ],
+                ['effect1', 'effect2']
+            );
+        } else {
+            $this->add_control(
+                'eael_wd_liquid_glass_shadow_effect',
+                [
+                    'label'     => esc_html__( 'Shadow Effects', 'essential-addons-for-elementor-lite' ),
+                    'type'      => Controls_Manager::SELECT2,
+                    'default'   => 'effect1',
+                    'separator' => 'before',
+                    'options'   => [
+                        '' 		 => esc_html__( 'None', 'essential-addons-for-elementor-lite' ),
+                        'effect1' => esc_html__( 'Effect 1', 'essential-addons-for-elementor-lite' ),
+                        'effect2' => esc_html__( 'Effect 2', 'essential-addons-for-elementor-lite' ),
+                        'effect3' => esc_html__( 'Effect 3', 'essential-addons-for-elementor-lite' ),
+                        'effect4' => esc_html__( 'Effect 4', 'essential-addons-for-elementor-lite' ),
+                    ],
+                    'prefix_class' => 'eael_wd_liquid_glass_shadow-',
+                    'condition'    => [
+                        'eael_wd_liquid_glass_effect_switch' => 'yes',
+                        'eael_wd_liquid_glass_effect'        => ['effect1', 'effect2', 'effect4', 'effect5', 'effect6'],
+                    ]
+                ]
+            );
+
+            $this->add_control(
+                'eael_wd_liquid_glass_shadow_inner',
+                [
+                    'label'     => esc_html__( 'Shadow Settings', 'essential-addons-for-elementor-lite' ),
+                    'type'      => Controls_Manager::HEADING,
+                    'separator' => 'before',
+                    'condition' => [
+                        'eael_wd_liquid_glass_effect_switch'  => 'yes',
+                        'eael_wd_liquid_glass_shadow_effect!' => '',
+                        'eael_wd_liquid_glass_effect'         => ['effect1', 'effect2', 'effect4', 'effect5', 'effect6'],
+                    ],
+                ]
+            );
+
+            // Liquid Glass Border Effects
+            $this->eael_wd_liquid_glass_border_effect( $this, 'effect1', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay', ['effect1', 'effect2', 'effect4', 'effect5', 'effect6'] );
+            $this->eael_wd_liquid_glass_border_effect( $this, 'effect2', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay', ['effect1', 'effect2', 'effect4', 'effect5', 'effect6'] );
+            $this->eael_wd_liquid_glass_border_effect( $this, 'effect3', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay', ['effect1', 'effect2', 'effect4', 'effect5', 'effect6'] );
+            $this->eael_wd_liquid_glass_border_effect( $this, 'effect4', '#FFFFFF1F', '.eael-img-accordion .overlay-active .overlay', ['effect1', 'effect2', 'effect4', 'effect5', 'effect6'] );
+
+            // Liquid Glass Border Radius Effects
+            $this->eael_wd_liquid_glass_border_radius_effect($this, 'effect1', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'top' 	  => 24,
+                    'right'    => 24,
+                    'bottom'   => 24,
+                    'left'     => 24,
+                    'unit'     => 'px',
+                    'isLinked' => true,
+                ],
+                ['effect1', 'effect2', 'effect4', 'effect5', 'effect6']
+            );
+
+            $this->eael_wd_liquid_glass_border_radius_effect($this, 'effect2', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'top' 	  => 16,
+                    'right'    => 16,
+                    'bottom'   => 16,
+                    'left'     => 16,
+                    'unit'     => 'px',
+                    'isLinked' => true,
+                ],
+                ['effect1', 'effect2', 'effect4', 'effect5', 'effect6']
+            );
+
+            $this->eael_wd_liquid_glass_border_radius_effect($this, 'effect3', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'top' 	  => 8,
+                    'bottom'   => 8,
+                    'left'     => 8,
+                    'right'    => 8,
+                    'unit'     => 'px',
+                    'isLinked' => true,
+                ],
+                ['effect1', 'effect2', 'effect4', 'effect5', 'effect6']
+            );
+
+            $this->eael_wd_liquid_glass_border_radius_effect($this, 'effect4', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'top' 	  => 24,
+                    'bottom'   => 24,
+                    'left'     => 24,
+                    'right'    => 24,
+                    'unit'     => 'px',
+                    'isLinked' => true,
+                ],
+                ['effect1', 'effect2', 'effect4', 'effect5', 'effect6']
+            );
+
+            // Liquid Glass Shadow Effects
+            $this->eael_wd_liquid_glass_shadow_effect($this, 'effect1', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'color'      => 'rgba(0,0,0,0.78)',
+                    'horizontal' => 0,
+                    'vertical'   => 19,
+                    'blur'       => 26,
+                    'spread'     => 1,
+                ],
+                ['effect1', 'effect2', 'effect4', 'effect5', 'effect6']
+            );
+
+            $this->eael_wd_liquid_glass_shadow_effect($this, 'effect2', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'color'      => '#383C65',
+                    'horizontal' => 0,
+                    'vertical'   => 0,
+                    'blur'       => 33,
+                    'spread'     => -2,
+                ],
+                ['effect1', 'effect2', 'effect4', 'effect5', 'effect6']
+            );
+
+            $this->eael_wd_liquid_glass_shadow_effect($this, 'effect3', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'color'      => 'rgba(255, 255, 255, 0.4)',
+                    'horizontal' => 1,
+                    'vertical'   => 1,
+                    'blur'       => 10,
+                    'spread'     => 5,
+                ],
+                ['effect1', 'effect2', 'effect4', 'effect5', 'effect6']
+            );
+
+            $this->eael_wd_liquid_glass_shadow_effect($this, 'effect4', '.eael-img-accordion .overlay-active .overlay',
+                [
+                    'color'      => '#00000040',
+                    'horizontal' => 0,
+                    'vertical'   => 9,
+                    'blur'       => 21,
+                    'spread'     => 0,
+                ],
+                ['effect1', 'effect2', 'effect4', 'effect5', 'effect6']
+            );
+        }
+    }
+
+    protected function render() {
+        $settings = $this->get_settings_for_display();
+
+        // Custom mode returns the manual repeater unchanged; ACF mode swaps in the mapped rows.
+        $settings['eael_img_accordions'] = $this->get_image_accordion_items( $settings );
+
+        $horizontal_alignment = 'eael-img-accordion-horizontal-align-' . $settings[ 'eael_img_accordion_content_horizontal_align' ];
+        $vertical_alignment   = 'eael-img-accordion-vertical-align-' . $settings[ 'eael_img_accordion_content_vertical_align' ];
+
+        $this->add_render_attribute(
+            'eael-image-accordion',
+            [
+                'class' => [
+                    'eael-img-accordion',
+                    $settings[ 'eael_img_accordion_direction' ],
+                    $horizontal_alignment,
+                    $vertical_alignment,
+                ],
+                'id'    => 'eael-img-accordion-' . $this->get_id(),
+            ]
+        );
+
+
+        $this->add_render_attribute( 'eael-image-accordion', 'data-img-accordion-id', esc_attr( $this->get_id() ) );
+        $this->add_render_attribute( 'eael-image-accordion', 'data-img-accordion-type', $settings[ 'eael_img_accordion_type' ] );
+        if ( empty( $settings[ 'eael_img_accordions' ] ) ) {
+            return;
+        }
+        ?>
+    <div <?php $this->print_render_attribute_string( 'eael-image-accordion' ); ?>>
+        <?php foreach ( $settings[ 'eael_img_accordions' ] as $key => $img_accordion ): ?>
+            <?php
+	        $active    = $img_accordion['eael_accordion_is_active'];
+	        $activeCSS = ( $active === 'yes' ? ' flex: 3 1 0%;' : '' );
+	        $img_accordion['eael_accordion_bg'] = Helper::eael_wpml_translate_media( $img_accordion['eael_accordion_bg'] ); // WPML Media Translation compatibility
+	        $this->add_render_attribute(
+		        'eael-image-accordion-item-wrapper-' . $key,
+		        [
+			        'class' => 'eael-image-accordion-hover eael-image-accordion-item',
+			        'style' => "background-image: url(" . esc_url( $img_accordion['eael_accordion_bg']['url'] ) . ");" . $activeCSS,
+		        ]
+	        );
+            if ( $active === 'yes' ) {
+                $this->add_render_attribute( 'eael-image-accordion-item-wrapper-' . $key, 'class', 'overlay-active' );
+            }
+            ?>
+
+            <div <?php $this->print_render_attribute_string( 'eael-image-accordion-item-wrapper-' . $key ); ?>  tabindex="0">
+                <div class="overlay">
+                    <?php do_action( 'eael_wd_liquid_glass_effect_svg_pro', $this, $settings, '.overlay-active' ); ?>
+                    <div class="overlay-inner <?php echo( $active === 'yes' ? ' overlay-inner-show' : '' ); ?>">
+                        <?php
+                        $title_linked = false;
+                        if ( $img_accordion['eael_accordion_enable_title_link'] == 'yes' && $img_accordion['eael_accordion_title_link']['url'] !== '#' && $img_accordion['eael_accordion_title_link']['url'] ) {
+                            $this->add_link_attributes( 'eael-image-accordion-link-' . $key, $img_accordion['eael_accordion_title_link'] );
+                            $title_linked = true;
+                            echo "<a "; $this->print_render_attribute_string( 'eael-image-accordion-link-' . $key ); echo ">";
+                        }
+                        if ( !empty( $img_accordion[ 'eael_accordion_tittle' ] ) ):
+                            printf( '<%1$s class="img-accordion-title">%2$s</%1$s>', esc_html( Helper::eael_validate_html_tag( $settings[ 'title_tag' ] ) ), wp_kses( $img_accordion[ 'eael_accordion_tittle' ], Helper::eael_allowed_tags() ) );
+                        endif;
+
+                        echo $title_linked ? '</a>' : '';
+
+                        if ( !empty( $img_accordion[ 'eael_accordion_content' ] ) ):
+                            ?>
+                            <p><?php 
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                            echo $this->parse_text_editor( wp_kses( $img_accordion[ 'eael_accordion_content' ], Helper::eael_allowed_tags() ) ); ?></p>
+                        <?php endif; ?>
+
+                        <?php if ( ! empty( $img_accordion['eael_ia_extras'] ) ) : ?>
+                            <ul class="eael-img-accordion-extras">
+                                <?php foreach ( $img_accordion['eael_ia_extras'] as $extra ) : ?>
+                                    <li class="eael-img-accordion-extra"><span class="eael-img-accordion-extra-value"><?php echo wp_kses_post( $extra['value'] ); ?></span></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+        </div>
+        <?php
+        if ( !empty( $settings[ 'eael_img_accordions' ] ) ) {
+            if ( 'on-hover' === $settings[ 'eael_img_accordion_type' ] ) {
+                echo '<style typr="text/css">
+                    #eael-img-accordion-' . esc_html( $this->get_id() ) . ' .eael-image-accordion-hover:hover {
+                        flex: 3 1 0% !important;
+                    }
+                    #eael-img-accordion-' . esc_html( $this->get_id() ) . ' .eael-image-accordion-hover:hover:hover .overlay-inner * {
+                        opacity: 1;
+                        visibility: visible;
+                        transform: none;
+                        transition: all .3s .3s;
+                    }
+                </style>';
+            }
+        }
+    }
+}

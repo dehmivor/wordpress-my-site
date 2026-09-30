@@ -1,0 +1,19 @@
+@use "../../variables/colors" as colors;
+
+.edd-pointer {
+	&.warning {
+		& h3 {
+			background: colors.$alert-yellow;
+			border-color: colors.$wp-yellow-50;
+			color: colors.$wp-gray-900;
+
+			&:before {
+				color: colors.$alert-yellow;
+			}
+		}
+	}
+
+	&.edd-has-action p:last-of-type {
+		margin-bottom: 2em;
+	}
+}

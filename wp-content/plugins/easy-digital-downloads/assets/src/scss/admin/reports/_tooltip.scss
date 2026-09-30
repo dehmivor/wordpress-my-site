@@ -1,0 +1,28 @@
+@use '../../variables/colors' as colors;
+
+.edd-chartjs-tooltip {
+	position: absolute;
+	background: #fff !important;
+	border-width: 0px;
+	border-radius: 12px !important;
+	box-shadow: colors.$tooltip-shadow !important;
+	color: colors.$tooltip-text !important;
+	width: auto;
+	min-width: 180px;
+	max-width: 250px !important;
+	padding: 16px !important;
+	text-rendering: optimizeLegibility;
+	text-shadow: none !important;
+	font-size: 13px !important;
+	transform: translate(-50%, 0);
+	pointer-events: none;
+	white-space: nowrap;
+	z-index: 1000;
+}
+
+.edd-chartjs-tooltip-key {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	margin-right: 5px;
+}

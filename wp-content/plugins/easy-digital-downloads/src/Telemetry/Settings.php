@@ -1,0 +1,313 @@
+<?php
+/**
+ * Gets the store settings data to send to our telemetry server.
+ *
+ * @package   easy-digital-downloads
+ * @copyright Copyright (c) 2023, Easy Digital Downloads
+ * @license   GPL2+
+ * @since     3.1.1
+ */
+
+namespace EDD\Telemetry;
+
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit; // @codeCoverageIgnore
+
+/**
+ * Class Settings
+ *
+ * @since 3.1.1
+ * @package EDD\Telemetry
+ */
+class Settings {
+	use Traits\Anonymize;
+
+	/**
+	 * Gets the array of settings data.
+	 *
+	 * @since 3.1.1
+	 * @return array
+	 */
+	public function get() {
+		$data          = array();
+		$settings_tabs = edd_get_settings_tabs();
+		$settings      = edd_get_registered_settings();
+		foreach ( $settings_tabs as $tab_key => $tab_contents ) {
+			$tab_sections = edd_get_settings_tab_sections( $tab_key );
+			foreach ( $tab_sections as $section_key => $section_title ) {
+				$section_setting_types = edd_get_registered_settings_types( $tab_key, $section_key );
+				if ( ! empty( $settings[ $tab_key ] ) && ! empty( $settings[ $tab_key ][ $section_key ] ) ) {
+					$section_settings = $settings[ $tab_key ][ $section_key ];
+					foreach ( $section_settings as $setting_key => $setting ) {
+						$value = $this->get_setting_value( $tab_key, $section_key, $setting_key );
+						// If the value is null, it's a skipped setting.
+						if ( is_null( $value ) ) {
+							continue;
+						}
+						$setting_id = isset( $setting['id'] ) ? $setting['id'] : sanitize_title( $setting['name'] );
+						if ( is_array( $value ) ) {
+							foreach ( $value as $v ) {
+								if ( is_scalar( $v ) ) {
+									$data[ "{$setting_id}_{$v}" ] = 1;
+								}
+							}
+						} else {
+							$data[ $setting_id ] = $value;
+						}
+					}
+				}
+			}
+		}
+
+		$emails = $this->get_registered_emails();
+		if ( $emails ) {
+			$data = array_merge( $data, $emails );
+		}
+
+		$features = \EDD\Admin\Tools\Labs::get_feature_settings();
+		if ( $features ) {
+			foreach ( $features as $feature ) {
+				if ( ! empty( $feature['id'] ) ) {
+					$data[ $feature['id'] ] = (int) (bool) edd_get_option( $feature['id'] );
+				}
+			}
+		}
+
+		$profilers = \EDD\Admin\Tools\Labs::get_profilers();
+		if ( $profilers ) {
+			foreach ( $profilers as $profiler ) {
+				if ( empty( $profiler['class'] ) || ! is_subclass_of( $profiler['class'], '\\EDD\\Profiler\\Profiler' ) ) {
+					continue;
+				}
+				$settings = $profiler['class']::get_settings();
+				foreach ( (array) $settings as $setting ) {
+					if ( ! empty( $setting['id'] ) ) {
+						$data[ $setting['id'] ] = (int) (bool) edd_get_option( $setting['id'] );
+					}
+				}
+			}
+		}
+
+		// PayPal Commerce active integration version (v2 = 1st-party REST API;
+		// v3 = 3rd-party proxy + PayPal Commerce Platform). Telemetry only fires
+		// in live mode, so we report the live-mode version only.
+		$paypal_commerce_version = get_option( 'edd_paypal_live_commerce_version', '' );
+		if ( ! empty( $paypal_commerce_version ) ) {
+			$data['paypal_commerce_version'] = $paypal_commerce_version;
+		}
+
+		// Always report the Stripe elements mode. The setting is only registered for stores with
+		// legacy card elements access, so otherwise it would be missing from the telemetry data.
+		if ( ! isset( $data['stripe_elements_mode'] ) && function_exists( 'edds_get_elements_mode' ) ) {
+			$data['stripe_elements_mode'] = edds_get_elements_mode();
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Gets the id and value for an individual setting.
+	 *
+	 * @param string $tab_key The tab key.
+	 * @param string $section_key The section key.
+	 * @param string $setting_key The setting key.
+	 * @return mixed
+	 */
+	private function get_setting_value( $tab_key, $section_key, $setting_key ) {
+		$setting = edd_get_registered_setting_details( $tab_key, $section_key, $setting_key );
+		if ( ! $this->can_include_setting( $setting ) ) {
+			return null;
+		}
+
+		$default = isset( $setting['std'] ) ? $setting['std'] : '';
+		$value   = edd_get_option( $setting['id'], $default );
+		if ( in_array( $setting['type'], array( 'checkbox', 'checkbox_description', 'checkbox_toggle' ), true ) ) {
+			return (int) (bool) $value;
+		}
+		if ( empty( $value ) ) {
+			if ( 'currency' === $setting['id'] ) {
+				return edd_get_currency();
+			}
+			if ( 'base_country' === $setting['id'] ) {
+				return strtoupper( edd_get_option( 'stripe_connect_account_country', $value ) );
+			}
+		}
+		// Use the helper function for stripe_elements_mode as it contains business logic for the default.
+		if ( 'stripe_elements_mode' === $setting['id'] && function_exists( 'edds_get_elements_mode' ) ) {
+			return edds_get_elements_mode();
+		}
+		// Use the helper function for default_gateway, which falls back to the first enabled gateway when no default is set.
+		if ( 'default_gateway' === $setting['id'] ) {
+			return edd_get_default_gateway();
+		}
+		if ( in_array( $setting['type'], $this->text_settings(), true ) ) {
+			return $this->anonymize( $value );
+		}
+		if ( $this->should_populate_array( $setting ) ) {
+			return $this->update_setting_value_array( $value, $setting );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Evaluates whether a setting can be included in the telemetry data.
+	 *
+	 * @since 3.1.1
+	 * @param array $setting The setting definition.
+	 * @return bool
+	 */
+	private function can_include_setting( $setting ) {
+
+		if ( empty( $setting ) ) {
+			return false;
+		}
+
+		// If the setting is marked readonly then it's not really a setting.
+		if ( ! empty( $setting['args']['readonly'] ) ) {
+			return false;
+		}
+
+		// Certain types of settings should always be skipped.
+		if ( in_array( $setting['type'], $this->skipped_settings_types(), true ) ) {
+			return false;
+		}
+
+		// Settings known to be PII are excluded.
+		if ( in_array( $setting['id'], $this->sensitive_settings(), true ) ) {
+			return false;
+		}
+
+		// Text settings are always excluded unless specifically included.
+		if ( in_array( $setting['type'], $this->text_settings(), true ) && ! in_array( $setting['id'], $this->allowed_text_settings(), true ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * These settings types are either not settings or nearly always full of sensitive data/PII.
+	 *
+	 * @since 3.1.1
+	 * @return array
+	 */
+	private function skipped_settings_types() {
+
+		return array_merge(
+			edd_get_non_setting_types(),
+			array(
+				'rich_editor',
+				'upload',
+				'color',
+				'password',
+			)
+		);
+	}
+
+	/**
+	 * These settings are known to be sensitive/PII and are not otherwise excluded.
+	 *
+	 * @since 3.1.1
+	 * @return array
+	 */
+	private function sensitive_settings() {
+		return array(
+			'base_state',
+			'paypal_live_client_id',
+			'paypal_live_client_secret',
+			'paypal_sandbox_client_id',
+			'paypal_sandbox_client_secret',
+		);
+	}
+
+	/**
+	 * We assume that any text field should be excluded unless it's in this array.
+	 *
+	 * @since 3.1.1
+	 * @return array
+	 */
+	private function allowed_text_settings() {
+		return array();
+	}
+
+	/**
+	 * Settings types which will be strings and which should be evaluated for PII.
+	 *
+	 * @since 3.1.1
+	 * @return array
+	 */
+	private function text_settings() {
+		return array(
+			'text',
+			'textarea',
+			'email',
+		);
+	}
+
+	/**
+	 * Whether an array of settings should be populated, due to the setting type.
+	 *
+	 * @since 3.1.1
+	 * @param array $setting The setting definition.
+	 * @return bool
+	 */
+	private function should_populate_array( $setting ) {
+		$settings = array( 'gateways', 'accepted_cards', 'checkout_address_fields' );
+
+		return 'multicheck' === $setting['type'] || in_array( $setting['id'], $settings, true );
+	}
+
+	/**
+	 * Updates the an array setting value to include all options.
+	 *
+	 * @since 3.1.1
+	 * @param mixed $saved_value The actual saved value (can be empty).
+	 * @param array $setting     The setting definition.
+	 * @return array
+	 */
+	private function update_setting_value_array( $saved_value, $setting ) {
+		$value = array();
+		if ( ! is_array( $saved_value ) ) {
+			return $value;
+		}
+
+		if ( ! empty( $setting['options'] ) ) {
+			foreach ( $setting['options'] as $key => $label ) {
+				if ( is_array( $saved_value ) && ! empty( $saved_value[ $key ] ) ) {
+					$value[] = $key;
+				}
+			}
+
+			return $value;
+		}
+
+		// If the setting options aren't available here, work from the saved value.
+		foreach ( $saved_value as $key => $enabled ) {
+			if ( $enabled ) {
+				$value[] = $key;
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Gets the array of registered email templates.
+	 *
+	 * @since 3.3.0
+	 * @return array
+	 */
+	private function get_registered_emails() {
+		$registry = edd_get_email_registry();
+		$data     = array();
+		foreach ( $registry->get_emails() as $key => $email_class ) {
+			$email = $registry->make_email_class( $email_class, array( $key ) );
+			if ( $email->can_view ) {
+				$data[ "email_template_{$email->email_id}" ] = (int) (bool) $email->status;
+			}
+		}
+
+		return $data;
+	}
+}

@@ -1,0 +1,95 @@
+<?php
+/**
+ * Sanitizes the Checkout section.
+ *
+ * @since 3.3.3
+ * @package EDD\Admin\Settings\Sanitize\Tabs\Gateways
+ */
+
+namespace EDD\Admin\Settings\Sanitize\Tabs\Gateways;
+
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit; // @codeCoverageIgnore
+
+use EDD\Admin\Settings\Sanitize\Tabs\Section;
+
+/**
+ * Sanitizes the Checkout section.
+ *
+ * @since 3.3.3
+ */
+class Checkout extends Section {
+	/**
+	 * Sanitize the banned emails list.
+	 *
+	 * @since 3.3.3
+	 * @param string $value The value to sanitize.
+	 * @return string
+	 */
+	protected static function sanitize_banned_emails( $value ) {
+		if ( empty( $value ) ) {
+			return '';
+		}
+
+		if ( is_array( $value ) ) {
+			$value = implode( "\n", $value );
+		}
+
+		// Sanitize the input.
+		$emails = array_map( 'trim', explode( "\n", $value ) );
+		$emails = array_unique( $emails );
+		$emails = array_map( 'sanitize_text_field', $emails );
+
+		foreach ( $emails as $id => $email ) {
+			if ( empty( $email ) || ( ! is_email( $email ) && '@' !== $email[0] && '.' !== $email[0] ) ) {
+				unset( $emails[ $id ] );
+			}
+		}
+
+		// Before return, make sure the array is re-indexed.
+		return array_values( $emails );
+	}
+
+	/**
+	 * Sanitize the address checkout fields.
+	 *
+	 * @since 3.3.8
+	 * @param string $value The value to sanitize.
+	 * @return string
+	 */
+	protected static function sanitize_checkout_address_fields( $value ) {
+		if ( ! edd_use_taxes() ) {
+			return $value;
+		}
+
+		// If taxes are enabled at all, we need to ensure the country field is always present.
+		$value['country'] = 1;
+
+		// If there are regional tax rates, we need to ensure the state field is always present.
+		if ( self::has_regional_rates() ) {
+			$value['state'] = 1;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Checks if there are any active regional tax rates.
+	 *
+	 * @since 3.5.0
+	 * @return bool
+	 */
+	private static function has_regional_rates() {
+		$tax_rates = new \EDD\Database\Queries\TaxRate();
+
+		return ! empty(
+			$tax_rates->query(
+				array(
+					'scope'  => 'region',
+					'status' => 'active',
+					'number' => 1,
+				)
+			)
+		);
+	}
+}

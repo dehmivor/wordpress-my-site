@@ -1,0 +1,12 @@
+@use "../../variables/colors" as colors;
+
+.edd-extension-manager__key-notice {
+	background: #fff;
+	border: 1px solid colors.$wp-red-50;
+	border-radius: 4px;
+	padding: 1em;
+
+	p:first-child {
+		margin-top: 0;
+	}
+}

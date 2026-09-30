@@ -1,0 +1,46 @@
+.edd-notes .edd-note {
+	padding: 10px;
+	background-color: #ffffee;
+	border: 1px solid #cccc00;
+	width: 100%;
+	position: relative;
+	margin-bottom: 10px;
+	box-sizing: border-box;
+	overflow: hidden;
+
+	&.deleting {
+		opacity: 0.5;
+	}
+}
+
+.edd-notes .edd-note__header {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.edd-add-note .spinner {
+	float: none;
+	display: inline-block;
+	margin: 0;
+}
+
+.edd-notes .edd-note time {
+	font-size: 11px;
+	color: #aaa;
+}
+
+.edd-notes .edd-note .edd-note-author {
+	margin-right: 5px;
+}
+
+.edd-notes .edd-note .edd-delete-note {
+	color: #a00;
+	font-weight: bold;
+	text-decoration: none;
+	margin-left: auto;
+}
+
+.edd-notes .edd-note .edd-delete-note:hover {
+	color: #888;
+}

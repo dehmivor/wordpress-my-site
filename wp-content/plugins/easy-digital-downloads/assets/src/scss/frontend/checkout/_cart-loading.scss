@@ -1,0 +1,33 @@
+/* Single full-screen checkout loading overlay (see cart-loading.js). */
+.edd-cart-loading {
+	align-items: center;
+	background: rgba(255, 255, 255, 0.7);
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	left: 0;
+	pointer-events: none;
+	position: fixed;
+	right: 0;
+	top: 0;
+	z-index: 999999;
+}
+
+.edd-cart-loading[hidden] {
+	display: none;
+}
+
+.edd-cart-loading__spinner,
+.edd-cart-loading__spinner:after {
+	border-radius: 50%;
+	height: 1.5em;
+	width: 1.5em;
+}
+
+.edd-cart-loading__spinner {
+	animation: edd-spinning 1.1s infinite linear;
+	border: 0.25em solid rgba(0, 0, 0, 0.2);
+	border-left-color: #000;
+	display: block;
+	transform: translateZ(0);
+}

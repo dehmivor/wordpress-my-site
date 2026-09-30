@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "edd/confirmation",
+	"version": "2.0.0",
+	"title": "EDD Confirmation",
+	"category": "easy-digital-downloads",
+	"icon": "yes-alt",
+	"description": "A brief confirmation screen to show to customers immediately after a successful purchase.",
+	"keywords": [ "easy digital downloads", "edd", "orders" ],
+	"supports": {
+		"html": false,
+		"innerBlocks": true
+	},
+	"textdomain": "easy-digital-downloads",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"attributes": {
+		"payment_key": {
+			"type": "boolean",
+			"default": false
+		},
+		"payment_method": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"example": {
+		"attributes": {}
+	},
+  "allowedBlocks": [ "core/paragraph", "core/heading" ]
+}

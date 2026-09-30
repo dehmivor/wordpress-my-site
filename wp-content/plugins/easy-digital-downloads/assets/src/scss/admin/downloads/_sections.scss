@@ -1,0 +1,30 @@
+@use "../../variables/colors" as colors;
+
+.edd-download-editor__sections {
+	margin-top: 20px;
+
+	&.edd-sections-wrap {
+		border: 1px solid colors.$wp-border;
+	}
+
+	.section-wrap .edd-section-content__fields--standard .edd-form-group {
+		margin-bottom: 16px;
+	}
+
+	.section-content .inside {
+		margin: 0 !important;
+		padding: 0;
+	}
+}
+
+body:not(.block-editor-page) {
+	#edd_product_details .inside {
+		margin: 0;
+		padding: 0;
+	}
+
+	.edd-download-editor__sections {
+		border: none;
+		margin-top: 0;
+	}
+}

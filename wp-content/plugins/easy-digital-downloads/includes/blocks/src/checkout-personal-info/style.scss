@@ -1,0 +1,25 @@
+.wp-block-edd-checkout-personal-info {
+	.edd-blocks__checkout-user {
+		// Inherit styles from existing personal info styles
+	}
+}
+
+// Same approach as .cc-address--state-zip: the fieldset is already a grid, so pairing the
+// name fields is a matter of giving it two columns and spanning everything else across both.
+.edd-checkout-block__personal-info--name-single-line {
+	#edd_checkout_user_info {
+		grid-template-columns: 1fr 1fr;
+
+		legend,
+		> div {
+			grid-column: span 2;
+		}
+
+		// Only pair First Name when Last Name is actually rendered, so removing Last Name
+		// leaves a full-width field instead of a half-empty row.
+		> div.edd-blocks-form__group-edd_first:has(~ div.edd-blocks-form__group-edd_last),
+		> div.edd-blocks-form__group-edd_last {
+			grid-column: span 1;
+		}
+	}
+}

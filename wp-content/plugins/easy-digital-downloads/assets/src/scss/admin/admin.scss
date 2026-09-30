@@ -1,0 +1,1699 @@
+/**
+ * EDD Admin CSS
+ *
+ * @package     EDD
+ * @subpackage  Admin CSS
+ * @copyright   Copyright (c) 2015, Pippin Williamson
+ * @license     http://opensource.org/licenses/gpl-2.0.php GNU Public License
+ */
+
+
+@use "../variables/colors" as colors;
+@use "../components/toggle-checkbox";
+@use "general/style" as general;
+@use "sections/style" as sections;
+@use "downloads/style" as downloads;
+@use "discounts/style" as discounts;
+@use "forms/style" as forms;
+@use "upgrades/v3" as upgrades;
+@use "reports/style" as reports;
+@use "orders/style" as orders;
+@use "promos/style" as promos;
+@use "gateways/style" as gateways;
+@use "settings/style" as settings;
+@use "dashboard/style" as dashboard;
+@use "customers/style" as customers;
+@use "tools/style" as tools;
+@use "modals/style" as modals;
+@use "notes/style" as notes;
+
+
+/**
+ * Notes:
+ *
+ * [1] Backwards compatibility for vertical tabs < 3.0
+ */
+
+.edd-wrap a,
+.edd-notice .notice-dismiss {
+	text-decoration: none;
+}
+
+/**
+ * Tag specificity should not be needed, but cannot
+ * safely be removed for fear of breaking even more things.
+ */
+.wp-core-ui .edd-delete,
+a.edd-delete {
+	border-color: #a00;
+	color: #a00;
+
+	&:hover {
+		border-color: #f00;
+		color: #f00;
+	}
+}
+
+/* General Settings Styles
+-------------------------------------------------------------- */
+body.post-type-download #contextual-help-link-wrap,
+body.post-type-download #screen-options-link-wrap {
+	top: 5px !important;
+}
+
+body.post-type-download #screen-meta {
+	margin: 0px 0px -1px -20px;
+}
+
+.download_page_edd-settings .edd-check-wrapper {
+	clear: both;
+}
+
+.download_page_edd-settings .form-table tr>th>strong,
+.download_page_edd-settings .form-table tr>th>h3 {
+	font-size: 1.2em;
+	font-weight: 600;
+	margin: 0 auto;
+}
+
+/* =Payment Icon Styling
+-------------------------------------------------------------- */
+
+.download_page_edd-settings .edd-settings-payment-icon-wrapper {
+	margin-top: 5px;
+}
+
+.download_page_edd-settings .edd-settings-payment-icon-wrapper input {
+	margin-top: 1px;
+}
+
+.download_page_edd-settings .form-table .edd-settings-payment-icon-wrapper input[type="checkbox"]+label {
+	margin: 0;
+	display: inline-block;
+}
+
+.download_page_edd-settings .edd-settings-payment-icon-wrapper .payment-icon-image {
+	margin-right: 5px;
+	width: 32px;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.download_page_edd-settings .edd-settings-payment-icon-wrapper .payment-option-name {
+	vertical-align: middle;
+}
+
+
+/* =Tax Settings Style
+-------------------------------------------------------------- */
+.download_page_edd-settings .taxrates th,
+.download_page_edd-settings .taxrates td {
+	padding: 8px 10px;
+}
+
+.download_page_edd-settings .taxrates td {
+	line-height: 1.5em;
+	vertical-align: top;
+	margin: 0;
+}
+
+.download_page_edd-settings .taxrates .regular-text {
+	width: 100%;
+}
+
+/* Insert Download
+-------------------------------------------------------------- */
+
+#TB_window {
+	overflow: hidden;
+}
+
+#TB_title {
+	padding: 5px;
+}
+
+#TB_ajaxContent {
+	width: calc(100% - 30px) !important;
+	padding: 15px;
+	margin: 0;
+	height: calc(100% - 118px) !important;
+}
+
+#TB_ajaxWindowTitle {
+	font-size: 18px;
+	font-weight: 600;
+	line-height: 30px;
+}
+
+#TB_closeWindowButton {
+	right: 6px;
+	top: 6px;
+}
+
+#choose-download-wrapper {
+	width: 100%;
+}
+
+#choose-download-wrapper .wrap {
+	overflow-y: scroll;
+	margin: 0;
+	padding: 0;
+	height: calc(100% - 50px);
+}
+
+#choose-download-wrapper .submit-wrapper {
+	position: absolute;
+	width: 100%;
+	bottom: 0;
+	padding: 0;
+	margin: 0 0 0 -15px;
+	text-align: right;
+}
+
+#choose-download-wrapper .submit-wrapper div {
+	background-color: #fafafa;
+	padding: 15px;
+	border-top: 1px solid #ddd;
+}
+
+/* Media Buttons Styles
+-------------------------------------------------------------- */
+
+.wp-media-buttons .button.edd-thickbox {
+	padding-left: 0;
+}
+
+/* Add/View Order Styles
+-------------------------------------------------------------- */
+
+/** Mimic WordPress 5.0 block-editor header region styles. */
+.download_page_edd-payment-history .edit-post-editor-regions__header {
+	flex-shrink: 0;
+	height: auto;
+	border-bottom: 1px solid #e2e4e7;
+	z-index: 30;
+	position: -webkit-sticky;
+	position: sticky;
+	top: 32px;
+
+	/** EDD-specific */
+	margin-left: -20px;
+}
+
+@media screen and (max-width: 782px) {
+
+	.download_page_edd-payment-history .edit-post-editor-regions__header {
+		position: initial;
+		top: 46px;
+	}
+}
+
+.download_page_edd-payment-history .edit-post-header {
+	height: 56px;
+	padding: 4px 2px;
+	background: #fff;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+
+	/** EDD-specific */
+	max-width: 100%;
+	box-sizing: border-box;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+@media screen and (max-width: 782px) {
+
+	.download_page_edd-payment-history .edit-post-header {
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+}
+
+@media (min-width: 280px) {
+
+	.download_page_edd-payment-history .edit-post-header {
+		flex-wrap: nowrap;
+	}
+}
+
+.download_page_edd-payment-history .edit-post-header .edit-post-header__toolbar {
+	order: 0;
+}
+
+.download_page_edd-payment-history .edit-post-header .edit-post-header__settings {
+	order: 1;
+}
+
+.download_page_edd-payment-history .edit-post-header #publishing-action,
+.download_page_edd-payment-history .edit-post-header .edit-post-header__toolbar,
+.download_page_edd-payment-history .edit-post-header .edit-post-header__settings {
+	display: flex;
+	align-items: center;
+}
+
+.download_page_edd-payment-history .edit-post-header #publishing-action .spinner {
+	margin: 0 5px 0 0;
+}
+
+.download_page_edd-payment-history .edit-post-header .button-primary {
+	margin: 2px;
+	height: 34px;
+	line-height: 32px;
+	font-size: 13px;
+}
+
+#edd-order-items .hndle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+#edd-order-items .hndle .edd-toggle {
+	font-weight: normal;
+}
+
+.edd-add-order-item td {
+	vertical-align: middle;
+}
+
+.edd-add-order-item input {
+	width: 80%;
+}
+
+.edd-add-order-item input[readonly] {
+	color: #555;
+	background: none;
+	border: 1px solid transparent;
+	box-shadow: none;
+}
+
+.edd-order-add-download-select .spinner {
+	display: none;
+}
+
+/** Overview */
+table.edd-order-overview-summary {
+	border-width: 0;
+	table-layout: fixed;
+}
+
+table.edd-order-overview-summary--refund {
+	border-width: 0;
+}
+
+@media screen and (min-width: 782px) {
+
+	.edd-order-overview .column-right {
+		text-align: right;
+	}
+}
+
+.edd-ml-auto {
+	margin-left: auto !important;
+}
+
+@media screen and (min-width: 782px) {
+
+	.edd-ml-lg-auto {
+		margin-left: auto !important;
+	}
+}
+
+.edd-ml-auto+.edd-ml-auto {
+	margin-left: 10px !important;
+}
+
+/** Items */
+.edd-order-overview-summary__items-name {
+	align-self: flex-start;
+}
+
+.edd-order-overview-summary__items> :nth-child(odd) {
+	background-color: colors.$wp-alternate;
+}
+
+@media screen and (min-width: 782px) {
+
+	.edd-order-overview-summary__items tr:last-child th,
+	.edd-order-overview-summary__items tr:last-child td {
+		border-bottom: 1px solid #e5e5e5;
+	}
+}
+
+@media screen and (max-width: 782px) {
+
+	.edd-order-overview-summary .row-actions>*,
+	.edd-order-overview-summary__items-name .row-actions {
+		display: block !important;
+	}
+
+	.edd-order-overview-summary .row-actions>*:not(:first-child):before {
+		display: none;
+	}
+}
+
+.edd-order-overview-summary th:not(.column-primary) {
+	width: 100px;
+}
+
+.edd-order-overview-summary .row-actions>*:not(:first-child):before {
+	color: colors.$wp-inactive;
+	content: " | ";
+}
+
+.edd-order-overview-summary .row-actions .text {
+	color: #555;
+}
+
+.edd-order-overview-summary .removable {
+	display: flex;
+	align-items: center;
+	position: relative;
+}
+
+.edd-order-overview-summary .removable .delete {
+	display: inline-block;
+	margin-right: 10px;
+	margin-left: -8px;
+	padding: 10px;
+	border-right: 1px solid #e5e5e5;
+	color: #a00;
+}
+
+.edd-order-overview-summary .removable .delete:hover {
+	color: #dc3232;
+}
+
+/** Adjustments */
+.edd-order-overview-summary__adjustments .column-primary {
+	font-weight: 600;
+}
+
+.edd-order-overview-summary__adjustments td small {
+	font-weight: normal;
+}
+
+/** Totals */
+.edd-order-overview-summary__subtotal .column-primary,
+.edd-order-overview-summary__tax tr:first-of-type .column-primary,
+.edd-order-overview-summary__total .column-primary {
+	font-weight: 600;
+}
+
+.edd-order-overview-summary__subtotal td,
+.edd-order-overview-summary__adjustments td,
+.edd-order-overview-summary__tax td,
+.edd-order-overview-summary__total td {
+	vertical-align: middle;
+}
+
+.edd-order-overview-summary__tax td small,
+.edd-order-overview-summary__total td small {
+	font-weight: normal;
+}
+
+.edd-order-overview-summary__total .total {
+	color: #017d5c;
+	display: inline-block;
+}
+
+.edd-order-overview-summary__total .total.is-negative {
+	color: #a00;
+}
+
+@media screen and (min-width: 783px) {
+
+	.edd-order-overview-summary__adjustments .removable .delete {
+		margin-left: -50px;
+	}
+
+	.edd-order-overview-summary__total .total {
+		font-size: 150%;
+		padding-top: 5px;
+		padding-bottom: 5px;
+	}
+}
+
+.edd-order-overview-summary__total tr:last-child th,
+.edd-order-overview-summary__total tr:last-child td:not(:first-of-type) {
+	border-top: 1px solid #e5e5e5;
+}
+
+.edd-order-overview-summary__total .notice {
+	margin: -1px;
+}
+
+.edd-order-overview-summary__total .notice p {
+	font-weight: normal;
+	margin: 0.5em 0;
+}
+
+/** Refunds */
+.edd-order-overview-summary__refunds .column-primary {
+	font-weight: 600;
+}
+
+.edd-order-overview-summary__refunds td small {
+	font-weight: normal;
+}
+
+.edd-order-overview-summary__refunds tr:first-child td {
+	border-top: 1px solid #e5e5e5;
+}
+
+/** Actions */
+#edd-order-overview-actions.inside {
+	border-top: 1px solid #ccd0d4;
+	margin-top: 0;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+#edd-order-overview-actions.inside:empty {
+	padding: 0;
+	border-top: 0;
+}
+
+#edd-order-overview-actions.inside>div {
+	display: flex;
+	align-items: center;
+}
+
+#edd-order-overview-actions .edd-order-overview-actions__notice {
+	flex-basis: 100%;
+	margin-top: 15px;
+}
+
+.edd-order-overview-actions .button {
+	width: 100%;
+	margin-bottom: 12px;
+}
+
+.edd-order-overview-actions .button:last-of-type {
+	margin-bottom: 0;
+}
+
+@media screen and (min-width: 782px) {
+	.edd-order-overview-actions .button {
+		width: auto;
+		margin-left: 12px;
+		margin-bottom: 0;
+	}
+
+	.edd-order-overview-actions .button:first-of-type {
+		margin-left: auto;
+	}
+}
+
+.edd-order-overview-actions__locked {
+	font-style: italic;
+	opacity: 0.80;
+}
+
+@media screen and (max-width: 782px) {
+
+	.edd-order-overview-actions__locked {
+		margin-bottom: 12px;
+	}
+}
+
+.edd-order-overview-actions__refund .dashicons {
+	margin-right: 8px;
+}
+
+/** Dialog */
+.edd-dialog .ui-button-icon-only {
+	font-size: 0;
+}
+
+.download_page_edd-payment-history .ui-dialog,
+.download_page_edd-payment-history .ui-dialog-content {
+	overflow: visible;
+}
+
+.edd-order-overview-modal form>p {
+	margin-top: 0;
+}
+
+.edd-order-overview-modal fieldset legend,
+.edd-order-overview-modal form label {
+	display: block;
+	margin-bottom: 4px;
+}
+
+.edd-order-overview-modal fieldset {
+	margin-bottom: calc(1em - 3px);
+}
+
+.edd-order-overview-modal fieldset>p {
+	margin: 2px 0 3px;
+}
+
+.edd-order-overview-modal form .submit {
+	margin: 0 -16px -16px;
+	padding: 16px;
+	background: #fcfcfc;
+	border-top: 1px solid #dfdfdf;
+	display: flex;
+	align-items: center;
+}
+
+.edd-order-overview-modal form .submit .spinner {
+	margin: 0;
+}
+
+.edd-order-overview-add-item [for="auto-calculate"] {
+	display: flex;
+	align-items: center;
+}
+
+.edd-order-overview-add-item [for="auto-calculate"] input[type="checkbox"] {
+	margin-top: 0;
+}
+
+.edd-order-overview-add-item [for="auto-calculate"] .label {
+	line-height: 1.15;
+	margin-left: 8px;
+}
+
+.edd-order-overview-add-item [for="auto-calculate"] .label small {
+	margin-top: 4px;
+	display: block;
+	opacity: 0.75;
+}
+
+.edd-order-overview-add-adjustment .notice,
+.edd-order-overview-add-item .notice {
+	margin: 0 0 1rem;
+}
+
+.edd-order-overview-add-adjustment #description,
+.edd-order-overview-add-discount select {
+	width: 100%;
+}
+
+.edd-order-overview-error {
+	font-style: italic;
+	color: #a00;
+	display: block;
+	margin: 4px 0;
+}
+
+.edd-order-copy-download-link textarea {
+	width: 100%;
+}
+
+.edd-order-resend-email-chooser legend {
+	font-weight: bold;
+	margin-bottom: 4px;
+}
+
+.edd-order-resend-email-chooser p {
+	margin: 4px 0;
+}
+
+/* List Tables
+-------------------------------------------------------------- */
+.ts-wrapper:has(+ input[type="submit"]) {
+	display: inline-block;
+	width: 200px;
+	vertical-align: middle;
+
+	.ts-control {
+		.tablenav.top & {
+			min-height: 32px;
+			padding: 0 8px;
+		}
+	}
+}
+
+.wp-list-table.emails .column-customer .avatar,
+.wp-list-table.customers .column-primary .avatar {
+	float: left;
+	margin-right: 10px;
+	margin-top: 1px;
+	border-radius: 5px;
+}
+
+.wp-list-table.orders div.order-list-email {
+	font-size: .85em;
+	color: #888;
+}
+
+.wp-list-table.orders th.column-amount {
+	width: 100px;
+}
+
+
+/* Row Actions
+-------------------------------------------------------------- */
+
+.wp-list-table .row-actions span.activate a {
+	color: green;
+}
+
+.wp-list-table .row-actions span.refund a {
+	color: #836fff;
+}
+
+.wp-list-table .row-actions span.cancel a {
+	color: #cc8c00;
+}
+
+.wp-list-table .row-actions span.cancel a:hover,
+.wp-list-table .row-actions span.refund a:hover {
+	opacity: 0.8;
+}
+
+.wp-list-table .type-download .row-actions {
+	color: colors.$wp-inactive;
+}
+
+/* Nav Tab Styles
+-------------------------------------------------------------- */
+
+.no-js.edit-tags-php.post-type-download .wp-heading-inline {
+	position: absolute;
+	top: 0;
+}
+
+.no-js.edit-tags-php.post-type-download .nav-tab-wrapper {
+	margin-top: 50px;
+}
+
+.edit-tags-php.post-type-download .wrap .nav-tab-wrapper .page-title-action,
+.download_page_edd-customers .wrap .nav-tab-wrapper .page-title-action,
+.download_page_edd-discounts .wrap .nav-tab-wrapper .page-title-action,
+.download_page_edd-payment-history .wrap .nav-tab-wrapper .page-title-action {
+	top: 3px;
+	margin-left: 10px;
+	line-height: 24px;
+}
+/* Payment History Styles
+-------------------------------------------------------------- */
+
+#edd-payments-filter ul.subsubsub {
+	margin-bottom: 8px;
+}
+
+marquee {
+	padding: 0;
+	margin: 0;
+}
+
+@media handheld,
+only screen and (max-width: 640px) {
+
+	.wp-list-table.downloads th {
+		width: auto !important;
+	}
+
+}
+
+#edd-download-link-textarea {
+	width: 100%;
+}
+
+/* Metabox Styles
+-------------------------------------------------------------- */
+
+.edd_files_name_label {
+	width: 225px;
+	float: left;
+}
+
+.edd_files_url_label {
+	width: 220px;
+	float: left;
+}
+
+#postbox-container-1 .edd_files_name_label {
+	width: 80px;
+}
+
+#postbox-container-1 .edd_files_url_label {
+	width: 80px;
+}
+
+#edd_product_prices .inside,
+#edd_product_files .inside {
+	margin-bottom: 0;
+}
+textarea#edd-payment-note {
+	width: 100%;
+	height: 4em;
+	margin: 0;
+}
+
+#edd-order-items .row .edd-purchased-files-list-wrapper .download {
+	line-height: 1.4;
+}
+
+#edd-order-items .edd-purchased-files-list-wrapper .edd-purchased-option {
+	color: #666;
+}
+
+input[class*="edd-price-field"] {
+	max-width: 125px;
+}
+
+[class*="item_"] [class*="edd-payment-details-download-"][type="number"].small-text,
+#edd-order-download-quantity[type="number"].small-text,
+#edd-order-download-tax[type="text"].small-text {
+	height: 25px;
+}
+
+.item_price .edd-payment-details-download-quantity[type="number"].small-text,
+#edd-order-download-quantity[type="number"].small-text {
+	width: 55px;
+}
+
+.item_tax .edd-payment-details-download-item-tax[type="number"].small-text,
+#edd-order-download-tax[type="text"].small-text {
+	width: 80%;
+	max-width: 125px;
+}
+
+#edd_product_notes_field {
+	display: block;
+	margin: 12px 0 0;
+	width: 100%;
+}
+
+/* Payment Details
+-------------------------------------------------------------- */
+
+.edd-metabox-title-action {
+	margin: 0;
+	float: right;
+	padding: 4px 8px;
+	position: relative;
+	top: -1px;
+	text-decoration: none;
+	border: none;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	background: #f7f7f7;
+	text-shadow: none;
+	font-weight: 600;
+	font-size: 10px;
+	line-height: normal;
+	color: #0073aa;
+	cursor: pointer;
+	outline: 0;
+}
+
+.edd-metabox-title-action:hover {
+	border-color: #008EC2;
+	background: #00a0d2;
+	color: #fff;
+}
+
+.edd-edit-purchase-element .tablenav {
+	padding: 2px 10px 8px 10px;
+}
+
+.edd-edit-purchase-element .edd-order-children-wrapper {
+	margin: 0 -1px;
+}
+
+.edd-edit-purchase-element .edd-order-children-wrapper.child-count-0 table {
+	border-top: none;
+	border-bottom: none;
+}
+
+.edd-edit-purchase-element .edd-order-children-wrapper.child-count-0 .tablenav {
+	display: none;
+}
+
+.edd-edit-purchase-element[class*="columns-"] ul li {
+	padding-right: 1%;
+}
+
+#edd-edit-order-form .columns-4 .column:nth-child(2n+1),
+#edd-edit-order-form .columns-5 .column:nth-child(3n+1),
+#edd-edit-order-form .column:nth-child(2n+1) {
+	margin-right: 0;
+}
+
+#edd-edit-order-form input.large-text {
+	width: 90%;
+}
+
+.edd-edit-purchase-element ul li.item_price {
+	width: 15%;
+}
+
+.edd-edit-purchase-element ul li.item_price.item_quantity {
+	width: 25%;
+}
+
+.edd-edit-purchase-element ul li.item_tax {
+	width: 15%;
+}
+
+.edd-edit-purchase-element ul li.price {
+	width: 20%;
+}
+
+.edd-admin-box-inside {
+	border-bottom: 1px solid #f1f1f1;
+	clear: both;
+	padding: 12px;
+	margin: 0;
+	word-wrap: break-word;
+}
+
+.edd-admin-box-inside--row {
+	display: flex;
+	flex-wrap: wrap;
+	word-break: break-all;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.edd-admin-box-inside>p {
+	margin: 8px 3px;
+}
+
+.edd-admin-box-inside .strong {
+	font-weight: 600;
+}
+
+.edd-admin-box div:not(.edd-admin-box-inside--row) .label {
+	display: block;
+	margin-bottom: 4px;
+	margin-right: 0;
+}
+
+.edd-admin-box .label--has-tip {
+	display: flex;
+	align-items: center;
+
+	.edd-help-tip {
+		margin-top: 0;
+		font-size: 20px;
+	}
+}
+
+.edd-admin-box div:not(.edd-admin-box-inside--row) .label--has-checkbox {
+	margin-bottom: 0;
+}
+
+.edd-payment-fees .fee-label {
+	color: #666;
+	font-weight: normal;
+}
+
+.edd-admin-box .right {
+	float: right;
+}
+
+#edd-order-refunds-list {
+	padding-left: 25px;
+}
+
+#poststuff .edd-order-data .inside {
+	margin: 0;
+	padding: 0;
+}
+
+.edd-order-data .edd-select-chosen {
+	width: 130px !important;
+}
+
+.edd-order-data input.edd_datepicker {
+	width: 180px;
+}
+
+.edd-order-data input[type="number"].edd-payment-time-hour,
+.edd-order-data input[type="number"].edd-payment-time-min {
+	width: 50px;
+}
+
+.edd-order-data .edd-tax-rate {
+	color: #9c9c9c;
+	font-style: italic;
+	padding: 5px;
+}
+
+#edd_general_logs p {
+	margin: 0;
+	padding: 0;
+}
+
+.edd-admin-box-inside span.label {
+	margin-right: 10px;
+}
+
+#edd-order-resend-receipt .inside {
+	margin-top: 11px;
+}
+
+.edd-order-resend-receipt-header {
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.edd-admin-box-inside:last-child {
+	border-bottom: 0;
+}
+
+#edd-edit-order-form .data-payment-key {
+	word-break: break-all;
+}
+
+.edd-order-update-box #major-publishing-actions .button-secondary {
+	margin-right: 10px;
+}
+
+.edd-order-update-box .button-primary {
+	margin-right: 0;
+}
+
+.edd-edit-purchase-element .edd-select-chosen {
+	width: 196px;
+}
+
+.edd-edit-purchase-element ul {
+	clear: both;
+	display: block;
+}
+
+#edd-customer-details .actions {
+	float: right;
+}
+
+.order-data-address h3 {
+	margin: 0 0 10px 0;
+}
+
+.order-data-address #edd-order-address-state-wrap,
+.order-data-address #edd-order-address-country-wrap {
+	display: inline-block;
+	width: 50%;
+	max-width: 300px;
+}
+
+.edd-order-data input.small-text {
+	margin: 0;
+}
+
+.edd-order-data input.med-text {
+	margin: 0;
+	width: 100px;
+}
+
+.edd-edit-purchase-element ul li {
+	display: block;
+	line-height: 1.4;
+	position: relative;
+	margin: 0;
+	vertical-align: middle;
+	font-size: 13px;
+}
+
+.edd-edit-purchase-element .row {
+	padding: 12px;
+}
+
+.edd-edit-purchase-element .row:not(:last-child) {
+	border-bottom: 1px solid #eee;
+}
+
+.edd-edit-purchase-element .row:nth-child(odd):not(.header) {
+	background-color: colors.$wp-alternate;
+}
+
+.edd-edit-purchase-element .row.header {
+	padding: 6px 12px;
+	font-weight: 600;
+	vertical-align: top;
+}
+
+.edd-edit-purchase-element ul {
+	margin: 0 0 15px;
+}
+
+.edd-edit-purchase-element ul:last-of-type {
+	margin-bottom: 0;
+}
+
+#edd-order-data .data span {
+	color: #666;
+	font-weight: 600;
+}
+
+.edd-edit-purchase-element .inside {
+	padding: 12px;
+}
+
+.edd-edit-purchase-element .edd-purchased-download-title {
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.edd-edit-purchase-element .edd-purchased-download-title .deleted {
+	color: #777;
+}
+
+.edd-edit-purchase-element .edd-purchased-download-actions {
+	color: #777;
+	line-height: 1.4;
+}
+
+.edd-edit-purchase-element .edd-purchased-download-actions .edd-purchased-download-actions-label {
+	font-weight: 500;
+}
+
+.edd-edit-purchase-element .edd-purchased-download-actions a {
+	color: #777;
+	font-size: 12px;
+}
+
+.edd-edit-purchase-element .edd-purchased-download-actions a:hover {
+	color: #444;
+}
+
+.edd-edit-purchase-element .edd-purchased-download-actions .edd-order-remove-download {
+	color: #a00;
+}
+
+.edd-edit-purchase-element .edd-purchased-download-actions .edd-order-remove-download:hover {
+	color: #f00;
+}
+
+.edd-add-download-to-purchase,
+.edd-add-adjustment-to-purchase {
+	padding: 15px;
+	border-top: 1px solid #e5e5e5;
+	background-color: #f5f5f5;
+}
+
+.edd-add-download-to-purchase .chosen-container,
+.edd-add-adjustment-to-purchase .chosen-container {
+	width: 90% !important;
+	max-width: 220px !important;
+}
+
+.edd-add-download-to-purchase .spinner,
+.edd-add-adjustment-to-purchase .spinner {
+	margin: 0;
+	float: none;
+}
+
+.edd-add-download-to-purchase .edd-add-order-quantity {
+	width: 40px;
+	height: 29px;
+	vertical-align: middle;
+}
+
+.edd-add-download-to-purchase .edd-add-order-item-button,
+.edd-add-adjustment-to-purchase .edd-add-adjustment-button,
+.edd-add-adjustment-to-purchase input[type="text"] {
+	height: 29px;
+}
+
+@media screen and (max-width: 1284px) {
+
+	.edd-edit-purchase-element .edd-purchased-download-title {
+		font-size: 16px;
+	}
+
+	.edd-edit-purchase-element ul li.item_price {
+		width: 22%;
+	}
+
+	.edd-edit-purchase-element ul li.item_price.item_quantity {
+		width: 35%;
+	}
+
+	.edd-edit-purchase-element ul li.item_tax {
+		width: 25%;
+	}
+
+	.edd-edit-purchase-element ul li.price {
+		width: 20%;
+	}
+
+	.edd-edit-purchase-element .edd-purchased-download-actions {
+		padding-top: 10px;
+	}
+}
+
+@media screen and (max-width: 1024px) {
+
+	.edd-edit-purchase-element ul li.item_price.item_quantity {
+		width: 40%;
+	}
+
+	.edd-edit-purchase-element ul li.price {
+		width: 24%;
+	}
+
+	.edd-edit-purchase-element .edd-purchased-download-actions {
+		padding-top: 15px;
+	}
+
+	.edd-edit-purchase-element .edd-purchased-download-actions,
+	.edd-edit-purchase-element .edd-purchased-download-actions a {
+		font-size: 14px;
+	}
+
+}
+
+@media screen and (max-width: 782px) {
+
+	.edd-edit-purchase-element ul li.item_price,
+	.edd-edit-purchase-element ul li.item_price.item_quantity {
+		padding-bottom: 10px;
+	}
+
+	.edd-edit-purchase-element ul li.item_price.item_quantity {
+		width: 35%;
+	}
+
+	.edd-edit-purchase-element ul li.item_tax,
+	.edd-edit-purchase-element ul li.price {
+		width: 20%;
+		padding-bottom: 10px;
+	}
+
+	.edd-price-currency,
+	.edd-payment-details-download-amount {
+		font-size: 16px;
+	}
+
+	.order-data-column input[type="email"] {
+		padding: 6px 10px;
+	}
+
+	.edd-refund-submit-line-total td:last-of-type {
+		flex: 0 0 120px;
+	}
+
+	#edd-item-tables-wrapper .addresses tbody tr {
+		display: grid;
+	}
+
+	#edd-item-tables-wrapper .addresses tbody td:not(.no-items) {
+		padding-left: 35%;
+	}
+}
+
+@media screen and (max-width: 600px) {
+
+	.edd-edit-purchase-element ul li.item_price,
+	.edd-edit-purchase-element ul li.item_price.item_quantity,
+	.edd-edit-purchase-element ul li.item_tax {
+		width: 100%;
+		padding-bottom: 20px;
+	}
+
+	.edd-edit-purchase-element ul li.price,
+	.edd-edit-purchase-element .edd-add-download-to-purchase ul li.item_tax {
+		width: 100%;
+		padding-bottom: 0;
+	}
+
+	.edd-edit-purchase-element .edd-add-download-to-purchase-actions {
+		padding-top: 15px;
+	}
+}
+
+/** Stats */
+#edd_product_stats .label {
+	display: inline-block;
+}
+
+#edd_product_stats .product-sales-stats:before,
+#edd_product_stats .product-earnings-stats:before {
+	color: #82878c;
+	font: normal 20px/1 'dashicons';
+	display: inline-block;
+	padding: 0 2px 0 0;
+	position: relative;
+	top: 0;
+	left: -1px;
+	speak: none;
+	text-decoration: none !important;
+	vertical-align: top;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+#edd_product_stats .product-sales-stats:before {
+	content: '\f174';
+}
+
+#edd_product_stats .product-earnings-stats:before {
+	content: '\f239';
+}
+
+/* Reports Styles
+-------------------------------------------------------------- */
+
+/* Force a scrollbar when on the reports page (https://github.com/easydigitaldownloads/easy-digital-downloads/issues/6718) */
+body.download_page_edd-reports {
+	overflow-y: scroll;
+}
+
+.edd-chip {
+	font-size: 10px;
+	font-weight: bold;
+	text-transform: uppercase;
+	line-height: 1;
+	padding: 3px;
+	border-radius: 3px;
+	color: #fff;
+	background-color: #444;
+}
+
+.download_page_edd-reports #edd-item-wrapper {
+	margin: 0;
+}
+
+#edd-dashboard-widgets-wrap .postbox h2,
+#edd-dashboard-widgets-wrap .postbox h3 {
+	cursor: default;
+}
+
+.edd-report-wrap {
+	clear: both;
+}
+
+.edd-report-wrap h3 {
+	clear: both;
+	margin: 0 0 20px;
+}
+
+.edd-reports-chart,
+.edd-reports-table {
+	margin-bottom: 20px;
+}
+
+h3 + .notice-wrap .notice {
+	margin-bottom: 1em;
+}
+
+.graph-option-section {
+	float: left;
+}
+
+.edd-report-filters-title span {
+	display: block;
+	padding: 20px;
+}
+
+#edd-graphs-filter form {
+	padding: 20px;
+}
+
+#edd-graphs-filter label {
+	vertical-align: inherit;
+}
+
+#edd-graphs-filter .graph-option-section {
+	display: inline-block;
+	line-height: 2em;
+	margin: 0 5px 0 0;
+	padding: 0;
+}
+
+.download_page_edd-reports .section-content #post-body-content {
+	float: none;
+}
+
+.download_page_edd-reports .section-content select[name="range"] {
+	display: none;
+}
+
+.edd-mix-totals {
+	background-color: #fff;
+	border: 1px solid #e5e5e5;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	padding: 10px;
+}
+
+.edd-mix-chart {
+	display: inline-block;
+	width: 49%;
+	vertical-align: top;
+}
+
+.edd-graph-notes {
+	color: #9c9c9c;
+}
+
+.edd-graph-notes span {
+	display: block;
+}
+
+.edd-pie-graph .legend {
+	display: none;
+}
+
+.edd-pie-legend {
+	overflow: auto;
+	margin-top: 10px;
+}
+
+.edd-legend-item-wrapper {
+	color: #333;
+	display: inline-block;
+	font-size: 8pt;
+	padding: 2px 5px 0px 5px;
+	width: 48%;
+	height: 20px;
+}
+
+.edd-legend-color {
+	border: 1px solid #cfcfcf;
+	display: inline-block;
+	margin-right: 5px;
+	width: 20px;
+	height: 15px;
+}
+
+.edd-pie-legend-item {
+	display: inline-block;
+	vertical-align: top;
+	width: 80%;
+}
+
+#edd-reports-tiles-wrap .metabox-holder {
+	padding: 0;
+}
+
+#edd-reports-tiles-wrap #dashboard-widgets {
+	overflow: auto;
+}
+
+#edd-reports-tiles-wrap #dashboard-widgets .postbox-container {
+	width: 33.3%;
+}
+
+/** Hide legacy report empty navigations */
+.download_page_edd-reports .section-content .tablenav.top {
+	display: none;
+}
+
+#edd_tax_rates {
+	margin: 1em 0 0;
+}
+
+@-webkit-keyframes edd-spinning {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+
+	100% {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes edd-spinning {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+
+	100% {
+		-webkit-transform: rotate(360deg);
+		transform: rotate(360deg);
+	}
+}
+
+/* Upgrades page styles
+-------------------------------------------------------------- */
+
+/* Settings page styles
+-------------------------------------------------------------- */
+
+#edd-send-test-summary-save-changes-notice .notice p {
+	font-size: 13px;
+}
+
+#edd-send-test-summary-save-changes-notice, #edd-send-test-summary-notice {
+	display: flex;
+	margin-top: 5px;
+}
+
+/* Global Graph Styles
+-------------------------------------------------------------- */
+
+.edd-graph .y1Axis {
+	color: rgb(237, 194, 64) !important;
+}
+
+.edd-graph .y2Axis {
+	color: rgb(175, 216, 248) !important;
+}
+
+/* API Table Styles
+-------------------------------------------------------------- */
+
+.wp-list-table.apikeys input.code {
+	width: 100%;
+	font-size: 10px;
+	cursor: text;
+	background: #fff;
+	border: 1px solid #ddd;
+	box-shadow: none;
+	color: #555;
+}
+
+/* List Table Styles
+-------------------------------------------------------------- */
+
+.download_page_edd-tools .tablenav .actions {
+	overflow: visible;
+}
+
+@media screen and (max-width: 1100px) {
+
+	.edd-mix-chart {
+		display: block;
+		width: 100%;
+	}
+}
+
+@media screen and (max-width: 782px) {
+
+	.license-lifetime-notice,
+	.license-expiration-date-notice,
+	.license-null {
+		padding-left: 0;
+	}
+}
+
+@media screen and (max-width: 600px) {
+	#edd-edit-order-form input.large-text {
+		width: 100%;
+	}
+}
+
+/* Customer Styles
+-------------------------------------------------------------- */
+
+#edd-item-wrapper {
+	background: #fff;
+	border: 1px solid colors.$wp-border;
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	position: relative;
+	margin-top: 15px;
+	display: grid;
+	grid-template-columns: 150px 1fr;
+
+	&.full-width {
+		max-width: 100%;
+		grid-template-columns: unset;
+	}
+
+	&:after {
+		content: "";
+		display: block;
+		clear: both;
+		visibility: hidden;
+		font-size: 0;
+		height: 0;
+	}
+
+	.edd-sections-wrap {
+		border: none;
+	}
+}
+
+#edd-item-tables-wrapper table {
+	width: 100%;
+}
+
+#edd-item-tables-wrapper .no-items {
+	text-align: left;
+}
+
+#edd-item-tables-wrapper .emails .add-customer-email-row {
+	background-color: #f4f4f4;
+	border-top: 1px solid #e5e5e5;
+}
+
+#edd-item-tables-wrapper .add-customer-email-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin: 12px 0;
+}
+
+#edd-item-tables-wrapper .edd-form-group {
+	margin-bottom: 0;
+}
+
+#edd-item-tables-wrapper .edd-make-email-primary {
+	flex-grow: 1;
+	margin-left: 12px;
+}
+
+#edd-item-tables-wrapper .emails .spinner {
+	float: none;
+	margin: 0 10px;
+	align-self: center;
+}
+
+#edd-item-tables-wrapper .notice-error {
+	background-color: #fff5f5;
+}
+
+#edd-item-notes-wrapper {
+	min-height: 50px;
+}
+
+.customer-note-input {
+	margin-bottom: 5px;
+	width: 100%;
+}
+
+.customer-note-wrapper {
+	border-bottom: 1px solid colors.$wp-alternate;
+	min-height: 38px;
+	padding: 7px 0 7px 7px;
+}
+
+.customer-note-wrapper span {
+	display: block;
+}
+
+.note-content-wrap {
+	padding-top: 7px;
+}
+
+@media screen and (max-width: 810px) and (min-width: 656px) {
+	.widefat th {
+		max-width: 100% !important;
+		display: table-cell;
+	}
+}
+
+@media screen and (max-width: 656px) {
+
+	#edd-item-tables-wrapper .emails td.column-primary {
+		padding-right: 10px;
+		width: 100% !important;
+	}
+
+	#edd-item-tables-wrapper .edd-form-group {
+		margin: 0 0 16px 0;
+	}
+}
+
+@media screen and (max-width: 480px) {
+	#edd-item-tab-wrapper-list li {
+		width: 50%;
+	}
+
+	#edd-item-tab-wrapper-list li:nth-child(3n+3) {
+		border-width: 0 1px 1px 0;
+	}
+
+	#edd-item-tab-wrapper-list li:nth-child(even) {
+		border-width: 0 0 1px 0;
+	}
+
+	.download_page_edd-reports .button {
+		text-align: center;
+	}
+
+	#edd-payment-date-filters span {
+		display: block;
+	}
+
+	#edd-payment-date-filters span>input {
+		float: right;
+	}
+
+	#edd-add-discount select[multiple] option,
+	#edd-edit-discount select[multiple] option {
+		height: 20px;
+	}
+
+	.download_page_edd-tools .inside input[type="text"],
+	.download_page_edd-tools .inside select,
+	.download_page_edd-tools .inside input[type="submit"],
+	.download_page_edd-settings .inside input[type="button"],
+	.download_page_edd-reports .inside input[type="text"],
+	.download_page_edd-reports .inside select,
+	.download_page_edd-reports .inside input[type="submit"],
+	.download_page_edd-reports .inside .button {
+		width: 100%;
+	}
+
+	#edd-add-discount select[multiple],
+	#edd-edit-discount select[multiple],
+	.download_page_edd-tools select[multiple] {
+		height: 200px !important;
+	}
+
+	.download_page_edd-settings input[type="checkbox"] {
+		margin: 2px 0;
+	}
+
+	.post-type-download input[type="checkbox"] {
+		margin-left: 2px;
+	}
+
+}
+
+/* Content wrapper */
+
+#edd-item-card-wrapper .item-section {
+	/** [1] */
+	background: #fff;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+*:not(#edd-item-tab-wrapper)+#edd-item-card-wrapper .item-section {
+	/** [1] */
+	margin: 25px 0;
+	padding: 20px;
+	border: 1px solid #e5e5e5;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+#edd-item-tab-wrapper+#edd-item-card-wrapper {
+	/** [1] */
+	padding: 20px;
+	border-left: 1px solid #e5e5e5;
+	box-sizing: border-box;
+}
+
+#edd-debug-log .edd-inline-button {
+	margin-left: 5px;
+}

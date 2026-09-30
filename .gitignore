@@ -1,0 +1,23 @@
+# Bỏ qua cấu hình database (Rất quan trọng, tránh lộ pass)
+wp-config.php
+
+# Bỏ qua thư mục chứa ảnh/files upload (để tránh repo quá nặng)
+wp-content/uploads/
+
+# Bỏ qua các file log, cache và backup
+*.log
+.htaccess
+wp-content/cache/
+wp-content/w3tc-config/
+wp-content/advanced-cache.php
+wp-content/backup-db/
+
+# Các file hệ thống OS
+.DS_Store
+Thumbs.db
+
+# (Tuỳ chọn) Bạn có thể bỏ qua cả lõi WordPress nếu chỉ code Theme/Plugin
+# wp-admin/
+# wp-includes/
+# *.php
+# !wp-config-sample.php

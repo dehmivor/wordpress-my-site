@@ -1,0 +1,21 @@
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+
+select.edd-select-chosen,
+.edd-select-chosen {
+	width: 25rem;
+	max-width: 100%;
+
+	.edd-recurring-subscription-section & {
+		width: 25rem !important; // Override Recurring CSS.
+	}
+
+	&.edd-time {
+		width: 55px;
+		max-width: 55px;
+
+		@media screen and (max-width: wp-breakpoints.$break-medium) {
+			width: 70px;
+			max-width: 70px;
+		}
+	}
+}

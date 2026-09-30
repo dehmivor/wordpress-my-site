@@ -1,0 +1,67 @@
+@use '../../variables/colors' as colors;
+
+.edd-help-tip {
+	cursor: help;
+	margin-top: -2px;
+	font-size: 24px;
+	color: colors.$tooltip-icon;
+}
+
+.edd-ui-tooltip {
+	position: absolute;
+	background: #fff !important;
+	border-width: 0px;
+	border-radius: 12px !important;
+	box-shadow: colors.$tooltip-shadow !important;
+	color: colors.$tooltip-text !important;
+	max-width: 300px !important;
+	padding: 16px !important;
+	text-rendering: optimizeLegibility;
+	text-shadow: none !important;
+	font-size: 13px !important;
+	z-index: 9999 !important;
+
+	.title {
+		font-weight: bold;
+	}
+
+	.timeline {
+		position: relative;
+		margin: 6px 0 0;
+		padding-left: 15px;
+
+		li {
+			position: relative;
+			margin: 0 0 3px 0;
+
+			&::before {
+				content: '';
+				position: absolute;
+				width: 4px;
+				height: 4px;
+				left: -16px;
+				background: rgb(0 0 0 / 0%);
+				border: 2px solid colors.$tooltip-text;
+				top: 0;
+				bottom: 0;
+				margin: auto;
+				border-radius: 100%;
+				z-index: 1;
+			}
+
+			&::after {
+				content: '';
+				width: 2px;
+				height: calc(100% - 4px);
+				background: colors.$tooltip-text;
+				position: absolute;
+				left: -13px;
+				top: calc(50% + 3px);
+			}
+
+			&:last-child::after {
+				display: none;
+			}
+		}
+	}
+}

@@ -1,0 +1,65 @@
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+@use "../../variables/colors" as colors;
+
+body.edd-admin-page {
+
+	@media (min-width: wp-breakpoints.$break-medium) {
+		& #wpbody-content {
+			padding-bottom: 200px;
+		}
+	}
+
+	& #wpfooter {
+		.edd-footer-promotion {
+			text-align: center;
+			font-weight: 400;
+			font-size: 13px;
+			line-height: 16px;
+			color: colors.$wp-gray-40;
+			padding: 20px 0 30px 0;
+			margin-bottom: 20px;
+			margin-top: 20px;
+
+			& p {
+				font-weight: 600;
+			}
+
+			& .edd-footer-promotion-links, .edd-footer-promotion-social {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			& .edd-footer-promotion-links {
+				margin: 9px 0 0;
+
+				& span {
+					color: colors.$wp-gray-10;
+					padding: 0 7px;
+				}
+			}
+
+			& .edd-footer-promotion-social {
+				margin: 10px 0 0 0;
+				gap: 10px;
+
+				& li {
+					margin-bottom: 0;
+
+					& path {
+						fill: #a7aaad;
+					}
+
+					&:hover path {
+						fill: #50575e;
+					}
+				}
+
+				& a {
+					display: block;
+					height: 16px;
+				}
+			}
+		}
+	}
+}

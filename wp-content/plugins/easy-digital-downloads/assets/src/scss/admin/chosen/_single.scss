@@ -1,0 +1,31 @@
+// Single-select control — minimal overrides, base handles most styling.
+.ts-wrapper.single .ts-control {
+	> .item {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+// Active state (dropdown open).
+.ts-wrapper.single.dropdown-active .ts-control {
+	--edd-ts-control-radius: 3px 3px 0 0;
+}
+
+// Placeholder text — match WP placeholder color.
+.ts-wrapper.single .ts-control > input::placeholder {
+	color: #50575e;
+}
+
+// WordPress 7.0+ overrides.
+body[class*="branch-7"] {
+
+	.ts-wrapper.single.dropdown-active .ts-control {
+		--edd-ts-control-radius: 2px 2px 0 0;
+	}
+
+	.ts-wrapper.single .ts-control > input::placeholder {
+		color: #757575;
+	}
+}

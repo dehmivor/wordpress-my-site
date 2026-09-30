@@ -1,0 +1,53 @@
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+
+.edd-admin--has-grid {
+	display: grid;
+	display: -ms-grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 20px;
+
+	.postbox {
+		margin-bottom: 0;
+	}
+
+	.edd-from-to-wrapper {
+		display: flex;
+		width: 100%;
+
+		input {
+			width: 100%;
+		}
+
+		span {
+			flex-grow: 1;
+		}
+	}
+
+	form {
+		display: flex;
+		flex-direction: column;
+		flex-wrap: wrap;
+		position: relative;
+		gap: 16px;
+		box-sizing: border-box;
+	}
+
+	.postbox .edd-select {
+		max-width: 100%;
+		margin-right: 0;
+	}
+
+	.edd-select-chosen {
+		width: 100%;
+	}
+
+	.button.updating-message:before,
+	.button.updated-message:before {
+		vertical-align: text-bottom;
+		margin: 0 5px 0 0;
+	}
+
+	@media screen and (max-width: wp-breakpoints.$break-mobile) {
+		grid-template-columns: 1fr;
+	}
+}

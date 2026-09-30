@@ -1,0 +1,1752 @@
+<?php
+/**
+ * Cart Object
+ *
+ * @package     EDD
+ * @subpackage  Classes/Cart
+ * @copyright   Copyright (c) 2018, Easy Digital Downloads, LLC
+ * @license     http://opensource.org/licenses/gpl-2.0.php GNU Public License
+ * @since       2.7
+ */
+
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit; // @codeCoverageIgnore
+
+/**
+ * EDD_Cart Class
+ *
+ * @since 2.7
+ */
+class EDD_Cart {
+	/**
+	 * Cart contents
+	 *
+	 * @var array
+	 * @since 2.7
+	 */
+	public $contents = array();
+
+	/**
+	 * Details of the cart contents
+	 *
+	 * @var array
+	 * @since 2.7
+	 */
+	public $details = array();
+
+	/**
+	 * Cart Quantity
+	 *
+	 * @var int
+	 * @since 2.7
+	 */
+	public $quantity = 0;
+
+	/**
+	 * Subtotal
+	 *
+	 * @var float
+	 * @since 2.7
+	 */
+	public $subtotal = 0.00;
+
+	/**
+	 * Total
+	 *
+	 * @var float
+	 * @since 2.7
+	 */
+	public $total = 0.00;
+
+	/**
+	 * Fees
+	 *
+	 * @var array
+	 * @since 2.7
+	 */
+	public $fees = array();
+
+	/**
+	 * Tax
+	 *
+	 * @var float
+	 * @since 2.7
+	 */
+	public $tax = 0.00;
+
+	/**
+	 * Determined tax rate, based on the customer's address.
+	 * This will be `null` until it is set for the first time.
+	 *
+	 * @var float|null
+	 * @since 3.0
+	 */
+	private $tax_rate = null;
+
+	/**
+	 * Saves and restores this cart. `null` until first needed.
+	 *
+	 * @var \EDD\Cart\SavedCart|null
+	 * @since 3.7.1
+	 */
+	private $saved_cart_handler = null;
+
+	/**
+	 * Purchase Session
+	 *
+	 * @var array
+	 * @since 2.7
+	 */
+	public $session;
+
+	/**
+	 * Discount codes
+	 *
+	 * @var array
+	 * @since 2.7
+	 */
+	public $discounts = array();
+
+	/**
+	 * Cart saving
+	 *
+	 * @var bool
+	 * @since 2.7
+	 */
+	public $saving;
+
+	/**
+	 * Saved cart
+	 *
+	 * @var array
+	 * @since 2.7
+	 */
+	public $saved;
+
+	/**
+	 * Has discount?
+	 *
+	 * @var bool
+	 * @since 2.7
+	 */
+	public $has_discounts = null;
+
+	/**
+	 * Cart session
+	 *
+	 * @var EDD\Sessions\Cart
+	 * @since 3.3.0
+	 */
+	private $cart_session;
+
+	/**
+	 * Cart profiler for performance tracking
+	 *
+	 * @var EDD\Profiler\Cart
+	 * @since 3.6.0
+	 */
+	private $profiler;
+
+	/**
+	 * Cached calculation results
+	 *
+	 * @var array
+	 * @since 3.6.0
+	 */
+	private $calculation_cache = array();
+
+	/**
+	 * Cache validity flag
+	 *
+	 * @var bool
+	 * @since 3.6.0
+	 */
+	private $cache_is_valid = false;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 2.7
+	 */
+	public function __construct() {
+		$this->cart_session = new EDD\Sessions\Cart( $this );
+
+		// Initialize profiler if debugging is enabled.
+		if ( edd_get_option( 'cart_profiler', false ) ) {
+			$this->profiler = new EDD\Profiler\Cart();
+		}
+
+		add_action( 'init', array( $this, 'setup_cart' ), 1 );
+	}
+
+	/**
+	 * Sets up cart components.
+	 *
+	 * @since  2.7
+	 * @return void
+	 */
+	public function setup_cart() {
+		if ( ! EDD\Utils\Request::is_request( 'frontend' ) ) {
+			return;
+		}
+
+		static $done = false;
+		if ( $done ) {
+			return;
+		}
+		$this->cart_session->get_contents();
+		$this->get_contents();
+		$this->get_contents_details();
+		$this->get_all_fees();
+		$this->cart_session->get_discounts();
+		$this->get_quantity();
+
+		$done = true;
+	}
+
+	/**
+	 * Retrieves the tax rate.
+	 *
+	 * This sets up the tax rate once so we don't have to recaculate it each time we need it.
+	 *
+	 * @link https://github.com/easydigitaldownloads/easy-digital-downloads/issues/8455
+	 *
+	 * @since 3.0
+	 * @return float
+	 */
+	private function get_tax_rate() {
+		if ( null === $this->tax_rate ) {
+			$this->tax_rate = edd_use_taxes() ? edd_get_tax_rate() : 0;
+		}
+
+		return $this->tax_rate;
+	}
+
+	/**
+	 * Sets the tax rate.
+	 *
+	 * @param float|null $tax_rate The tax rate to set, or null to reset.
+	 *
+	 * @since 3.0
+	 * @since 3.6.5 Invalidate the cart cache when the tax rate is reset to null.
+	 */
+	public function set_tax_rate( $tax_rate ) {
+		$this->tax_rate = $tax_rate;
+
+		// When the tax rate is reset, invalidate the cache since cached calculations
+		// contain tax amounts based on the previous rate.
+		// @link https://github.com/easydigitaldownloads/easy-digital-downloads/issues/2159
+		if ( null === $tax_rate && $this->is_caching_enabled() ) {
+			$this->invalidate_cache();
+		}
+	}
+
+	/**
+	 * Get cart contents
+	 *
+	 * @since 2.7
+	 * @return array List of cart contents.
+	 */
+	public function get_contents() {
+		// Track profiling.
+		if ( $this->profiler ) {
+			$this->profiler->track_call( 'get_contents' );
+		}
+
+		// Check for the session contents if the cart contents haven't been loaded yet and the session is available.
+		if ( ! did_action( 'edd_cart_contents_loaded_from_session' ) && $this->cart_session ) {
+			$this->cart_session->get_contents();
+		}
+
+		$cart       = is_array( $this->contents ) && ! empty( $this->contents ) ? array_values( $this->contents ) : array();
+		$cart_count = count( $cart );
+
+		foreach ( $cart as $key => $item ) {
+			$download = new EDD_Download( $item['id'] );
+
+			// If the item is not a download or it's status has changed since it was added to the cart.
+			if ( empty( $download->ID ) || ! $download->can_purchase() ) {
+				unset( $cart[ $key ] );
+				continue;
+			}
+
+			$options = isset( $item['options'] ) ? $item['options'] : array();
+			if ( ! $this->is_item_sellable( $item['id'], $options ) ) {
+				unset( $cart[ $key ] );
+			}
+		}
+
+		// We've removed items, reset the cart session
+		if ( count( $cart ) < $cart_count ) {
+			$this->contents = $cart;
+			$this->update_cart();
+		}
+
+		$this->contents = apply_filters( 'edd_cart_contents', $cart );
+
+		do_action( 'edd_cart_contents_loaded' );
+
+		return (array) $this->contents;
+	}
+
+	/**
+	 * Get cart contents details
+	 *
+	 * @since 2.7
+	 * @return array
+	 */
+	public function get_contents_details() {
+		// Track profiling.
+		$profiler_start = null;
+		if ( $this->profiler ) {
+			$this->profiler->track_call( 'get_contents_details' );
+			$profiler_start = $this->profiler->start_timer();
+		}
+
+		// Check cache first (if caching is enabled).
+		if ( $this->is_caching_enabled() && $this->cache_is_valid && isset( $this->calculation_cache['details'] ) ) {
+			// End profiling timer for cached call.
+			if ( $this->profiler && null !== $profiler_start ) {
+				$this->profiler->end_timer( 'get_contents_details', $profiler_start );
+			}
+			return $this->calculation_cache['details'];
+		}
+
+		global $edd_is_last_cart_item;
+
+		if ( empty( $this->contents ) ) {
+			// If the contents haven't been fetched yet, fetch them.
+			if ( ! did_action( 'edd_cart_contents_loaded' ) ) {
+				$this->get_contents();
+			}
+			if ( empty( $this->contents ) ) {
+				return array();
+			}
+		}
+
+		$details = array();
+		$length  = count( $this->contents ) - 1;
+
+		foreach ( $this->contents as $key => $item ) {
+			if ( $key >= $length ) {
+				$edd_is_last_cart_item = true;
+			}
+
+			$item['quantity'] = edd_item_quantities_enabled() ? absint( $item['quantity'] ) : 1;
+			$item['quantity'] = max( 1, $item['quantity'] ); // Force quantity to 1
+
+			$options = isset( $item['options'] ) ? $item['options'] : array();
+
+			$price_id = isset( $options['price_id'] ) ? $options['price_id'] : null;
+
+			$item_price = $this->get_item_price( $item['id'], $options );
+
+			if ( ! $this->is_item_sellable( $item['id'], $options, $item_price ) ) {
+				$this->reset_flat_discount_state();
+
+				continue;
+			}
+
+			$discount_details  = $this->get_item_discount_amount( $item, false, true );
+			$discount          = $discount_details['amount'];
+			$applied_discounts = $discount_details['discounts'];
+			$discount          = apply_filters( 'edd_get_cart_content_details_item_discount_amount', $discount, $item );
+			$quantity          = $this->get_item_quantity( $item['id'], $options );
+			$fees              = $this->get_fees( 'fee', $item['id'], $price_id );
+			$subtotal          = floatval( $item_price ) * $quantity;
+
+			// Subtotal for tax calculation must exclude fees that are greater than 0. See $this->get_tax_on_fees().
+			$subtotal_for_tax = $subtotal;
+
+			foreach ( $fees as $id => $fee ) {
+
+				$fee_amount = (float) $fee['amount'];
+				$subtotal  += $fee_amount;
+
+				if ( $fee_amount > 0 ) {
+					// Calculate tax on positive item-specific fees.
+					if ( edd_use_taxes() && empty( $fee['no_tax'] ) ) {
+						add_filter( 'edd_prices_include_tax', '__return_false' );
+						$fees[ $id ]['tax'] = edd_calculate_tax( $fee_amount, '', '', true, $this->get_tax_rate() );
+						remove_filter( 'edd_prices_include_tax', '__return_false' );
+					}
+					continue;
+				}
+
+				$subtotal_for_tax += $fee_amount;
+			}
+
+			$tax = $this->get_item_tax( $item['id'], $options, $subtotal_for_tax - $discount );
+
+			if ( edd_prices_include_tax() ) {
+				$subtotal -= $this->format_amount( $tax );
+			}
+
+			$total = $subtotal - $discount + $tax;
+
+			if ( $total < 0 ) {
+				$total = 0;
+			}
+
+			$details[ $key ] = array(
+				'name'              => get_the_title( $item['id'] ),
+				'id'                => $item['id'],
+				'item_number'       => $item,
+				'item_price'        => $this->format_amount( $item_price ),
+				'quantity'          => $quantity,
+				'discount'          => $this->format_amount( $discount ),
+				'applied_discounts' => $applied_discounts,
+				'subtotal'          => $this->format_amount( $subtotal ),
+				'tax'               => $this->format_amount( $tax ),
+				'fees'              => $fees,
+				'price'             => $this->format_amount( $total ),
+			);
+
+			$this->reset_flat_discount_state();
+		}
+
+		$this->details = $details;
+
+		// Store in cache (if caching is enabled).
+		if ( $this->is_caching_enabled() ) {
+			$this->calculation_cache['details'] = $details;
+			$this->cache_is_valid               = true;
+		}
+
+		// End profiling timer.
+		if ( $this->profiler && null !== $profiler_start ) {
+			$this->profiler->end_timer( 'get_contents_details', $profiler_start );
+		}
+
+		return $this->details;
+	}
+
+	/**
+	 * Get Discounts.
+	 *
+	 * @since 2.7
+	 * @since 3.6.6 Uses get_discounts_from_session() for normalization.
+	 * @return array $discounts The active discount codes
+	 */
+	public function get_discounts() {
+		$this->discounts = $this->get_discounts_from_session();
+
+		return $this->discounts;
+	}
+
+	/**
+	 * Update Cart
+	 *
+	 * @since 2.7
+	 * @return void
+	 */
+	public function update_cart() {
+		EDD()->session->set( 'edd_cart', $this->contents );
+	}
+
+	/**
+	 * Checks if any discounts have been applied to the cart
+	 *
+	 * @since 2.7
+	 * @return bool
+	 */
+	public function has_discounts() {
+		if ( null !== $this->has_discounts ) {
+			return $this->has_discounts;
+		}
+
+		$has_discounts = false;
+
+		$discounts = $this->get_discounts();
+		if ( ! empty( $discounts ) ) {
+			$has_discounts = true;
+		}
+
+		$this->has_discounts = apply_filters( 'edd_cart_has_discounts', $has_discounts );
+
+		return $this->has_discounts;
+	}
+
+	/**
+	 * Get quantity
+	 *
+	 * @since 2.7
+	 * @return int
+	 */
+	public function get_quantity() {
+		$total_quantity = 0;
+
+		$contents = $this->get_contents();
+		if ( ! empty( $contents ) ) {
+			$quantities     = wp_list_pluck( $this->contents, 'quantity' );
+			$total_quantity = absint( array_sum( $quantities ) );
+		}
+
+		$this->quantity = apply_filters( 'edd_get_cart_quantity', $total_quantity, $this->contents );
+		return $this->quantity;
+	}
+
+	/**
+	 * Checks if the cart is empty
+	 *
+	 * @since 2.7
+	 * @return boolean
+	 */
+	public function is_empty() {
+		return 0 === count( (array) $this->get_contents() );
+	}
+
+	/**
+	 * Add to cart
+	 *
+	 * As of EDD 2.7, items can only be added to the cart when the object passed extends EDD_Cart_Item
+	 *
+	 * @since 2.7
+	 * @return array $cart Updated cart object
+	 */
+	public function add( $download_id, $options = array() ) {
+		$download = new EDD_Download( $download_id );
+
+		// Not a download product.
+		if ( empty( $download->ID ) ) {
+			return;
+		}
+
+		// Do not allow draft/pending to be purchased if can't edit. Fixes #1056.
+		if ( ! $download->can_purchase() ) {
+			return;
+		}
+
+		do_action( 'edd_pre_add_to_cart', $download_id, $options );
+
+		/**
+		 * Pre-Add to Cart Contents.
+		 *
+		 * Prior to adding the new item to the cart, allow filtering of the current contents
+		 *
+		 * @since
+		 * @since 3.0 Added the additional $download_id and $options arguments.
+		 *
+		 * @param array The current cart contents.
+		 * @param int   The download ID being added to the cart.
+		 * @param array The options for the item being added including but not limited to quantity.
+		 */
+		$this->contents = apply_filters( 'edd_pre_add_to_cart_contents', $this->contents, $download_id, $options );
+
+		if ( $download->has_variable_prices() && ! isset( $options['price_id'] ) ) {
+			// Forces to the default price ID if none is specified and download has variable prices.
+			$options['price_id'] = $download->get_default_price_id();
+		}
+
+		if ( isset( $options['quantity'] ) ) {
+			$quantities_enabled = edd_item_quantities_enabled() && ! edd_download_quantities_disabled( $download_id );
+			if ( is_array( $options['quantity'] ) ) {
+				$quantity = array();
+				foreach ( $options['quantity'] as $q ) {
+					$quantity[] = $quantities_enabled ? absint( preg_replace( '/[^0-9\.]/', '', $q ) ) : 1;
+				}
+			} else {
+				$quantity = $quantities_enabled ? absint( preg_replace( '/[^0-9\.]/', '', $options['quantity'] ) ) : 1;
+			}
+
+			unset( $options['quantity'] );
+		} else {
+			$quantity = 1;
+		}
+
+		// If the price IDs are a string and is a coma separated list, make it an array (allows custom add to cart URLs).
+		if ( isset( $options['price_id'] ) && ! is_array( $options['price_id'] ) && false !== strpos( $options['price_id'], ',' ) ) {
+			$options['price_id'] = explode( ',', $options['price_id'] );
+		}
+
+		$items = array();
+
+		if ( isset( $options['price_id'] ) && is_array( $options['price_id'] ) ) {
+			$prices = $download->get_prices();
+			// Process multiple price options at once.
+			foreach ( $options['price_id'] as $key => $price ) {
+				$price_id = preg_replace( '/[^0-9\.-]/', '', $price );
+				if ( ! isset( $prices[ $price_id ] ) ) {
+					$price_id = $download->get_default_price_id();
+				}
+				$items[] = array(
+					'id'       => $download_id,
+					'options'  => array(
+						'price_id' => $price_id,
+					),
+					'quantity' => is_array( $quantity ) && isset( $quantity[ $key ] ) ? $quantity[ $key ] : $quantity,
+				);
+			}
+		} else {
+			// Sanitize price IDs.
+			foreach ( $options as $key => $option ) {
+				if ( 'price_id' === $key && ! is_null( $option ) ) {
+					$prices   = $download->get_prices();
+					$price_id = preg_replace( '/[^0-9\.-]/', '', $option );
+					if ( ! isset( $prices[ $price_id ] ) ) {
+						$price_id = $download->get_default_price_id();
+					}
+					$options[ $key ] = $price_id;
+				}
+			}
+
+			// Add a single item.
+			$items[] = array(
+				'id'       => $download_id,
+				'options'  => $options,
+				'quantity' => $quantity,
+			);
+		}
+
+		foreach ( $items as &$item ) {
+			$item   = apply_filters( 'edd_add_to_cart_item', $item );
+			$to_add = $item;
+
+			if ( ! is_array( $to_add ) ) {
+				continue;
+			}
+
+			if ( ! isset( $to_add['id'] ) || empty( $to_add['id'] ) ) {
+				continue;
+			}
+
+			if ( edd_item_in_cart( $to_add['id'], $to_add['options'] ) && edd_item_quantities_enabled() ) {
+				$key = edd_get_item_position_in_cart( $to_add['id'], $to_add['options'] );
+
+				if ( is_array( $quantity ) ) {
+					$this->contents[ $key ]['quantity'] += $quantity[ $key ];
+				} else {
+					$this->contents[ $key ]['quantity'] += $quantity;
+				}
+			} else {
+				// Generate a unique disposable hash for this item.
+				$to_add['hash']   = md5( $to_add['id'] . serialize( $to_add['options'] ) . time() . wp_rand( 0, 1000 ) );
+				$this->contents[] = $to_add;
+			}
+		}
+
+		unset( $item );
+
+		$this->update_cart();
+
+		do_action( 'edd_post_add_to_cart', $download_id, $options, $items );
+
+		// Clear all the checkout errors, if any.
+		edd_clear_errors();
+
+		return count( $this->contents ) - 1;
+	}
+
+	/**
+	 * Remove from cart
+	 *
+	 * @since 2.7
+	 *
+	 * @param int $key Cart key to remove. This key is the numerical index of the item contained within the cart array.
+	 * @return array Updated cart contents
+	 */
+	public function remove( $key ) {
+		$cart = $this->get_contents();
+
+		do_action( 'edd_pre_remove_from_cart', $key );
+
+		if ( ! is_array( $cart ) ) {
+			return true; // Empty cart
+		} else {
+			$item_id = isset( $cart[ $key ]['id'] ) ? $cart[ $key ]['id'] : null;
+			unset( $cart[ $key ] );
+		}
+
+		$this->contents = $cart;
+		$this->update_cart();
+
+		do_action( 'edd_post_remove_from_cart', $key, $item_id );
+
+		edd_clear_errors();
+
+		return $this->contents;
+	}
+
+	/**
+	 * Generate the URL to remove an item from the cart.
+	 *
+	 * @since 2.7
+	 *
+	 * @param int $cart_key Cart item key
+	 * @return string $remove_url URL to remove the cart item
+	 */
+	public function remove_item_url( $cart_key ) {
+
+		$current_page = edd_doing_ajax()
+			? edd_get_checkout_uri()
+			: edd_get_current_page_url();
+
+		$remove_url = edd_add_cache_busting(
+			add_query_arg(
+				array(
+					'cart_item'  => urlencode( $cart_key ),
+					'edd_action' => 'remove',
+				),
+				$current_page
+			)
+		);
+
+		return apply_filters( 'edd_remove_item_url', $remove_url );
+	}
+
+	/**
+	 * Generate the URL to remove a fee from the cart.
+	 *
+	 * @since 2.7
+	 *
+	 * @param int $fee_id Fee ID.
+	 * @return string $remove_url URL to remove the cart item
+	 */
+	public function remove_fee_url( $fee_id = '' ) {
+
+		$current_page = edd_doing_ajax()
+			? edd_get_checkout_uri()
+			: edd_get_current_page_url();
+
+		$remove_url = add_query_arg(
+			array(
+				'fee'        => urlencode( $fee_id ),
+				'edd_action' => 'remove_fee',
+				'nocache'    => 'true',
+			),
+			$current_page
+		);
+
+		return apply_filters( 'edd_remove_fee_url', $remove_url );
+	}
+
+	/**
+	 * Empty the cart
+	 *
+	 * @since 2.7
+	 * @return void
+	 */
+	public function empty_cart() {
+		$this->cart_session->empty_cart();
+
+		do_action( 'edd_empty_cart' );
+	}
+
+	/**
+	 * Remove discount from the cart
+	 *
+	 * @since 2.7
+	 * @return array Discount codes
+	 */
+	public function remove_discount( $code = '' ) {
+		if ( empty( $code ) ) {
+			return;
+		}
+
+		$discounts = $this->get_discounts();
+		if ( $discounts ) {
+			$key = array_search( $code, $discounts, true );
+
+			if ( false !== $key ) {
+				unset( $discounts[ $key ] );
+			}
+
+			$this->discounts = implode( '|', array_values( $discounts ) );
+
+			// Update the active discounts.
+			EDD()->session->set( 'cart_discounts', $this->discounts );
+		}
+
+		do_action( 'edd_cart_discount_removed', $code, $this->discounts );
+		do_action( 'edd_cart_discounts_updated', $this->discounts );
+
+		return $this->discounts;
+	}
+
+	/**
+	 * Get the discounted amount on a price
+	 *
+	 * @since 2.7
+	 * @since 3.0 Use `edd_get_item_discount_amount()` for calculations.
+	 *
+	 * @param array       $item     Cart item.
+	 * @param bool|string $discount False to use the cart discounts or a string to check with a discount code.
+	 * @param bool        $return_details Whether to return the discounted amount and the discounts applied to the item.
+	 * @return float|array The discounted amount or an array of the discounted amount and the discounts applied to the item.
+	 */
+	public function get_item_discount_amount( $item = array(), $discount = false, $return_details = false ) {
+		// Validate item.
+		if ( empty( $item ) || empty( $item['id'] ) ) {
+			return 0;
+		}
+
+		if ( ! isset( $item['quantity'] ) ) {
+			return 0;
+		}
+
+		if ( ! isset( $item['options'] ) ) {
+			$item['options'] = array();
+
+			/*
+			 * Support for variable pricing when calling `edd_get_cart_item_discount_amount()`
+			 * @link https://github.com/easydigitaldownloads/easy-digital-downloads/issues/8246
+			 */
+			if ( isset( $item['item_number']['options'] ) ) {
+				$item['options'] = $item['item_number']['options'];
+			}
+		}
+
+		$discounts = false === $discount
+			? $this->get_discounts()
+			: array( $discount );
+
+		$item_price = $this->get_item_price( $item['id'], $item['options'] );
+
+		if ( $return_details ) {
+			$discount_details = edd_get_item_discount_breakdown( $item, $this->get_contents(), $discounts, $item_price );
+			$discount_amount  = $discount_details['amount'];
+		} else {
+			$discount_amount = edd_get_item_discount_amount( $item, $this->get_contents(), $discounts, $item_price );
+		}
+
+		$discounted_amount = ( $item_price - $discount_amount );
+
+		/**
+		 * Filters the amount to be discounted from the original cart item amount.
+		 *
+		 * @since unknown
+		 *
+		 * @param float    $discounted_amount Amount to be discounted from the cart item amount.
+		 * @param string[] $discounts         Discount codes applied to the Cart.
+		 * @param array    $item              Cart item.
+		 * @param float    $item_price        Cart item price.
+		 */
+		$discounted_amount = apply_filters(
+			'edd_get_cart_item_discounted_amount',
+			$discounted_amount,
+			$discounts,
+			$item,
+			$item_price
+		);
+
+		if ( $return_details ) {
+			return array(
+				'amount'    => $this->format_amount( $item_price - $discounted_amount ),
+				'discounts' => $discount_details['discounts'],
+			);
+		} else {
+			return $this->format_amount( $item_price - $discounted_amount );
+		}
+	}
+
+	/**
+	 * Shows the fully formatted cart discount
+	 *
+	 * @since 2.7
+	 *
+	 * @param bool $echo Echo?
+	 * @return string $amount Fully formatted cart discount
+	 */
+	public function display_cart_discount( $echo = false ) {
+		$discounts = $this->get_discounts();
+
+		if ( empty( $discounts ) ) {
+			return false;
+		}
+
+		$discount_id = edd_get_discount_id_by_code( $discounts[0] );
+		$amount      = edd_format_discount_rate( edd_get_discount_type( $discount_id ), edd_get_discount_amount( $discount_id ) );
+
+		if ( $echo ) {
+			echo esc_html( $amount );
+		}
+
+		return $amount;
+	}
+
+	/**
+	 * Checks to see if an item is in the cart.
+	 *
+	 * @since 2.7
+	 *
+	 * @param int   $download_id Download ID of the item to check.
+	 * @param array $options      Cart item options.
+	 * @return bool
+	 */
+	public function is_item_in_cart( $download_id = 0, $options = array() ) {
+		$cart = $this->get_contents();
+
+		$is_in_cart = false;
+
+		if ( is_array( $cart ) ) {
+			foreach ( $cart as $item ) {
+				if ( $item['id'] == $download_id ) {
+					if ( ! empty( $options['hash'] ) && ! empty( $item['hash'] ) && hash_equals( $item['hash'], $options['hash'] ) ) {
+						$is_in_cart = true;
+						break;
+					}
+					if ( isset( $options['price_id'] ) && isset( $item['options']['price_id'] ) ) {
+						if ( $options['price_id'] == $item['options']['price_id'] ) {
+							$is_in_cart = true;
+							break;
+						}
+					} else {
+						$is_in_cart = true;
+						break;
+					}
+				}
+			}
+		}
+
+		return (bool) apply_filters( 'edd_item_in_cart', $is_in_cart, $download_id, $options );
+	}
+
+	/**
+	 * Get the position of an item in the cart
+	 *
+	 * @since 2.7
+	 *
+	 * @param int   $download_id Download ID of the item to check.
+	 * @param array $options
+	 * @return mixed int|false
+	 */
+	public function get_item_position( $download_id = 0, $options = array() ) {
+		$cart = $this->get_contents();
+
+		if ( ! is_array( $cart ) ) {
+			return false;
+		} else {
+			foreach ( $cart as $position => $item ) {
+				if ( $item['id'] == $download_id ) {
+					if ( isset( $options['price_id'] ) && isset( $item['options']['price_id'] ) ) {
+						if ( (int) $options['price_id'] == (int) $item['options']['price_id'] ) {
+							return $position;
+						}
+					} else {
+						return $position;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the quantity of an item in the cart.
+	 *
+	 * @since 2.7
+	 *
+	 * @param int   $download_id Download ID of the item
+	 * @param array $options
+	 * @return int Numerical index of the position of the item in the cart
+	 */
+	public function get_item_quantity( $download_id = 0, $options = array() ) {
+		$key = $this->get_item_position( $download_id, $options );
+
+		$quantity = isset( $this->contents[ $key ]['quantity'] ) && edd_item_quantities_enabled() ? $this->contents[ $key ]['quantity'] : 1;
+
+		if ( $quantity < 1 ) {
+			$quantity = 1;
+		}
+
+		return absint( apply_filters( 'edd_get_cart_item_quantity', $quantity, $download_id, $options ) );
+	}
+
+	/**
+	 * Set the quantity of an item in the cart.
+	 *
+	 * @since 2.7
+	 *
+	 * @param int   $download_id Download ID of the item
+	 * @param int   $quantity    Updated quantity of the item
+	 * @param array $options
+	 * @return array $contents Updated cart object.
+	 */
+	public function set_item_quantity( $download_id = 0, $quantity = 1, $options = array() ) {
+		$key = $this->get_item_position( $download_id, $options );
+
+		if ( false === $key ) {
+			return $this->contents;
+		}
+
+		if ( $quantity < 1 ) {
+			$quantity = 1;
+		}
+
+		$this->contents[ $key ]['quantity'] = $quantity;
+		$this->update_cart();
+
+		do_action( 'edd_after_set_cart_item_quantity', $download_id, $quantity, $options, $this->contents );
+
+		return $this->contents;
+	}
+
+	/**
+	 * Cart Item Price.
+	 *
+	 * @since 2.7
+	 *
+	 * @param int   $item_id Download (cart item) ID number
+	 * @param array $options Optional parameters, used for defining variable prices
+	 * @return string Fully formatted price
+	 */
+	public function item_price( $item_id = 0, $options = array() ) {
+		$price = $this->get_item_price( $item_id, $options );
+		$label = '';
+
+		$price_id = isset( $options['price_id'] ) ? $options['price_id'] : false;
+
+		if ( ! edd_is_free_download( $item_id, $price_id ) && ! edd_download_is_tax_exclusive( $item_id ) ) {
+			if ( edd_prices_show_tax_on_checkout() && ! edd_prices_include_tax() ) {
+				$price += edd_get_cart_item_tax( $item_id, $options, $price );
+			}
+
+			if ( ! edd_prices_show_tax_on_checkout() && edd_prices_include_tax() ) {
+				$price -= edd_get_cart_item_tax( $item_id, $options, $price );
+			}
+
+			if ( edd_display_tax_rate() ) {
+				$label = '&nbsp;&ndash;&nbsp;';
+
+				if ( edd_prices_show_tax_on_checkout() ) {
+					/* translators: %s: tax rate formatted as a percentage */
+					$label .= sprintf( __( 'includes %s tax', 'easy-digital-downloads' ), edd_get_formatted_tax_rate() );
+				} else {
+					/* translators: %s: tax rate formatted as a percentage */
+					$label .= sprintf( __( 'excludes %s tax', 'easy-digital-downloads' ), edd_get_formatted_tax_rate() );
+				}
+
+				$label = apply_filters( 'edd_cart_item_tax_description', $label, $item_id, $options );
+			}
+		}
+
+		$price = edd_currency_filter( edd_format_amount( $price ) );
+
+		return apply_filters( 'edd_cart_item_price_label', $price . $label, $item_id, $options );
+	}
+
+	/**
+	 * Gets the price of the cart item. Always exclusive of taxes.
+	 *
+	 * Do not use this for getting the final price (with taxes and discounts) of an item.
+	 * Use edd_get_cart_item_final_price()
+	 *
+	 * @since 2.7
+	 * @since 3.7.1 A cart item whose price option does not resolve — reachable only for
+	 *                       an item that did not go through `add()`'s own price ID sanitizing —
+	 *                       returns false instead of falling back to the product's `edd_price`
+	 *                       meta.
+	 *
+	 * @param  int   $download_id               Download ID for the cart item
+	 * @param  array $options                   Optional parameters, used for defining variable prices
+	 * @param  bool  $remove_tax_from_inclusive Remove the tax amount from tax inclusive priced products.
+	 * @return float|bool Price for this item
+	 */
+	public function get_item_price( $download_id = 0, $options = array(), $remove_tax_from_inclusive = false ) {
+		$price           = 0;
+		$prices          = array();
+		$variable_prices = edd_has_variable_prices( $download_id );
+
+		if ( $variable_prices ) {
+			$prices = edd_get_variable_prices( $download_id );
+
+			if ( $prices ) {
+				/*
+				 * A variable priced product whose price option cannot be resolved has no price.
+				 * The product's `edd_price` meta is not a substitute: it is the lowest price
+				 * option, or `0.00` when it was never written.
+				 */
+				$price_id = isset( $options['price_id'] ) ? $options['price_id'] : null;
+
+				if ( is_null( $price_id ) || ! isset( $prices[ $price_id ] ) ) {
+					/*
+					 * The filter still prices the item, because an extension can carry the
+					 * amount in the item's own options. Only a price above zero counts: `false`
+					 * is zero in arithmetic, so a callback which adjusts rather than replaces
+					 * the price hands back `0.0` for an item it did not price.
+					 */
+					$filtered = apply_filters( 'edd_cart_item_price', false, $download_id, $options );
+
+					return is_numeric( $filtered ) && (float) $filtered > 0 ? $filtered : false;
+				}
+
+				$price = $prices[ $price_id ]['amount'];
+			}
+		}
+
+		/*
+		 * A product flagged as variable priced but carrying no price options has nothing to
+		 * resolve against, so its price is the product's own meta.
+		 */
+		if ( ! $variable_prices || empty( $prices ) ) {
+			// Get the standard Download price if not using variable prices
+			$price = edd_get_download_price( $download_id );
+		}
+
+		if ( $remove_tax_from_inclusive && edd_prices_include_tax() ) {
+			$price -= $this->get_item_tax( $download_id, $options, $price );
+		}
+
+		$price = false !== $price ? $this->format_amount( $price ) : $price;
+
+		return apply_filters( 'edd_cart_item_price', $price, $download_id, $options );
+	}
+
+	/**
+	 * Final Price of Item in Cart (incl. discounts and taxes)
+	 *
+	 * @since 2.7
+	 *
+	 * @param int $item_key Cart item key
+	 * @return float Final price for the item
+	 */
+	public function get_item_final_price( $item_key = 0 ) {
+		$final_price = $this->details[ $item_key ]['price'];
+
+		return apply_filters( 'edd_cart_item_final_price', $final_price, $item_key );
+	}
+
+	/**
+	 * Calculate the tax for an item in the cart.
+	 *
+	 * @since 2.7
+	 *
+	 * @param array $download_id Download ID
+	 * @param array $options     Cart item options
+	 * @param float $subtotal    Cart item subtotal
+	 * @return float Tax amount
+	 */
+	public function get_item_tax( $download_id = 0, $options = array(), $subtotal = '' ) {
+		$tax = 0;
+
+		if ( ! edd_download_is_tax_exclusive( $download_id ) ) {
+			$country = ! empty( $_POST['billing_country'] ) ? $_POST['billing_country'] : false;
+			$state   = ! empty( $_POST['card_state'] ) ? $_POST['card_state'] : false;
+
+			$tax = edd_calculate_tax( $subtotal, $country, $state, true, $this->get_tax_rate() );
+		}
+
+		$tax = max( $tax, 0 );
+
+		return apply_filters( 'edd_get_cart_item_tax', $this->format_amount( $tax ), $download_id, $options, $subtotal );
+	}
+
+	/**
+	 * Get Cart Fees
+	 *
+	 * @since 2.7
+	 * @return array Cart fees
+	 */
+	public function get_fees( $type = 'all', $download_id = 0, $price_id = null ) {
+		return EDD()->fees->get_fees( $type, $download_id, $price_id );
+	}
+
+	/**
+	 * Get All Cart Fees.
+	 *
+	 * @since 2.7
+	 * @return array
+	 */
+	public function get_all_fees() {
+		$this->fees = EDD()->fees->get_fees( 'all' );
+		return $this->fees;
+	}
+
+	/**
+	 * Get Cart Items Subtotal.
+	 *
+	 * @since 2.7
+	 *
+	 * @param array $items Cart items array
+	 * @return float items subtotal
+	 */
+	public function get_items_subtotal( $items ) {
+		$subtotal = 0.00;
+
+		if ( is_array( $items ) && ! empty( $items ) ) {
+			$prices = wp_list_pluck( $items, 'subtotal' );
+
+			if ( is_array( $prices ) ) {
+				$subtotal = array_sum( $prices );
+			} else {
+				$subtotal = 0.00;
+			}
+
+			if ( $subtotal < 0 ) {
+				$subtotal = 0.00;
+			}
+		}
+
+		$this->subtotal = apply_filters( 'edd_get_cart_items_subtotal', $this->format_amount( $subtotal ) );
+
+		return $this->subtotal;
+	}
+
+	/**
+	 * Get Discountable Subtotal.
+	 *
+	 * @since 2.7
+	 * @return float Total discountable amount before taxes
+	 */
+	public function get_discountable_subtotal( $code_id ) {
+		$cart_items = $this->get_contents_details();
+		$items      = array();
+
+		$excluded_products = edd_get_discount_excluded_products( $code_id );
+
+		if ( $cart_items ) {
+			foreach ( $cart_items as $item ) {
+				if ( ! in_array( $item['id'], $excluded_products ) ) {
+					$items[] = $item;
+				}
+			}
+		}
+
+		$subtotal = $this->get_items_subtotal( $items );
+
+		return apply_filters( 'edd_get_cart_discountable_subtotal', $subtotal );
+	}
+
+	/**
+	 * Get Discounted Amount.
+	 *
+	 * @since 2.7
+	 *
+	 * @param bool $discounts Discount codes
+	 * @return float|mixed|void Total discounted amount
+	 */
+	public function get_discounted_amount( $discounts = false ) {
+		// Track profiling.
+		if ( $this->profiler ) {
+			$this->profiler->track_call( 'get_discounted_amount' );
+		}
+
+		$amount = 0.00;
+		$items  = $this->get_contents_details();
+
+		if ( $items ) {
+			$discounts = wp_list_pluck( $items, 'discount' );
+
+			if ( is_array( $discounts ) ) {
+				$discounts = array_map( 'floatval', $discounts );
+				$amount    = array_sum( $discounts );
+			}
+		}
+
+		return apply_filters( 'edd_get_cart_discounted_amount', $this->format_amount( $amount ) );
+	}
+
+	/**
+	 * Get Cart Subtotal.
+	 *
+	 * Gets the total price amount in the cart before taxes and before any discounts.
+	 *
+	 * @since 2.7
+	 *
+	 * @return float Total amount before taxes
+	 */
+	public function get_subtotal() {
+		// Track profiling.
+		if ( $this->profiler ) {
+			$this->profiler->track_call( 'get_subtotal' );
+		}
+
+		$items    = $this->get_contents_details();
+		$subtotal = $this->get_items_subtotal( $items );
+
+		return apply_filters( 'edd_get_cart_subtotal', $subtotal );
+	}
+
+	/**
+	 * Subtotal (before taxes).
+	 *
+	 * @since 2.7
+	 * @return float Total amount before taxes fully formatted
+	 */
+	public function subtotal() {
+		return esc_html( edd_currency_filter( edd_format_amount( edd_get_cart_subtotal() ) ) );
+	}
+
+	/**
+	 * Get Total Cart Amount.
+	 *
+	 * @since 2.7
+	 *
+	 * @param bool $discounts Array of discounts to apply (needed during AJAX calls)
+	 * @return float Cart amount
+	 */
+	public function get_total( $discounts = false ) {
+		// Track profiling.
+		if ( $this->profiler ) {
+			$this->profiler->track_call( 'get_total' );
+		}
+
+		$subtotal     = (float) $this->get_subtotal();
+		$discounts    = (float) $this->get_discounted_amount();
+		$fees         = (float) $this->get_total_fees();
+		$cart_tax     = (float) $this->get_tax();
+		$total_wo_tax = $subtotal - $discounts + $fees;
+		$total        = $subtotal - $discounts + $cart_tax + $fees;
+
+		if ( $total < 0 || ! $total_wo_tax > 0 ) {
+			$total = 0.00;
+		}
+
+		$this->total = (float) apply_filters( 'edd_get_cart_total', $this->format_amount( $total ) );
+
+		return $this->total;
+	}
+
+	/**
+	 * Fully Formatted Total Cart Amount.
+	 *
+	 * @since 2.7
+	 *
+	 * @param bool $echo
+	 * @return mixed|string|void
+	 */
+	public function total( $echo = false ) {
+		$total = apply_filters( 'edd_cart_total', edd_currency_filter( edd_format_amount( $this->get_total() ) ) );
+
+		if ( $echo ) {
+			echo esc_html( $total );
+		}
+
+		return $total;
+	}
+
+	/**
+	 * Get Cart Fee Total
+	 *
+	 * @since 2.7
+	 * @return double
+	 */
+	public function get_total_fees() {
+		$fee_total = 0.00;
+
+		foreach ( $this->get_fees() as $fee ) {
+
+			// Since fees affect cart item totals, we need to not count them towards the cart total if there is an association.
+			if ( ! empty( $fee['download_id'] ) ) {
+				continue;
+			}
+
+			$fee_total += $fee['amount'];
+		}
+
+		return apply_filters( 'edd_get_fee_total', $this->format_amount( $fee_total ), $this->fees );
+	}
+
+	/**
+	 * Get the price ID for an item in the cart.
+	 *
+	 * @since 2.7
+	 *
+	 * @param array $item Item details
+	 * @return string $price_id Price ID
+	 */
+	public function get_item_price_id( $item = array() ) {
+		if ( isset( $item['item_number'] ) ) {
+			$price_id = isset( $item['item_number']['options']['price_id'] ) ? $item['item_number']['options']['price_id'] : null;
+		} else {
+			$price_id = isset( $item['options']['price_id'] ) ? $item['options']['price_id'] : null;
+		}
+
+		return $price_id;
+	}
+
+	/**
+	 * Get the price name for an item in the cart.
+	 *
+	 * @since 2.7
+	 *
+	 * @param array $item Item details
+	 * @return string $name Price name
+	 */
+	public function get_item_price_name( $item = array() ) {
+		$price_id = (int) $this->get_item_price_id( $item );
+		$prices   = edd_get_variable_prices( $item['id'] );
+		$name     = ! empty( $prices[ $price_id ] ) ? $prices[ $price_id ]['name'] : '';
+
+		return apply_filters( 'edd_get_cart_item_price_name', $name, $item['id'], $price_id, $item );
+	}
+
+	/**
+	 * Get the name of an item in the cart.
+	 *
+	 * @since 2.7
+	 * @since 3.1.2 Updated to use edd_get_download_name() for consistency
+	 *
+	 * @param array $item Item details
+	 * @return string $name Item name
+	 */
+	public function get_item_name( $item = array() ) {
+		$download_id = $item['id'];
+		$price_id    = $this->get_item_price_id( $item );
+
+		$item_title = edd_get_download_name( $download_id, $price_id );
+
+		// In the event that we dont' get a name back, use the ID.
+		if ( empty( $item_title ) ) {
+			$item_title = $item['id'];
+		}
+
+		return apply_filters( 'edd_get_cart_item_name', $item_title, $item['id'], $item );
+	}
+
+	/**
+	 * Get all applicable tax for the items in the cart
+	 *
+	 * @since 2.7
+	 * @return float Total tax amount
+	 */
+	public function get_tax() {
+		// Track profiling.
+		if ( $this->profiler ) {
+			$this->profiler->track_call( 'get_tax' );
+		}
+
+		$cart_tax = 0;
+		$items    = $this->get_contents_details();
+
+		if ( $items ) {
+
+			$taxes = wp_list_pluck( $items, 'tax' );
+
+			if ( is_array( $taxes ) ) {
+				$cart_tax = array_sum( $taxes );
+			}
+		}
+		$cart_tax += $this->get_tax_on_fees();
+
+		$subtotal = $this->get_subtotal();
+		if ( empty( $subtotal ) ) {
+			$cart_tax = 0;
+		}
+
+		return apply_filters( 'edd_get_cart_tax', $this->format_amount( edd_sanitize_amount( $cart_tax ) ) );
+	}
+
+	/**
+	 * Gets the total tax amount for the cart contents in a fully formatted way.
+	 *
+	 * @since 2.7
+	 *
+	 * @param bool $should_echo Decides if the result should be returned or not.
+	 * @return string Formatted tax amount.
+	 */
+	public function tax( $should_echo = false ) {
+		$cart_tax = $this->get_tax();
+		$cart_tax = edd_currency_filter( edd_format_amount( $cart_tax ) );
+
+		$tax = apply_filters( 'edd_cart_tax', $cart_tax );
+
+		if ( $should_echo ) {
+			echo esc_html( $tax );
+		}
+
+		return $tax;
+	}
+
+	/**
+	 * Get tax applicable for fees.
+	 *
+	 * @since 2.7
+	 * @return float Total taxable amount for fees
+	 */
+	public function get_tax_on_fees() {
+		$tax  = 0;
+		$fees = edd_get_cart_fees();
+
+		if ( $fees ) {
+			foreach ( $fees as $fee_id => $fee ) {
+				if ( ! empty( $fee['no_tax'] ) || $fee['amount'] < 0 ) {
+					continue;
+				}
+
+				/**
+				 * Fees (at this time) must be exclusive of tax
+				 */
+				add_filter( 'edd_prices_include_tax', '__return_false' );
+				$tax += edd_calculate_tax( $fee['amount'], '', '', true, $this->get_tax_rate() );
+				remove_filter( 'edd_prices_include_tax', '__return_false' );
+			}
+		}
+
+		return apply_filters( 'edd_get_cart_fee_tax', $this->format_amount( $tax ) );
+	}
+
+	/**
+	 * Is Cart Saving Enabled?
+	 *
+	 * @since 2.7
+	 * @return bool
+	 */
+	public function is_saving_enabled() {
+		return edd_get_option( 'enable_cart_saving', false );
+	}
+
+	/**
+	 * Checks if the cart has been saved
+	 *
+	 * @since 2.7
+	 * @return bool
+	 */
+	public function is_saved() {
+		if ( ! $this->is_saving_enabled() ) {
+			return false;
+		}
+
+		if ( is_user_logged_in() ) {
+			$saved_cart = get_user_meta( get_current_user_id(), 'edd_saved_cart', true );
+			if ( ! $saved_cart ) {
+				return false;
+			}
+
+			return EDD()->session->get( 'edd_cart' ) === $saved_cart;
+		}
+
+		if ( ! isset( $_COOKIE['edd_saved_cart'] ) ) {
+			return false;
+		}
+
+		// If there is a saved cart and it doesn't match the current cart, return true.
+		return json_decode( stripslashes( $_COOKIE['edd_saved_cart'] ), true ) !== EDD()->session->get( 'edd_cart' );
+	}
+
+	/**
+	 * Save Cart
+	 *
+	 * @since 2.7
+	 * @since 3.7.1 A guest's cart token is signed with the store's own key. The work of
+	 *                       saving and restoring a cart now lives in `EDD\Cart\SavedCart`; this
+	 *                       stays the public entry point.
+	 *
+	 * @return bool
+	 */
+	public function save() {
+		return $this->saved_cart()->save();
+	}
+
+	/**
+	 * Restore Cart
+	 *
+	 * @since 2.7
+	 * @since 3.7.1 A guest's cart restores through a store-signed token, rebuilt via
+	 *                       `EDD_Cart::add()`. A request with nothing saved for it is refused,
+	 *                       and `edd_get_cart_token` does not apply on the guest path — a
+	 *                       guest's token is checked against the store's signature, a logged in
+	 *                       customer's against their own user meta.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function restore() {
+		return $this->saved_cart()->restore();
+	}
+
+	/**
+	 * Retrieve a saved cart token. Used in validating saved carts
+	 *
+	 * @since 2.7
+	 * @return int
+	 */
+	public function get_token() {
+		return $this->saved_cart()->get_token();
+	}
+
+	/**
+	 * Generate URL token to restore the cart via a URL
+	 *
+	 * @since 2.7
+	 * @return int
+	 */
+	public function generate_token() {
+		return $this->saved_cart()->generate_token();
+	}
+
+	/**
+	 * Gets the object which saves and restores this cart.
+	 *
+	 * @since 3.7.1
+	 *
+	 * @return \EDD\Cart\SavedCart
+	 */
+	private function saved_cart() {
+		if ( null === $this->saved_cart_handler ) {
+			$this->saved_cart_handler = new \EDD\Cart\SavedCart( $this );
+		}
+
+		return $this->saved_cart_handler;
+	}
+
+	/**
+	 * Format an amount for the cart/currency.
+	 *
+	 * @since 3.3.6
+	 * @param string $amount The amount to format.
+	 * @return string
+	 */
+	private function format_amount( $amount ) {
+		return edd_format_amount( $amount, true, '', 'data' );
+	}
+
+	/**
+	 * Check if cart calculation caching is enabled.
+	 *
+	 * Caching can be disabled via constant for testing/comparison.
+	 *
+	 * @since 3.6.0
+	 * @return bool True if caching is enabled, false otherwise.
+	 */
+	private function is_caching_enabled() {
+		return edd_get_option( 'cart_caching', false );
+	}
+
+	/**
+	 * Invalidate the calculation cache.
+	 *
+	 * Forces cart calculations to be recalculated on the next request.
+	 *
+	 * @since 3.6.0
+	 * @return void
+	 */
+	public function invalidate_cache() {
+		$this->cache_is_valid    = false;
+		$this->calculation_cache = array();
+	}
+
+	/**
+	 * Get calculation cache statistics.
+	 *
+	 * Useful for debugging and performance monitoring.
+	 *
+	 * @since 3.6.0
+	 * @return array {
+	 *     Cache statistics.
+	 *
+	 *     @type bool $cached     Whether the cache is currently valid.
+	 *     @type int  $cache_size Number of items in the cache.
+	 * }
+	 */
+	public function get_calculation_stats() {
+		return array(
+			'cached'     => $this->cache_is_valid,
+			'cache_size' => count( $this->calculation_cache ),
+		);
+	}
+
+	/**
+	 * Populate the cart with the data stored in the session.
+	 *
+	 * @since 2.7
+	 * @deprecated 3.3.0
+	 * @return void
+	 */
+	public function get_contents_from_session() {
+		$this->cart_session->get_contents();
+	}
+
+	/**
+	 * Gets the discounts from the session.
+	 *
+	 * @since  2.7
+	 * @since 3.6.6 Now returns an array of discounts.
+	 * @return array The active discount codes.
+	 */
+	public function get_discounts_from_session() {
+		$this->cart_session->get_discounts();
+
+		// If the discounts are a string, explode them into an array.
+		if ( is_string( $this->discounts ) && ! empty( $this->discounts ) ) {
+			$this->discounts = explode( '|', $this->discounts );
+		}
+
+		return ! empty( $this->discounts ) ? (array) $this->discounts : array();
+	}
+
+	/**
+	 * Remove all discount codes.
+	 *
+	 * @since 2.7
+	 * @deprecated 3.3.0
+	 * @return void
+	 */
+	public function remove_all_discounts() {
+		$this->cart_session->remove_all_discounts();
+	}
+
+	/**
+	 * Whether a cart item's price can be resolved from the product's own price options.
+	 *
+	 * A product with no price options at all still resolves, because its price comes from the
+	 * product's `edd_price` meta rather than from a price option.
+	 *
+	 * @since 3.7.1
+	 *
+	 * @param int   $download_id Download ID for the cart item.
+	 * @param array $options     The cart item's options, which may name a price option.
+	 * @return bool
+	 */
+	private function is_item_priceable( $download_id, $options = array() ) {
+		if ( ! edd_has_variable_prices( $download_id ) ) {
+			return true;
+		}
+
+		$prices = edd_get_variable_prices( $download_id );
+		if ( empty( $prices ) ) {
+			return true;
+		}
+
+		$price_id = isset( $options['price_id'] ) ? $options['price_id'] : null;
+
+		return ! is_null( $price_id ) && isset( $prices[ $price_id ] );
+	}
+
+	/**
+	 * Whether a cart item can be sold.
+	 *
+	 * An item core cannot price has no price at all, and `false` is zero in the checkout
+	 * arithmetic, so it cannot be carried through. An item core can price is sellable whatever
+	 * the `edd_cart_item_price` filter returned, which is what keeps get_contents() and
+	 * get_contents_details() in step.
+	 *
+	 * @since 3.7.1
+	 *
+	 * @param int        $download_id Download ID for the cart item.
+	 * @param array      $options     The cart item's options, which may name a price option.
+	 * @param float|bool $item_price  Optional. The item's resolved price, when the caller has it
+	 *                                already. Resolved here when it does not.
+	 * @return bool
+	 */
+	private function is_item_sellable( $download_id, $options = array(), $item_price = null ) {
+		if ( $this->is_item_priceable( $download_id, $options ) ) {
+			return true;
+		}
+
+		if ( null === $item_price ) {
+			$item_price = $this->get_item_price( $download_id, $options );
+		}
+
+		return false !== $item_price;
+	}
+
+	/**
+	 * Clears the flat rate discount bookkeeping after a cart item has been handled.
+	 *
+	 * A flat rate discount's remainder is applied to the last cart item, so the marker and the
+	 * running total are consumed once that item has been through the loop.
+	 *
+	 * @since 3.7.1
+	 *
+	 * @return void
+	 */
+	private function reset_flat_discount_state() {
+		global $edd_is_last_cart_item, $edd_flat_discount_total;
+
+		if ( $edd_is_last_cart_item ) {
+			$edd_is_last_cart_item   = false;
+			$edd_flat_discount_total = 0.00;
+		}
+	}
+}

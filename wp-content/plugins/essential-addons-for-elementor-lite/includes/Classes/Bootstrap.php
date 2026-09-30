@@ -1,0 +1,470 @@
+<?php
+
+namespace Essential_Addons_Elementor\Classes;
+
+if (!defined('ABSPATH')) {
+    exit;
+} // Exit if accessed directly
+
+use Elementor\Plugin;
+use Essential_Addons_Elementor\Traits\Admin;
+use Essential_Addons_Elementor\Traits\Core;
+use Essential_Addons_Elementor\Traits\Elements;
+use Essential_Addons_Elementor\Traits\Enqueue;
+use Essential_Addons_Elementor\Traits\Helper;
+use Essential_Addons_Elementor\Traits\Library;
+use Essential_Addons_Elementor\Traits\Login_Registration;
+use Essential_Addons_Elementor\Traits\Woo_Product_Comparable;
+use Essential_Addons_Elementor\Traits\Controls;
+use Essential_Addons_Elementor\Traits\Facebook_Feed;
+use Essential_Addons_Elementor\Classes\Asset_Builder;
+use Essential_Addons_Elementor\Theme_Builder\Theme_Builder;
+use Essential_Addons_Elementor\Traits\Ajax_Handler;
+use Essential_Addons_Elementor\Pro\Classes\License\LicenseManager;
+
+class Bootstrap
+{
+    use Library;
+    use Core;
+    use Helper;
+    use Enqueue;
+    use Admin;
+    use Elements;
+    use Login_Registration;
+    use Woo_Product_Comparable;
+    use Controls;
+    use Facebook_Feed;
+    use Ajax_Handler;
+
+    // instance container
+    private static $instance = null;
+
+    // request unique id container
+    protected $uid = null;
+
+    // registered elements container
+    protected $registered_elements;
+
+    // registered extensions container
+    protected $registered_extensions;
+
+    // identify whether pro is enabled
+    protected $pro_enabled;
+
+    // localize objects
+    public $localize_objects = [];
+
+    // request data container
+    protected $request_requires_update;
+
+    // loaded templates in a request
+    protected $loaded_templates = [];
+
+    // loaded elements in a request
+    protected $loaded_elements = [];
+
+    // used for internal css
+    protected $css_strings;
+
+    // used for internal js
+    protected $js_strings;
+
+    // used to store custom js
+    protected $custom_js_strings;
+
+    // modules
+    protected $installer;
+
+
+    const EAEL_PROMOTION_FLAG = 21;
+    const EAEL_ADMIN_MENU_FLAG = 21;
+    /**
+     * Singleton instance
+     *
+     * @since 3.0.0
+     */
+    public static function instance()
+    {
+        if (self::$instance == null) {
+            self::$instance = new self;
+        }
+
+        return self::$instance;
+    }
+
+    /**
+     * Constructor of plugin class
+     *
+     * @since 3.0.0
+     */
+    private function __construct()
+    {
+        // init modules
+        $this->installer = new WPDeveloper_Plugin_Installer();
+
+        // ThinkRank cross-promotion surfaces (admin-only; self-gates internally)
+        new ThinkRank_Promotion();
+
+        // Keep the shared `wpdeveloper_xspeed_offer` record in step with xSpeed
+        // being activated or deleted by any route, WP-CLI included.
+        XSpeed_Setup::register_hooks();
+
+        // before init hook
+        do_action('eael/before_init');
+
+        // search for pro version
+        $this->pro_enabled = apply_filters('eael/pro_enabled', false);
+
+        // elements classmap
+        $this->registered_elements = apply_filters('eael/registered_elements', $GLOBALS['eael_config']['elements']);
+
+        // extensions classmap
+        $this->registered_extensions = apply_filters('eael/registered_extensions', $GLOBALS['eael_config']['extensions']);
+
+	    // start plugin tracking
+	    if ( ! $this->pro_enabled ) {
+            add_action( 'init', [ $this, 'start_plugin_tracking' ] );
+	    }
+
+        // register extensions
+        $this->register_extensions();
+
+        // register hooks
+        $this->register_hooks();
+
+	    if ( $this->is_activate_elementor() ) {
+		    new Asset_Builder( $this->registered_elements, $this->registered_extensions );
+	    }
+
+        // Theme Builder — header & footer templates built with Elementor. Boots
+        // the requirement notice instead of the module when Elementor is off, so
+        // the admin page stays reachable and says why it is empty.
+        Theme_Builder::boot();
+
+        // Compatibility Support
+        new Compatibility_Support();
+
+        // Mega Menu — registers the editor-side nested element type.
+        \Essential_Addons_Elementor\MegaMenu\Manager::instance()->init();
+        // Angie (Elementor AI Assistant) widget discovery; self-gates on ANGIE_VERSION
+        if ( $this->is_activate_elementor() ) {
+            new Angie_Integration( $this->registered_elements );
+        }
+
+		include_once(EAEL_PLUGIN_PATH . 'includes/bfcm-pointer.php');
+
+    }
+
+    protected function register_hooks() {
+        // Core
+        add_action('init', [$this, 'i18n']);
+        // TODO::RM
+        add_filter('eael/active_plugins', [$this, 'is_plugin_active'], 10, 1);
+
+        add_filter('eael/is_plugin_active', [$this, 'is_plugin_active'], 10, 1);
+        add_action('elementor/editor/after_save', array($this, 'save_global_values'), 10, 2);
+        add_action('trashed_post', array($this, 'save_global_values_trashed_post'), 10, 1);
+
+        // Enqueue
+        add_action('eael/before_enqueue_styles', [$this, 'before_enqueue_styles']);
+        add_action('elementor/editor/before_enqueue_scripts', [$this, 'editor_enqueue_scripts']);
+        add_action('elementor/frontend/before_register_scripts', [$this, 'frontend_enqueue_scripts']);
+
+        // Generator
+
+	    $this->init_ajax_hooks();
+
+        // Ajax
+        add_action('wp_ajax_facebook_feed_load_more', [$this, 'facebook_feed_render_items']);
+        add_action('wp_ajax_nopriv_facebook_feed_load_more', [$this, 'facebook_feed_render_items']);
+
+        // Compare table
+	    add_action( 'wp_ajax_nopriv_eael_product_grid', [$this, 'get_compare_table']);
+	    add_action( 'wp_ajax_eael_product_grid', [$this, 'get_compare_table']);
+
+	    add_action( 'wp_ajax_eael_clear_widget_cache_data', [ $this, 'eael_clear_widget_cache_data' ] );
+
+	    if ( defined( 'ELEMENTOR_VERSION' ) ) {
+		    if ( version_compare( ELEMENTOR_VERSION, '3.5.0', '>=' ) ) {
+			    add_action( 'elementor/controls/register', array( $this, 'register_controls' ) );
+			    add_action('elementor/widgets/register', array($this, 'register_elements'));
+		    } else {
+			    add_action( 'elementor/controls/controls_registered', array( $this, 'register_controls' ) );
+			    add_action('elementor/widgets/widgets_registered', array($this, 'register_elements'));
+		    }
+	    }
+
+        // Elements
+        add_action('elementor/elements/categories_registered', array($this, 'register_widget_categories'));
+        add_filter('elementor/editor/localize_settings', [$this, 'promote_pro_elements']);
+        add_action('wp_footer', [$this, 'render_global_html']);
+        add_action('wp_footer', [$this, 'render_advanced_accordion_global_faq']);
+
+        // Controls
+        add_action('eael/controls/query', [$this, 'query'], 10, 1);
+        add_action('eael/controls/betterdocs/query', [$this, 'betterdocs_query'], 10, 1);
+        add_action('eael/controls/layout', [$this, 'layout'], 10, 1);
+        add_action('eael/controls/terms_style', [$this, 'terms_style'], 10, 1);
+        add_action('eael/controls/read_more_button_style', [$this, 'read_more_button_style'], 10, 1);
+        add_action('eael/controls/load_more_button_style', [$this, 'load_more_button_style'], 10, 1);
+        add_action('eael/controls/custom_positioning', [$this, 'custom_positioning'], 10, 5);
+	    add_action('eael/controls/nothing_found_style', [$this, 'nothing_found_style'], 10, 1);
+
+        add_filter('eael/controls/event-calendar/source', [$this, 'event_calendar_source']);
+        add_action('eael/controls/advanced-data-table/source', [$this, 'advanced_data_table_source']);
+
+        // Login | Register
+        add_action('init', [$this, 'login_or_register_user']);
+        add_filter('wp_new_user_notification_email', array($this, 'new_user_notification_email'), 10, 3);
+        add_filter('wp_new_user_notification_email_admin', array($this, 'new_user_notification_email_admin'), 10, 3);
+
+        // Email OTP Verification (Login | Register)
+        add_action('wp_ajax_eael_lr_send_otp',        [$this, 'eael_ajax_send_otp']);
+        add_action('wp_ajax_nopriv_eael_lr_send_otp', [$this, 'eael_ajax_send_otp']);
+        add_action('wp_ajax_eael_lr_verify_otp',        [$this, 'eael_ajax_verify_otp']);
+        add_action('wp_ajax_nopriv_eael_lr_verify_otp', [$this, 'eael_ajax_verify_otp']);
+
+        // Block any core authentication path (wp-login.php, XML-RPC, application
+        // passwords, wp_signon() calls elsewhere) for accounts still pending OTP
+        // verification. The EA login widget's own gate in log_user_in() only covers
+        // logins submitted through that widget's form/AJAX endpoint.
+        add_filter( 'wp_authenticate_user', [ $this, 'eael_block_otp_pending_authentication' ], 20, 2 );
+
+        // Flag unverified OTP register users in wp-admin → Users.
+        add_action('admin_footer-users.php', [$this, 'eael_lr_otp_pending_user_flag']);
+        add_action( 'init', [$this, 'eael_redirect_to_reset_password'] );
+
+        if( 'on' === get_option( 'eael_custom_profile_fields' ) ){
+            add_action( 'show_user_profile', [ $this, 'eael_extra_user_profile_fields' ] );
+            add_action( 'edit_user_profile', [ $this, 'eael_extra_user_profile_fields' ] );
+
+            add_action( 'personal_options_update', [ $this, 'eael_save_extra_user_profile_fields' ] );
+            add_action( 'edit_user_profile_update', [ $this, 'eael_save_extra_user_profile_fields' ] );
+        }
+
+        // Admin Approval hooks registered unconditionally so option/widget checks
+        // happen at call time (correct site context in Multisite) rather than at init.
+        add_filter( 'wp_authenticate_user', [ $this, 'eael_block_pending_user_login' ], 10, 2 );
+        add_filter( 'manage_users_columns', [ $this, 'eael_add_user_status_column' ] );
+        add_filter( 'manage_users_custom_column', [ $this, 'eael_render_user_status_column' ], 10, 3 );
+        add_action( 'show_user_profile', [ $this, 'eael_show_approve_user_button' ] );
+        add_action( 'edit_user_profile', [ $this, 'eael_show_approve_user_button' ] );
+        add_action( 'personal_options_update', [ $this, 'eael_handle_approve_user' ] );
+        add_action( 'edit_user_profile_update', [ $this, 'eael_handle_approve_user' ] );
+        add_filter( 'bulk_actions-users', [ $this, 'eael_register_bulk_approve_action' ] );
+        add_filter( 'views_users', [ $this, 'eael_register_status_views' ] );
+        add_action( 'pre_get_users', [ $this, 'eael_filter_users_by_status' ] );
+        add_filter( 'handle_bulk_actions-users', [ $this, 'eael_handle_bulk_approve_action' ], 10, 3 );
+        add_filter( 'handle_bulk_actions-users', [ $this, 'eael_handle_bulk_reject_action' ], 10, 3 );
+        add_action( 'admin_notices', [ $this, 'eael_bulk_approve_admin_notice' ] );
+
+        //rank math support
+        add_filter('rank_math/researches/toc_plugins', [$this, 'toc_rank_math_support']);
+
+        // Translate embedded Elementor templates/documents (saved templates used by
+        // Advanced Tabs, Advanced Accordion, Info Box, etc.) to the current language.
+        // eael_wpml_template_translation() handles both WPML and Polylang. Previously
+        // this was disabled and gated to WPML only, so Polylang sites always rendered
+        // the source-language template.
+        if ( defined( 'WPML_TM_VERSION' ) || defined( 'POLYLANG_VERSION' ) || function_exists( 'pll_get_post_language' ) ) {
+            add_filter( 'elementor/documents/get/post_id', [ $this, 'eael_wpml_template_translation' ] );
+        }
+
+        // Polylang has no Elementor integration, so the template library is not
+        // translatable by default. Opt it in so saved templates can be mapped to the
+        // current language (and managed from Polylang's UI).
+        if ( defined( 'POLYLANG_VERSION' ) || function_exists( 'pll_get_post_language' ) ) {
+            add_filter( 'pll_get_post_types', [ $this, 'eael_pll_translate_elementor_library' ], 10, 2 );
+        }
+
+        //templately plugin support
+        /**
+         * Filters whether Templately is offered from Elementor's add-element row.
+         *
+         * Off by default. The button there is the Templately logo and nothing
+         * else, so on a site without Templately it reads as Templately being
+         * installed rather than as an offer to install it — and it sits directly
+         * beside the EA button, which is a real one. The same offer is made in
+         * the Theme Builder's preset picker, as a panel that says what it is.
+         *
+         * The popup, its install and activate flow and its "don't show again"
+         * dismissal are all still here; this only decides whether anything opens
+         * them from that row.
+         *
+         * @since 6.7.4
+         *
+         * @param bool $enabled Whether to show the promo button.
+         */
+        $templately_promo = apply_filters( 'eael/templately_promo', false );
+
+        if( $templately_promo && !class_exists('Templately\Plugin') && !get_option('eael_templately_promo_hide') ) {
+            add_action( 'elementor/editor/before_enqueue_scripts', [$this, 'templately_promo_enqueue_scripts'] );
+            add_action( 'eael/before_enqueue_styles', [$this, 'templately_promo_enqueue_style'] );
+            add_action( 'elementor/editor/footer', [ $this, 'print_template_views' ] );
+            add_action( 'wp_ajax_templately_promo_status', array($this, 'templately_promo_status'));
+        }
+
+	    if( class_exists( 'woocommerce' ) ) {
+		    // Login|Register custom fields on WooCommerce My Account edit-account page
+		    add_action( 'woocommerce_edit_account_form_fields', [ $this, 'eael_wc_account_form_fields' ] );
+		    add_action( 'woocommerce_save_account_details', [ $this, 'eael_wc_save_account_fields' ] );
+
+		    // quick view
+		    add_action( 'eael_woo_single_product_image', 'woocommerce_show_product_images', 20 );
+		    add_action( 'eael_woo_single_product_summary', 'woocommerce_template_single_title', 5 );
+		    add_action( 'eael_woo_single_product_summary', 'woocommerce_template_single_rating', 10 );
+		    add_action( 'eael_woo_single_product_summary', 'woocommerce_template_single_price', 15 );
+		    add_action( 'eael_woo_single_product_summary', 'woocommerce_template_single_excerpt', 20 );
+		    add_action( 'eael_woo_single_product_summary', 'woocommerce_template_single_add_to_cart', 25 );
+		    add_action( 'eael_woo_single_product_summary', 'woocommerce_template_single_meta', 30 );
+
+		    add_filter( 'eael_product_wrapper_class', [ $this, 'eael_product_wrapper_class' ], 10, 3 );
+
+            add_action('wp_ajax_eael_checkout_cart_qty_update', [$this, 'eael_checkout_cart_qty_update'] );
+    		add_action('wp_ajax_nopriv_eael_checkout_cart_qty_update', [$this, 'eael_checkout_cart_qty_update'] );
+
+		    add_action( 'wp_loaded', [ $this, 'eael_woo_cart_empty_action' ], 20 );
+		    add_filter( 'woocommerce_checkout_fields', [ $this, 'eael_customize_woo_checkout_fields' ] );
+
+		    add_action( 'eael_woo_before_product_loop', function ( $layout ) {
+			    if ( $layout === 'eael-product-default' ) {
+				    return;
+			    }
+
+			    remove_action( 'woocommerce_before_shop_loop_item', 'woocommerce_template_loop_product_link_open' );
+			    remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_product_link_close' );
+			    remove_action( 'woocommerce_after_shop_loop_item', 'astra_woo_woocommerce_shop_product_content' );
+			    remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+		    } );
+
+            add_action( 'eael_woo_after_product_loop', function ( $layout ) {
+			    if ( $layout === 'eael-product-default' ) {
+				    return;
+			    }
+
+			    add_action( 'woocommerce_before_shop_loop_item', 'woocommerce_template_loop_product_link_open' );
+			    add_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_product_link_close' );
+                //Get current active theme
+                $theme = wp_get_theme();
+                $theme = $theme->parent() ? $theme->parent() : $theme;
+                //Astra Theme
+                if( function_exists( 'astra_woo_woocommerce_shop_product_content' ) ){
+                    add_action( 'woocommerce_after_shop_loop_item', 'astra_woo_woocommerce_shop_product_content' );
+                } else {
+                    add_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+                }
+                //Theme Support
+                $theme_to_check = ['OceanWP', 'Blocksy', 'Travel Ocean'];
+                if( in_array( $theme->name, $theme_to_check, true ) ) {
+                    remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
+                }
+		    } );
+
+		    add_filter( 'wcml_multi_currency_ajax_actions', function ( $ajax_actions ) {
+			    $ajax_actions[] = 'load_more';
+
+			    return $ajax_actions;
+		    } );
+	    }
+
+        // Admin
+	    if ( is_admin() ) {
+            // Admin
+            if (!$this->pro_enabled) {
+                add_action( 'admin_init', [ $this, 'admin_notice' ] );
+            } else {
+                new WPDeveloper_Core_Installer( basename( EAEL_PLUGIN_BASENAME, '.php' ) );
+            }
+
+		    add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		    add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		    add_action( 'admin_enqueue_scripts', array( $this, 'admin_dequeue_scripts' ), 100 );
+
+            // Core
+            add_filter('plugin_action_links_' . EAEL_PLUGIN_BASENAME, array($this, 'insert_plugin_links'));
+            add_filter('plugin_row_meta', array($this, 'insert_plugin_row_meta'), 10, 2);
+
+            // removed activation redirection temporarily
+            // add_action('admin_init', array($this, 'redirect_on_activation'));
+
+	        if ( ! did_action( 'elementor/loaded' ) ) {
+		        add_action( 'admin_notices', array( $this, 'elementor_not_loaded' ) );
+		        add_action( 'eael_admin_notices', array( $this, 'elementor_not_loaded' ) );
+	        }
+
+	        add_action( 'in_admin_header', [ $this, 'remove_admin_notice' ], 99 );
+
+	        //handle typeform auth token
+	        add_action('admin_init', [$this, 'typeform_auth_handle']);
+
+
+	        // On Editor - Register WooCommerce frontend hooks before the Editor init.
+	        // Priority = 5, in order to allow plugins remove/add their wc hooks on init.
+	        if ( ! empty( $_REQUEST['action'] ) && 'elementor' === $_REQUEST['action'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		        add_action( 'init', [ $this, 'register_wc_hooks' ], 5 );
+	        }
+
+			// update admin menu notice flag once visit EA settings page
+	        add_action( 'eael_admin_page_setting', [ $this, 'eael_show_admin_menu_notice' ] );
+
+		    if ( ! current_user_can( 'administrator' ) ) {
+			    add_filter( 'elementor/document/save/data', function ( $data ) {
+				    if ( isset( $data['settings']['eael_custom_js'] ) ) {
+					    $data['settings']['eael_custom_js'] = get_post_meta( get_the_ID(), '_eael_custom_js', true );
+				    }
+
+				    if ( empty( $data['elements'] ) ) {
+					    return $data;
+				    }
+
+				    $data['elements'] = Plugin::$instance->db->iterate_data( $data['elements'], function ( $element ) {
+					    if ( isset( $element['widgetType'] ) && $element['widgetType'] === 'eael-login-register' ) {
+						    if ( ! empty( $element['settings']['register_user_role'] ) ) {
+							    $element['settings']['register_user_role'] = '';
+						    }
+					    }
+
+					    if ( isset( $element['widgetType'] ) && $element['widgetType'] === 'eicon-woocommerce' ) {
+						    if ( ! empty( $element['settings']['eael_product_grid_products_status'] ) ) {
+							    $element['settings']['eael_product_grid_products_status'] = [ 'publish' ];
+						    }
+					    }
+
+                        if ( ! current_user_can( 'install_plugins' ) && isset( $element['widgetType'] ) && $element['widgetType'] === 'eael-advanced-data-table' ) {
+						    if ( ! empty( $element['settings']['ea_adv_data_table_source'] ) ) {
+							    $element['settings']['ea_adv_data_table_source'] = 'static';
+						    }
+					    }
+
+					    return $element;
+				    } );
+
+				    return $data;
+			    } );
+		    }
+        } else {
+	        add_action( 'wp', [ $this, 'eael_post_view_count' ] );
+        }
+
+	    // beehive theme compatibility
+	    add_filter( 'beehive_scripts', array( $this, 'beehive_theme_swiper_slider_compatibility' ), 999 );
+
+
+	    // init plugin updater with version check
+	    if ( defined( 'EAEL_PRO_PLUGIN_VERSION' ) && version_compare( EAEL_PRO_PLUGIN_VERSION, '6.2.2', '>=' ) && version_compare( EAEL_PRO_PLUGIN_VERSION, '6.2.3', '<=' ) ) {
+		    add_action( 'init', [ $this, 'eael_init_plugin_updater' ], 99 );
+	    }
+    }
+
+    /**
+     * Initialize plugin updater
+     *
+     * @since 6.1.14
+     */
+	function eael_init_plugin_updater() {
+		if ( is_admin() ) {
+			$license_manager = LicenseManager::get_instance( [] );
+			$license_manager->plugin_updater();
+		}
+	}
+}

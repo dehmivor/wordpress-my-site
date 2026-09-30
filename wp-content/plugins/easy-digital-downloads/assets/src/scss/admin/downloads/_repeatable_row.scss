@@ -1,0 +1,168 @@
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+@use "../../variables/colors" as colors;
+.edd-repeatables-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.edd_repeatable_row {
+	border: 1px solid colors.$wp-border;
+	border-radius: 3px;
+	margin: 0;
+	padding: 20px;
+
+	&.ui-sortable-placeholder {
+		line-height: 0;
+		padding: 0;
+		margin: 0;
+		box-sizing: border-box;
+		border: 1px dashed colors.$wp-border;
+		visibility: visible !important;
+	}
+
+	& input[type="text"].large-text {
+		width: 100%;
+	}
+
+	& .edd_repeatable_row.ui-sortable-helper {
+		& .edd-repeatable-row-actions {
+			& .edd-remove-row {
+				display: none;
+			}
+		}
+	}
+}
+
+.edd-add-repeatable-row {
+	border-top: 1px solid colors.$wp-border;
+	padding: 12px;
+	margin: 15px -12px -12px -12px;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.edd-repeatable-row-actions {
+	color: colors.$wp-gray-40;
+
+	a {
+		text-decoration: none;
+		width: auto;
+		cursor: pointer;
+	}
+}
+
+.edd-repeatable-row-header {
+	clear: both;
+	background: colors.$wp-gray-0;
+	border-bottom: 1px solid colors.$wp-border;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 8px;
+	margin-bottom: 16px;
+}
+
+.edd_repeatable_row:hover .edd-repeatable-row-header,
+.edd_repeatable_row:hover .edd-repeatable-row-standard-fields {
+	border-color: colors.$wp-border;
+}
+
+.edd-repeatable-row-header:before,
+.edd-repeatable-row-header:after,
+.edd-bundled-product-row:before,
+.edd-bundled-product-row:after {
+	content: '';
+	display: table;
+}
+
+.edd-repeatable-row-header:after,
+.edd-bundled-product-row:after {
+	clear: both;
+}
+
+.edd-repeatable-row-title {
+	font-weight: 600;
+	padding: 9px 0;
+	margin-right: auto;
+}
+
+.edd-repeatable-row-actions {
+	display: flex;
+	margin-left: auto;
+	align-items: center;
+	gap: 8px;
+}
+
+.edd-repeatable-row-standard-fields,
+.edd-bundled-product-row {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 16px;
+	flex-grow: 1;
+
+	.edd-form-group {
+		margin-bottom: 0;
+		display: inline-flex;
+		flex-direction: column;
+		flex-grow: 1;
+		justify-content: space-between;
+
+		select {
+			width: 100%;
+			max-width: 300px;
+		}
+
+		&.edd-hidden {
+			display: none;
+		}
+	}
+}
+
+.edd_repeatable_product_wrapper {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	flex-wrap: wrap;
+	gap: 16px;
+
+	td {
+		overflow: visible;
+	}
+}
+
+@media screen and (max-width: wp-breakpoints.$break-mobile) {
+
+	.edd-repeatable-row-header,
+	.edd-repeatable-row-standard-fields,
+	.edd-bundled-product-row {
+		flex-wrap: wrap;
+	}
+
+	.edd-repeatable-row-standard-fields .edd-form-group,
+	.edd-bundled-product-row .edd-form-group {
+		margin-left: 0 !important;
+		margin-bottom: 24px;
+	}
+}
+
+/* still used by extensions - Software Licensing upgrade paths, Custom Prices */
+.edd_remove_repeatable {
+	border: none;
+	cursor: pointer;
+	display: inline-block;
+	padding: 0;
+	overflow: hidden;
+	margin: 8px 0 0 0;
+	text-indent: -9999px;
+	width: 10px;
+	height: 10px;
+}
+
+.edd_remove_repeatable:active,
+.edd_remove_repeatable:hover,
+.edd_remove_repeatable:focus {
+	background-position: -10px 0 !important;
+}

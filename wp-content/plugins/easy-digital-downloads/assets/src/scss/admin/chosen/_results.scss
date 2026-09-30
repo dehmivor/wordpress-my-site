@@ -1,0 +1,44 @@
+@use '../../variables/colors';
+
+// Dropdown options.
+.ts-wrapper .ts-dropdown .ts-dropdown-content .option,
+.ts-wrapper .ts-dropdown .ts-dropdown-content .optgroup-header {
+	padding: 8px 12px;
+	cursor: pointer;
+	color: colors.$wp-input-text;
+	min-height: 34px;
+}
+
+// Highlighted option.
+.ts-wrapper .ts-dropdown .ts-dropdown-content .option.active {
+	background-color: colors.$wp-alternate;
+}
+
+// No results message.
+.ts-wrapper .ts-dropdown .no-results {
+	padding: 8px 12px;
+	color: colors.$wp-inactive;
+}
+
+// Optgroup headers.
+.ts-wrapper .ts-dropdown .ts-dropdown-content .optgroup-header {
+	font-weight: 600;
+	cursor: default;
+}
+
+// WordPress 7.0+ color overrides.
+body[class*="branch-7"] {
+
+	.ts-wrapper .ts-dropdown .ts-dropdown-content .option,
+	.ts-wrapper .ts-dropdown .ts-dropdown-content .optgroup-header {
+		color: colors.$wp-input-text;
+	}
+
+	.ts-wrapper .ts-dropdown .ts-dropdown-content .option.active {
+		background-color: colors.$wp-alternate;
+	}
+
+	.ts-wrapper .ts-dropdown .no-results {
+		color: colors.$wp-inactive;
+	}
+}

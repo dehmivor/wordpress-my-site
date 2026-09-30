@@ -1,0 +1,134 @@
+@use "../../variables/animations";
+@use "../../variables/colors" as colors;
+
+/* PayPal Connect
+-------------------------------------------------------------- */
+$paypal-blue: #0070ba;
+$paypal-blue-hover: #005ea6;
+$paypal-blue-active: #003087;
+
+// Branded connect button/link. Tag-agnostic: styles the v3 <button>, the
+// onboarding <a> clone the connect JS swaps in, and the legacy v2 <a>.
+// Mirrors the footprint of .edd-stripe-connect so the two buttons match
+// when rendered side by side.
+.edd-paypal-connect {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 38px;
+	padding: 0 16px;
+	border: 0;
+	border-radius: 4px;
+	background: $paypal-blue;
+	color: #fff;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1;
+	text-decoration: none;
+	cursor: pointer;
+	user-select: none;
+	-webkit-font-smoothing: antialiased;
+	transition: background-color 0.15s ease;
+
+	img {
+		display: block;
+		width: 16px;
+		height: 16px;
+	}
+
+	span {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+
+		// Translucent divider between the PayPal mark and the label.
+		&::before {
+			content: "";
+			width: 1px;
+			height: 16px;
+			background: rgba(255, 255, 255, 0.4);
+		}
+	}
+
+	&:hover,
+	&:focus {
+		background: $paypal-blue-hover;
+		color: #fff;
+	}
+
+	&:focus {
+		outline: none;
+		box-shadow: 0 0 0 1px #fff, 0 0 0 3px $paypal-blue;
+	}
+
+	&:active {
+		background: $paypal-blue-active;
+		color: #fff;
+	}
+
+	// State styles the connect JS toggles; previously provided by WP core's
+	// `.button` class, which this branded button no longer uses.
+	&:disabled,
+	&.disabled {
+		opacity: 0.7;
+		cursor: default;
+		pointer-events: none;
+	}
+
+	&.updating-message::before {
+		content: "\f463";
+		display: inline-block;
+		font: normal 16px/1 dashicons;
+		animation: edd-paypal-connect-spin 1s linear infinite;
+	}
+}
+
+@keyframes edd-paypal-connect-spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+#edd-paypal-commerce-connect-wrap.loading {
+	& ul.edd-paypal-account-status, ul.edd-paypal-webhook-events {
+		& li {
+			& span {
+				animation: skeleton-loading 1s infinite alternate;
+				width: 250px;
+				height: 18px;
+				display: inline-block;
+			}
+		}
+	}
+
+	& .edd-paypal-connect-actions {
+		& span {
+			animation: skeleton-loading 1s infinite alternate;
+			width: 150px;
+			height: 32px;
+			display: inline-block;
+		}
+	}
+}
+
+.edd-paypal-account-status ul {
+	margin-left: 25px;
+	list-style-type: none;
+}
+.edd-paypal-account-status > li {
+	margin-bottom: 1em;
+}
+.edd-paypal-account-status ul:not(.edd-paypal-webhook-events) li {
+	margin: .25em 0;
+}
+.edd-paypal-account-status .dashicons-yes {
+	color: colors.$wp-green-50;
+}
+.edd-paypal-account-status .dashicons-no {
+	color: colors.$wp-red-50;
+}

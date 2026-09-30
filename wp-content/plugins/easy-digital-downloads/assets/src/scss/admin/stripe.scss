@@ -1,0 +1,237 @@
+@use "../variables/colors" as colors;
+@use "../variables/animations";
+
+.edds-stripe-connect-account-info {
+	& .display-name,
+	.info {
+		display: block;
+	}
+
+	& .display-name {
+		font-weight: 700;
+	}
+
+	&.loading {
+		& span {
+			display: block;
+		}
+
+		& .account-name,
+		.info {
+			animation: skeleton-loading 1s linear infinite alternate;
+			width: 200px;
+			height: 14px;
+			margin: 0.25rem 0;
+		}
+	}
+}
+
+#edds-stripe-disconnect-reconnect {
+	&.loading {
+		animation: skeleton-loading 1s linear infinite alternate;
+		width: 350px;
+		height: 1rem;
+		margin: 0.5rem 0;
+	}
+}
+
+// Payment Gateways setting.
+#edds-payment-gateways-stripe-unmet-requirements {
+	margin: -10px 0 0 -16px;
+	padding-top: 10px;
+
+	input[type="checkbox"] {
+		margin: 0 6px 0 0;
+	}
+}
+
+// Settings subtab.
+.edds-requirements-not-met {
+	th {
+		display: none;
+	}
+
+	td {
+		padding: 0;
+	}
+}
+
+/*
+ * Stripe Connect
+ */
+$stripe-blurple: #635bff;
+$stripe-blurple-hover: #5851df;
+$stripe-blurple-active: #4b45c6;
+
+.edd-stripe-connect {
+	display: inline-flex;
+	align-items: center;
+	height: 38px;
+	padding: 0 16px;
+	border: 0;
+	border-radius: 4px;
+	background: $stripe-blurple;
+	color: #fff;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1;
+	text-decoration: none;
+	cursor: pointer;
+	user-select: none;
+	-webkit-font-smoothing: antialiased;
+	transition: background-color 0.15s ease;
+
+	&:hover,
+	&:focus {
+		background: $stripe-blurple-hover;
+		color: #fff;
+	}
+
+	&:focus {
+		outline: none;
+		box-shadow: 0 0 0 1px #fff, 0 0 0 3px $stripe-blurple;
+	}
+
+	&:active {
+		background: $stripe-blurple-active;
+		color: #fff;
+	}
+
+	span {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+
+		// The current Stripe "S" mark as an inline SVG so it scales on any screen density.
+		&::before {
+			content: "";
+			order: -2;
+			width: 16px;
+			height: 16px;
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z'/%3E%3C/svg%3E");
+			background-repeat: no-repeat;
+			background-size: 16px 16px;
+		}
+
+		&::after {
+			content: "";
+			order: -1;
+			width: 1px;
+			height: 16px;
+			background: rgba(255, 255, 255, 0.4);
+		}
+	}
+}
+
+.edds-stripe-connect-account-info span.edd-pro-upgrade a {
+	color: var(--edd-notice-green);
+	font-weight: 600;
+	text-decoration: none;
+}
+/* End of Stripe Connect */
+
+.edd-text-loading {
+	animation: skeleton-loading 1s infinite alternate;
+}
+
+.edd-button__toggle {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	width: 36px;
+	height: 20px;
+	min-height: unset;
+	transition: background 0.2s ease;
+	border-radius: 30px;
+	box-shadow: none;
+	border: none;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: colors.$wp-gray-10;
+	margin-right: 12px;
+
+	&--enabled {
+		background: var(--edd-wp-admin-theme-color);
+
+		&::after {
+			transform: translateX(16px);
+		}
+	}
+}
+
+.edd-button__toggle:after {
+	position: absolute;
+	content: "";
+	height: 14px;
+	width: 14px;
+	left: 3px;
+	bottom: 3px;
+	background-color: #fff;
+	transition: 0.1s transform ease;
+	border-radius: 50%;
+}
+
+.edd-stripe-payment-methods__description {
+	.button-group {
+		display: block !important;
+		margin: 20px auto;
+		text-align: center;
+	}
+}
+
+.edd_settingsstripe_payment_methods {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 1em;
+
+	.edd-form-group__control--wrap {
+		background-color: #fff;
+		border: 1px solid colors.$wp-gray-10;
+		border-radius: 4px;
+		padding: 20px;
+		margin: 0;
+		justify-content: space-between;
+
+		.edd-toggle {
+			gap: 8px;
+			margin-bottom: 0;
+		}
+
+		.edd-form-group__control__label {
+			flex-grow: 1;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			justify-content: space-between;
+
+			label {
+				flex-grow: 1;
+			}
+		}
+
+		.description {
+			flex-basis: 100%;
+		}
+
+		.edd-icon__placeholder,
+		> svg {
+			width: 32px;
+			height: 32px;
+		}
+
+		input[type="checkbox"] {
+			order: 100;
+		}
+
+		input[type="checkbox"]:disabled:not(:checked) {
+			background-color: rgba(colors.$wp-red-50, 0.5);
+		}
+	}
+}
+
+p.edd-stripe-payment-methods__reset {
+	margin-top: 20px !important;
+	text-align: right;
+}

@@ -1,0 +1,344 @@
+<?php
+/**
+ * Handle available payment methods for the Stripe Payment Element.
+ *
+ * @package EDD\Gateways\Stripe
+ * @since 3.3.5
+ */
+
+namespace EDD\Gateways\Stripe;
+
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit; // @codeCoverageIgnore
+
+/**
+ * Payment methods for Stripe.
+ *
+ * @since 3.3.5
+ */
+class PaymentMethods {
+
+	/**
+	 * Retrieves the payment method label for the specified type.
+	 *
+	 * @since 3.3.5
+	 * @param string $type The type of payment method to retrieve.
+	 * @return string The payment method label.
+	 */
+	public static function get_label( $type ) {
+		$payment_method = self::get_payment_method( $type );
+
+		if ( $payment_method ) {
+			return $payment_method::get_label();
+		}
+
+		// Check for legacy/deprecated payment methods that may exist in historical order data.
+		$legacy_label = self::get_legacy_label( $type );
+		if ( $legacy_label ) {
+			return $legacy_label;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Retrieves the list of legacy/deprecated payment methods.
+	 *
+	 * These payment methods have been deprecated by Stripe but may still
+	 * exist in historical order data. This method is public to allow
+	 * reports to include historical transactions made with these methods.
+	 *
+	 * @since 3.6.5
+	 * @return array Array of legacy payment method types and their labels.
+	 */
+	public static function get_legacy_methods() {
+		return array(
+			// Sofort was deprecated by Stripe and replaced with Klarna.
+			// @see https://docs.stripe.com/payments/sofort/replace.
+			'sofort' => __( 'Sofort (Legacy)', 'easy-digital-downloads' ),
+		);
+	}
+
+	/**
+	 * Retrieves a list of Stripe payment methods.
+	 *
+	 * @since 3.3.5
+	 * @return array The list of Stripe payment methods.
+	 */
+	public static function list() {
+		$methods = array();
+		foreach ( self::get_registered_methods() as $method ) {
+			$payment_method = self::get_payment_method( $method );
+			if ( $payment_method ) {
+				$methods[ $method ] = $payment_method::get_label();
+			}
+		}
+
+		return $methods;
+	}
+
+	/**
+	 * Retrieves the payment methods that are available for this store.
+	 *
+	 * @since 3.3.5
+	 * @return array The payment methods that are enabled in Stripe.
+	 */
+	public static function get_configurations() {
+		$mode           = edd_is_test_mode() ? 'test' : 'live';
+		$configurations = new \EDD\Utils\Transient( "edd_stripe_pmc_{$mode}" );
+		$value          = $configurations->get();
+		if ( $value ) {
+			return $value;
+		}
+
+		$pmc = self::get_pmc();
+		if ( ! $pmc ) {
+			return false;
+		}
+
+		$configurations->set( $pmc );
+
+		return $pmc;
+	}
+
+	/**
+	 * Retrieves a specific payment method configuration ID.
+	 *
+	 * @since 3.3.5
+	 * @param string $type The type of payment method configuration to retrieve.
+	 * @return string The configuration ID.
+	 */
+	public static function get_configuration_id( $type = '' ) {
+		$base           = 'edd20241002';
+		$configurations = self::get_configurations();
+		if ( empty( $configurations ) || ! is_array( $configurations ) || ! array_key_exists( $base, $configurations ) ) {
+			return false;
+		}
+		$configuration = $base;
+		if ( $type ) {
+			$configuration = "{$base}-{$type}";
+		}
+
+		return array_key_exists( $configuration, $configurations ) ? $configurations[ $configuration ] : false;
+	}
+
+	/**
+	 * Retrieves the base configuration for the payment methods.
+	 *
+	 * @since 3.3.5
+	 * @return array The array of payment methods in the base configuration.
+	 */
+	public static function get_base_configuration() {
+		$configuration_id = self::get_configuration_id();
+		if ( ! $configuration_id ) {
+			return false;
+		}
+		if ( ! edd_stripe()->connect->is_connected ) {
+			return false;
+		}
+
+		$configuration = new \EDD\Utils\Transient( $configuration_id );
+		$value         = $configuration->get();
+		if ( $value ) {
+			return $value;
+		}
+
+		try {
+			$value = edds_api_request(
+				'PaymentMethodConfiguration',
+				'retrieve',
+				$configuration_id
+			);
+		} catch ( \Exception $e ) {
+			return false;
+		}
+
+		$methods = array();
+		foreach ( self::list() as $method => $label ) {
+			if ( ! isset( $value->$method ) ) {
+				continue;
+			}
+			$methods[ $method ] = $value->$method;
+		}
+
+		$configuration->set( $methods );
+
+		return $methods;
+	}
+
+	/**
+	 * Checks whether any available payment method requires a billing address.
+	 *
+	 * Any payment method that declares $requires_billing_address forces the billing
+	 * address fields on checkout when it reports itself as available for the current
+	 * checkout (see Method::is_available()).
+	 *
+	 * @since 3.7.0
+	 * @return bool True if an available, eligible payment method requires a billing address.
+	 */
+	public static function requires_billing_address() {
+		if ( 'payment-elements' !== edds_get_elements_mode() ) {
+			return false;
+		}
+
+		foreach ( self::get_registered_methods() as $method ) {
+			$payment_method = self::get_payment_method( $method );
+			if ( ! $payment_method || ! $payment_method::$requires_billing_address ) {
+				continue;
+			}
+
+			if ( $payment_method::is_available() ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Retrieves the class name for the specified payment method.
+	 *
+	 * @since 3.3.5
+	 * @param string $method The payment method.
+	 * @return string|false The class name for the specified payment method, or false if not found.
+	 */
+	public static function get_payment_method( $method ) {
+		// Only process registered payment methods to prevent autoloader errors
+		// for removed payment methods like Sofort.
+		if ( ! in_array( $method, self::get_registered_methods(), true ) ) {
+			return false;
+		}
+
+		$method    = str_replace( '_', ' ', $method );
+		$method    = ucwords( $method );
+		$method    = str_replace( ' ', '', $method );
+		$classname = __NAMESPACE__ . '\\PaymentMethods\\' . $method;
+
+		return class_exists( $classname ) ? $classname : false;
+	}
+
+	/**
+	 * Resets the payment method configuration options.
+	 *
+	 * @since 3.3.5
+	 */
+	public static function reset() {
+		delete_option( 'edd_stripe_account_capabilities' );
+		foreach ( array( 'test', 'live' ) as $mode ) {
+			$option = get_option( "edd_stripe_pmc_{$mode}" );
+			if ( $option ) {
+				$configurations = json_decode( $option, true );
+				if ( ! empty( $configurations['value']['edd20241002'] ) ) {
+					delete_option( $configurations['value']['edd20241002'] );
+				}
+				delete_option( "edd_stripe_pmc_{$mode}" );
+			}
+		}
+	}
+
+	/**
+	 * Retrieves the label for legacy/deprecated payment methods.
+	 *
+	 * These payment methods have been deprecated by Stripe but may still
+	 * exist in historical order data.
+	 *
+	 * @since 3.6.5
+	 * @param string $type The type of payment method.
+	 * @return string|false The legacy label if found, false otherwise.
+	 */
+	private static function get_legacy_label( $type ) {
+		$legacy_methods = self::get_legacy_methods();
+
+		return isset( $legacy_methods[ $type ] ) ? $legacy_methods[ $type ] : false;
+	}
+
+	/**
+	 * Retrieves the supported payment methods.
+	 *
+	 * @since 3.3.5
+	 * @return array The supported payment methods.
+	 */
+	private static function get_registered_methods() {
+		return array(
+			'acss_debit',
+			'ach_debit',
+			'affirm',
+			'alipay',
+			'amazon_pay',
+			'apple_pay',
+			'bacs_debit',
+			'bancontact',
+			'blik',
+			'card',
+			'cartes_bancaires',
+			'cashapp',
+			'eps',
+			'fpx',
+			'giropay',
+			'google_pay',
+			'grabpay',
+			'ideal',
+			'klarna',
+			'link',
+			'p24',
+			'revolut_pay',
+			'sepa_debit',
+			'twint',
+			'us_bank_account',
+			'wechat_pay',
+			'upi',
+		);
+	}
+
+	/**
+	 * Retrieves the payment method configuration for EDD.
+	 *
+	 * @since 3.3.5
+	 * @return object The configuration for the specified payment method.
+	 */
+	private static function get_pmc() {
+		if ( ! edd_stripe()->connect() || ! edd_stripe()->connect->is_connected ) {
+			return false;
+		}
+
+		try {
+			$pmc = edds_api_request(
+				'PaymentMethodConfiguration',
+				'all',
+				array(
+					'application' => 'ca_CCnYEUzwAy5xzFgSVNc8C5jw7Zagm5cH',
+				)
+			);
+		} catch ( \Exception $e ) {
+			edd_record_gateway_error( 'stripe', 'edds_api_error', $e->getMessage() );
+
+			return false;
+		}
+
+		$configurations = array();
+		foreach ( $pmc->data as $configuration ) {
+			$configurations[ strtolower( $configuration->name ) ] = $configuration->id;
+		}
+
+		return $configurations;
+	}
+
+	/**
+	 * Checks if the Affirm payment method is supported.
+	 *
+	 * @since 3.3.5
+	 * @deprecated 3.7.0 Use PaymentMethods::requires_billing_address() instead.
+	 * @return bool True if the Affirm payment method is supported, false otherwise.
+	 */
+	public static function affirm_requires_support() {
+		_edd_deprecated_function( __METHOD__, '3.7.0', __CLASS__ . '::requires_billing_address' );
+
+		if ( 'payment-elements' !== edds_get_elements_mode() ) {
+			return false;
+		}
+
+		$affirm = self::get_payment_method( 'affirm' );
+
+		return $affirm && $affirm::is_available();
+	}
+}

@@ -1,0 +1,129 @@
+@import "~@wordpress/base-styles/breakpoints";
+
+// Empty-cart state: center the lone message and give it room, rather than a bare line of text in the
+// top-left. Kept light on purpose: a [downloads]/[purchase_link] message renders a product grid in
+// place of the message, so this only centers and pads it, never mutes or resizes the grid's content.
+.edd_empty_cart {
+	display: block;
+	// Fill the line so the centering reads: the message is a flex child inside the Elementor checkout
+	// container, where it would otherwise shrink-wrap and sit hard left.
+	width: 100%;
+	padding: 3rem 1rem;
+	text-align: center;
+}
+
+.edd-blocks-form__cart {
+	.edd_cart_remove_item_btn {
+		border: none;
+		text-decoration: none;
+		padding: 0;
+		margin-left: .5rem;
+
+		svg {
+			opacity: .6;
+
+			&:hover {
+				opacity: .9;
+			}
+		}
+	}
+
+	#edd_checkout_cart {
+		border: 1px solid var(--edd-blocks-light-grey);
+		display: grid;
+	}
+
+	.edd_cart_item_name {
+		display: grid;
+		gap: 1rem;
+
+		.edd_cart_actions {
+			flex-basis: 100%;
+			display: inline-flex;
+			gap: .5rem;
+			align-items: center;
+
+			label {
+				margin: 0 !important;
+			}
+
+			input.edd-item-quantity {
+				width: 3rem !important;
+			}
+		}
+	}
+
+	.edd_checkout_cart_item_title {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.edd_cart_item_price,
+	.edd_cart_fee_amount {
+		display: flex;
+		align-items: center;
+		gap: .5rem;
+
+		@media (min-width: $break-mobile) {
+			justify-content: flex-end;
+		}
+	}
+
+	.edd-blocks-cart__row,
+	.edd_cart_footer_row {
+		display: flex;
+		align-items: center;
+		padding: 1.5rem;
+		gap: 1rem;
+		flex-wrap: wrap;
+
+		> div:last-of-type:not(:first-of-type) {
+			flex: 1 1 110px;
+
+			@media (min-width: $break-mobile) {
+				text-align: right;
+			}
+		}
+	}
+
+	.edd-blocks-cart__row-header,
+	.edd-blocks-cart__items {
+		border-bottom: 1px solid var(--edd-blocks-light-grey);
+	}
+
+	.edd-blocks-cart__row-header,
+	.edd_cart_total {
+		font-weight: bold;
+	}
+
+	.edd-blocks-cart__row-footer {
+		text-align: right;
+
+		> div:only-child {
+			flex-grow: 1;
+		}
+	}
+
+	.edd-blocks-cart__action-remove,
+	.edd_discount_remove {
+		height: 1em;
+		width: 1em;
+		background: url('/assets/images/remove.svg') center no-repeat;
+		background-size: 1em;
+		opacity: .6;
+		top: 0;
+		display: block;
+		box-shadow: none !important;
+
+		&:hover {
+			opacity: 1;
+			background-position: center;
+		}
+	}
+
+	.edd_cart_item_image img {
+		display: block;
+		height: auto;
+	}
+}

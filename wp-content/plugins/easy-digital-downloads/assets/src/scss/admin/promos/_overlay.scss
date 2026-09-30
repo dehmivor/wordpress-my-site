@@ -1,0 +1,124 @@
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+@use "../../variables/colors" as colors;
+
+/* Overlay Notice
+-------------------------------------------------- */
+
+.edd-promo-notice__overlay {
+	display: none;
+	position: fixed;
+	background: rgba( colors.$wp-gray-2, .75 );
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 160px;
+	z-index: 9999;
+	justify-content: center;
+	align-items: center;
+
+	.folded & {
+		left: 36px;
+	}
+
+	@media screen and (max-width: wp-breakpoints.$break-medium) {
+		left: 0;
+	}
+}
+
+.edd-admin-notice-overlay {
+	display: none;
+	background-color: #fff;
+	padding: 2.5em;
+	text-align: center;
+	max-width: 650px;
+	position: relative;
+	flex-direction: column;
+	border-top: 5px solid var(--edd-light-blue);
+	border-radius: 12px;
+
+	.edd-promo-notice__overlay & {
+		display: flex;
+	}
+
+	h2 {
+		line-height: 1.6em;
+		margin: 0 auto;
+		max-width: 540px;
+	}
+
+	.edd-promo-notice__features {
+		text-align: left;
+		display: grid;
+		grid-template-columns: repeat( 3, auto );
+		margin: 2em auto;
+		gap: 0 1.5em;
+
+		&--2-col {
+			grid-template-columns: repeat( 2, auto );
+		}
+
+		li {
+			display: flex;
+			gap: .5em;
+			align-items: center;
+		}
+
+		@media screen and (max-width: wp-breakpoints.$break-small) {
+			grid-template-columns: unset;
+		}
+	}
+
+	.button {
+		padding: 4px 36px;
+		margin: 0 auto .5em;
+		max-width: 360px;
+	}
+
+	&__link {
+		color: colors.$wp-gray-2;
+	}
+
+	.edd-promo-notice-dismiss.button-link {
+		position: absolute;
+		color: colors.$gray-text-min;
+		text-decoration: none;
+		font-size: 2em;
+		top: 0;
+		right: .5em;
+
+		&:active,
+		&:hover {
+			color: colors.$wp-gray-2;
+		}
+	}
+
+	@media screen and (max-width: wp-breakpoints.$break-medium) {
+		margin: 1em;
+	}
+
+	& .edd-promo-notice__info {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+
+		& p {
+			display: flex;
+			justify-content: center;
+			margin: 0;
+
+			&.info {
+				color: colors.$wp-blue-500;
+				background-color: rgba( colors.$wp-blue-500, 0.1 );
+				padding: 1em;
+				border-radius: 4px;
+				margin-top: 1em;
+				font-weight: 500;
+			}
+
+			&.edd-hidden {
+				display: none;
+			}
+		}
+	}
+}

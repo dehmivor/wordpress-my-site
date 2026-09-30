@@ -1,0 +1,16 @@
+@import 'header';
+@import 'pagination';
+
+.edd-notes .edd-note p:last-child {
+	margin-bottom: 0;
+}
+
+.edd-notes .edd-no-notes {
+	margin: 4px 0 10px 0;
+}
+
+textarea[name="edd-note"] {
+	width: 100%;
+	min-height: 70px;
+	margin-top: 0;
+}

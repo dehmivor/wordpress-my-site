@@ -1,0 +1,17 @@
+@import "../scss/forms";
+
+.wp-block-edd-profile-editor {
+	@import "../scss/password";
+
+	.edd-blocks-form {
+		border: none;
+		padding: 0;
+
+		fieldset {
+			border: 1px solid var(--edd-blocks-light-grey);
+			display: grid;
+			gap: 1.25rem;
+			padding: 2rem;
+		}
+	}
+}

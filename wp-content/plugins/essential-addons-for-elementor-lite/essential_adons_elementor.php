@@ -1,0 +1,188 @@
+<?php
+/**
+ * Plugin Name: Essential Addons for Elementor
+ * Description: The Essential plugin you install after Elementor! Packed with 100+ stunning elements like Data Table, Event Calendar, Filterable Gallery, WooCommerce.
+ * Plugin URI: https://essential-addons.com/
+ * Author: WPDeveloper
+ * Version: 6.8.4
+ * Author URI: https://wpdeveloper.com/
+ * Text Domain: essential-addons-for-elementor-lite
+ * Domain Path: /languages
+ *
+ * WC tested up to: 10.8
+ * Elementor tested up to: 4.1
+ * Elementor Pro tested up to: 4.1
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+} // Exit if accessed directly
+
+/**
+ * Defining plugin constants.
+ *
+ * @since 3.0.0
+ */
+define( 'EAEL_PLUGIN_FILE', __FILE__ );
+define( 'EAEL_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+define( 'EAEL_PLUGIN_PATH', trailingslashit( plugin_dir_path( __FILE__ ) ) );
+define( 'EAEL_PLUGIN_URL', trailingslashit( plugins_url( '/', __FILE__ ) ) );
+define( 'EAEL_PLUGIN_VERSION', '6.8.4' );
+define( 'EAEL_ASSET_PATH', wp_upload_dir()['basedir'] . '/essential-addons-elementor' );
+define( 'EAEL_ASSET_URL', wp_upload_dir()['baseurl'] . '/essential-addons-elementor' );
+/**
+ * Including composer autoloader globally.
+ *
+ * @since 3.0.0
+ */
+require_once EAEL_PLUGIN_PATH . 'autoload.php';
+
+/**
+ * Neutralize WordPress shortcode syntax in untrusted external / reflected data.
+ *
+ * Elementor injects widget HTML into `the_content` at priority 9, while core
+ * `do_shortcode` runs at priority 11 — so any `[shortcode]` token present in a
+ * widget's rendered output (including inside attribute values) is executed during
+ * page generation. None of esc_html/esc_attr/esc_url/wp_kses* encode `[` or `]`,
+ * so escaping alone does NOT stop shortcode injection.
+ *
+ * Apply this to every untrusted external (Google/social/remote API) or reflected
+ * request field, OUTERMOST — i.e. after any esc_*() call — so the escaped output
+ * is not double-encoded. Brackets become HTML entities that render as literal
+ * `[` `]` text and are ignored by `do_shortcode`.
+ *
+ * Array-aware: recurses into arrays (e.g. data destined for json_encode()).
+ *
+ * @since 6.6.11
+ *
+ * @param mixed $value String or array of untrusted data.
+ * @return mixed Value with `[`/`]` bracket-encoded.
+ */
+if ( ! function_exists( 'eael_neutralize_shortcodes' ) ) {
+	function eael_neutralize_shortcodes( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'eael_neutralize_shortcodes', $value );
+		}
+
+		if ( is_string( $value ) ) {
+			return str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $value );
+		}
+
+		return $value;
+	}
+}
+
+/**
+ * Including plugin config.
+ *
+ * @since 3.0.0
+ */
+$GLOBALS['eael_config'] = require_once EAEL_PLUGIN_PATH . 'config.php';
+
+/**
+ * Run plugin after all others plugins
+ *
+ * @since 3.0.0
+ */
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( class_exists( '\Essential_Addons_Elementor\Classes\Bootstrap' ) ) {
+			\Essential_Addons_Elementor\Classes\Bootstrap::instance();
+		}
+	}
+);
+
+/**
+ * Plugin migrator
+ *
+ * @since v3.0.0
+ */
+add_action(
+	'wp_loaded',
+	function () {
+		if ( class_exists( '\Essential_Addons_Elementor\Classes\Migration' ) ) {
+			$migration = new \Essential_Addons_Elementor\Classes\Migration();
+			$migration->migrator();
+		}
+	}
+);
+
+/**
+ * Activation hook
+ *
+ * @since v3.0.0
+ */
+register_activation_hook(
+	__FILE__,
+	function () {
+		if ( class_exists( '\Essential_Addons_Elementor\Classes\Migration' ) ) {
+			$migration = new \Essential_Addons_Elementor\Classes\Migration();
+			$migration->plugin_activation_hook();
+		}
+	}
+);
+
+/**
+ * Deactivation hook
+ *
+ * @since v3.0.0
+ */
+register_deactivation_hook(
+	__FILE__,
+	function () {
+		if ( class_exists( '\Essential_Addons_Elementor\Classes\Migration' ) ) {
+			$migration = new \Essential_Addons_Elementor\Classes\Migration();
+			$migration->plugin_deactivation_hook();
+		}
+	}
+);
+
+/**
+ * Upgrade hook
+ *
+ * @since v3.0.0
+ */
+add_action(
+	'upgrader_process_complete',
+	function ( $upgrader_object, $options ) {
+		if ( class_exists( '\Essential_Addons_Elementor\Classes\Migration' ) ) {
+			$migration = new \Essential_Addons_Elementor\Classes\Migration();
+			$migration->plugin_upgrade_hook( $upgrader_object, $options );
+		}
+	},
+	10,
+	2
+);
+
+add_action(
+	'wp_loaded',
+	function () {
+		if ( ! class_exists( '\Essential_Addons_Elementor\Classes\WPDeveloper_Setup_Wizard' ) ) {
+			return;
+		}
+
+		$setup_wizard = get_option( 'eael_setup_wizard' );
+		if ( $setup_wizard === 'redirect' ) {
+			\Essential_Addons_Elementor\Classes\WPDeveloper_Setup_Wizard::redirect();
+		}
+
+		if ( $setup_wizard === 'init' ) {
+			new \Essential_Addons_Elementor\Classes\WPDeveloper_Setup_Wizard();
+		}
+	}
+);
+
+/**
+ * WooCommerce HPOS Support
+ *
+ * @since v5.8.2
+ */
+add_action(
+	'before_woocommerce_init',
+	function () {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		}
+	}
+);

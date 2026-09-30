@@ -1,0 +1,716 @@
+=== Essential Addons for Elementor - Popular Elementor Templates & Widgets ===
+Contributors: wpdevteam, Codetic, re_enter_rupok, Asif2BD, priyomukul, rudlinkon, jakariaistauk, himadree
+Tags: elementor, elementor addons, elementor widgets, elementor templates, elementor woocommerce
+Requires at least: 5.0
+Tested up to: 7.1
+Requires PHP: 7.0
+Stable tag: 6.8.4
+License: GPLv3
+License URI: https://opensource.org/licenses/GPL-3.0
+
+Elementor addon: 120+ widgets & templates — Elementor Gallery, Mega Menu, Slider, Form, Post Grid, Accordion, Header Footer Builder & WooCommerce.
+
+== Description ==
+
+Enhance **[Elementor](https://wordpress.org/plugins/elementor/)** page building experience with 120+ creative elements and extensions. Add powers to your website builder using our easy-to-use Elementor widgets and ready Elementor templates, which were designed to make your next WordPress website design easier and prettier than ever before.
+
+= Essential Addons for Elementor offers 120+ advanced Elementor widgets with kits, 6,500+ ready templates & WooCommerce builder, serving 2 million+ active users. =
+
+[Check the Demos](https://essential-addons.com/demos)
+
+### Completely Customizable
+Each widget and extension comes with a bunch of options to customize your website in every possible way. You can achieve nearly any design of your imagination.
+
+### Light Weight & Instant Loading
+No extra resources or messy code to slow down your website. Optimized for super fast loading and instant Live editing.
+
+### Elements Control option
+Enable and disable individual elements adding to make your page load faster and smoother. You can deactivate unnecessary widgets to keep the site light.
+
+### Angie AI Integration
+Build faster with Elementor's agentic AI — prompt Angie to create, customize, and fine-tune your Essential Addons widgets right inside the editor.
+
+
+### 6,500+ Ready WordPress Templates & Blocks through **Templately**
+Grab access to 3,000+ pre-made Elementor templates from Templately (a large templates cloud for WordPress), that come with Essential Addons.Unlock stunning Elementor templates, blocks & sections;and design your website to stand out from the crowd.
+
+https://youtu.be/Z73muoczARc
+
+Each of these Elementor templates is completely customizable and responsive, and also seamlessly compatible with Essential Addons. You can personalize them effortlessly by changing font, color, etc.
+
+Templately also offers advanced features and facilities to save your templates to the cloud. Store all your ready and customized designs with Templately & deploy on hundreds of websites with 1-click. Increase productivity and power up your whole team to build websites faster than ever before.
+
+Ready Elementor Templates From Templately:
+
+- [Textivy AI - AI SaaS Template](https://templately.com/pack/textivy-ai-elementor-ai-sass)
+- [KetoFlow - Keto Diet Website Template](https://templately.com/pack/ketoflow-elementor-keto-diet-template)
+- [IllustrateAI - AI Photo Creation Website Template](https://templately.com/pack/illustrateai-elementor-ai-photo-creation)
+
+
+### Expert Support
+We have an extraordinary support team ready to help you. Ask your questions in the support forum, or contact us directly through live chat and contact form.
+
+### [Elementor](https://wordpress.org/plugins/elementor/) Website Builder is required for this plugin.
+
+
+### 60+ FREE ELEMENTOR ADDONS AND COUNTING
+
+We have designed more than 65+ useful widgets to enhance your Elementor Page Building experience and allow you to climb the peak of your design capabilities.
+
+1. [Post Grid](https://essential-addons.com/post-grid/) - Showcase your blog posts in 3 unique styles
+2. [Post Timeline](https://essential-addons.com/post-timeline/) - Create stunning timeline for your posts & pages
+3. [Fancy Text](https://essential-addons.com/fancy-text/ ) - Design pages using animated texts in 8 different styles
+4. [Creative Buttons](https://essential-addons.com/creative-buttons/) - Quickly add modern buttons with hover effects
+5. [Countdown](https://essential-addons.com/countdown/ ) - Include a countdown timer to boost click-through rates
+6. [Team Members](https://essential-addons.com/team-members/) - Feature your team members with a few clicks
+7. [Testimonials](https://essential-addons.com/testimonials/) - Showcase customer reviews & increase credibility
+8. [WooCommerce Product Grid](https://essential-addons.com/woo-product-grid/) - Display WooCommerce products in grid layout
+9. [Contact Form 7](https://essential-addons.com/contact-form-7/) - Customize beautiful forms without any coding
+10. [Gravity Forms](https://essential-addons.com/gravity-forms/) - Design forms with Elementor & Gravity Forms
+11. [Ninja Forms](https://essential-addons.com/ninja-forms/) - Easily create your form style just the way you want
+12. [Caldera Forms](https://essential-addons.com/caldera-forms/) - Design effective mobile-friendly forms
+13. [WPForms](https://essential-addons.com/wpforms/) - Create powerful WordPress forms in minutes
+14. [weForms](https://essential-addons.com/weforms/) - Get an incredibly fast form building experience
+15. [Info Box](https://essential-addons.com/info-box/) - Design beautiful info box from predefined styles
+16. [Flip Box](https://essential-addons.com/flip-box/) - Use animated Flip Boxes to highlight any content
+17. [Dual Color Heading](https://essential-addons.com/dual-color-headline/) - Highlight your headings with dual colors
+18. [Call to Action](https://essential-addons.com/call-to-action/) - Design call-to-action buttons with a few clicks
+19. [Pricing Table](https://essential-addons.com/pricing-table/) - Create Pricing Tables within minutes that convert
+20. [Twitter Feed](https://essential-addons.com/twitter-feed/) - Showcase your latest tweets to your visitors
+21. [Data Table](https://essential-addons.com/table/) - Insert attractive data table anywhere you want
+22. [Filterable Gallery](https://essential-addons.com/filterable-gallery/) - Share images with an interactive gallery
+23. [Image Accordion](https://essential-addons.com/image-accordion/) - Highlight your images with amazing hover effects
+24. [Content Ticker](https://essential-addons.com/content-ticker/) - Use slider & ticker effects to display your content
+25. [Tooltip](https://essential-addons.com/tooltip/) - Set tooltip for Icon, Image, Text or shortcodes
+26. [Advanced Tabs](https://essential-addons.com/advanced-tabs/) - Display information neatly in nested tabs
+27. [Advanced Accordion](https://essential-addons.com/advanced-accordion/) - Add beautiful nested accordions anywhere
+28. [Progress Bar](https://essential-addons.com/progress-bar/) - Display progress bars with 4+ different styles
+29. [Feature List](https://essential-addons.com/feature-list/) - Display feature lists with custom icons and styles
+30. [Fluent Forms](https://essential-addons.com/fluent-forms/) - Design your Fluent Forms container, fields and anything you want
+31. [Facebook Feed](https://essential-addons.com/facebook-feed/) - Display Facebook post feed from your page
+32. [Sticky Video](https://essential-addons.com/sticky-video/) - Add videos that are sticky on scroll while playing
+33. [BetterDocs Category Grid](https://essential-addons.com/betterdocs-category-grid/) - Create documentation in grid layout
+34. [BetterDocs Category Box](https://essential-addons.com/betterdocs-category-box/) - Create documentation in box layout
+35. [BetterDocs Search Form](https://essential-addons.com/betterdocs-search-form/) - Add a live search box for documentation
+36. [Advanced Data Table](https://essential-addons.com/advanced-data-table) - Design large data tables without coding
+37. [Event Calendar](https://essential-addons.com/event-calendar) - Create customized event pages
+38. [Formstack](https://essential-addons.com/formstack/) - Design your Formstack forms
+39. [Woo Checkout](https://essential-addons.com/woo-checkout/) -  Build attractive WooCommerce Checkout pages
+[youtube](https://www.youtube.com/watch?v=l3GNAJHza5c)
+40. [Typeform](https://essential-addons.com/typeform/) - Embed & design your Typeform forms
+41. [Login | Register Form](https://essential-addons.com/login-register-form/) - Create amazing login/registration forms
+42. [Woo Product Compare](https://essential-addons.com/woo-product-compare/) - Design stunning product compare tables
+43. [Woo Product Carousel](https://essential-addons.com/woo-product-carousel/) - Add Product Carousels for WooCommerce
+44. [Simple Menu](https://essential-addons.com/simple-menu/)- Design minimalist navigation menus
+45. [Woo Product Gallery](https://essential-addons.com/woo-product-gallery/)- Show your products in a filterable gallery
+46. [Woo Cart](https://essential-addons.com/woo-cart/)- Use WooCommerce Cart page to boost online sales
+47. [Interactive Circle](https://essential-addons.com/interactive-circle/)- Display content with engaging circular layouts
+48. [NFT Gallery](https://essential-addons.com/nft-gallery/)- Add and showcase NFT collections effortlessly
+49. [Business Reviews](https://essential-addons.com/business-reviews/)- Display Google Customer Review to increase your online reputation
+50. [SVG Draw](https://essential-addons.com/svg-draw/)- Display SVG elements in a visually striking and interactive way on your website
+51. [Woo Product List](https://essential-addons.com/woo-product-list/)- Showcase your store’s products with a stunning listicle format
+52. [Woo Product Price](https://essential-addons.com/woo-product-price/)- Style your product price with custom colors and typography
+53. [Woo Product Rating](https://essential-addons.com/woo-product-rating/)- Show ratings to help customers make informed choices
+54. [Woo Product Images](https://essential-addons.com/woo-product-images/)- Display WooCommerce product images with stunning effects
+55. [Woo Add to Cart](https://essential-addons.com/woo-add-to-cart/)- Make shopping easier with an ‘Add to Cart’ button
+56. [Breadcrumbs](https://essential-addons.com/breadcrumbs/)- Improve navigation with breadcrumbs for easy exploration
+57. [Code Snippet](https://essential-addons.com/code-snippet)- Display beautifully formatted code on your Elementor website
+58. [Mega Menu](https://essential-addons.com/mega-menu/)- Build rich, multi-column navigation menus visually
+
+Extensions (Free):
+
+1. [Reading Progress Bar](https://essential-addons.com/reading-progress/) - Add progress bar to show reading position
+[Watch YouTube Tutorial](https://www.youtube.com/watch?v=3Teo4kSWJPA)
+2. [Duplicator](https://essential-addons.com/duplicator/) - Duplicate any page or post in a single click
+3. [Table of Contents](https://essential-addons.com/table-of-content/) - Display Table of Contents anywhere you want
+[Watch YouTube Tutorial](https://youtu.be/W6woRX7Ud7I)
+4. [Custom JS](https://essential-addons.com/custom-js/) - Add custom JavaScript with a few clicks
+5. [Scroll to Top](https://essential-addons.com/scroll-to-top) - Let visitors quickly navigate to the top of your page
+6. [Wrapper Link](https://essential-addons.com/wrapper-link) - Add custom links into any section, column, or even flexbox
+7. [Hover Interactions](https://essential-addons.com/hover-interaction/) - Create captivating effects on buttons, images, texts and more
+8. [Liquid Glass Effects](https://essential-addons.com/liquid-glass-effects/) - Give your website a sleek, futuristic feel with stunning glass effects
+9. [Image Masking with Morphing](https://essential-addons.com/image-masking-with-morphing/) -  Create seamless transformations and interactive visual effects with smooth masking & morphing
+10. [Vertical Text Orientation](https://essential-addons.com/vertical-text-orientation/) - Bring style to pages with modern, eye-catching vertical text
+11. [Header & Footer Builder](https://essential-addons.com/header-footer-builder/) - Build custom Elementor headers and footers from presets
+
+### More elements (50+) on [Premium Version](https://wpdeveloper.com/in/upgrade-essential-addons-elementor)
+
+1. [Post Block](https://essential-addons.com/post-block/) - Display your blog posts with a variety of styles
+2. [Lightbox & Modal](https://essential-addons.com/lightbox-modal/) - Create interactive popups after trigger actions
+3. [Testimonial Slider](https://essential-addons.com/testimonial-slider/) - Share customer reviews with animated sliders
+4. [Image Comparison](https://essential-addons.com/image-comparison/) - Let your viewers compare between two images
+5. [Interactive Promo](https://essential-addons.com/interactive-promo/ ) - Display content with attractive animations
+6. [Instagram Feed](https://essential-addons.com/instagram-feed/) - Display Instagram posts beautifully
+7. [Advanced Google Map](https://essential-addons.com/advanced-google-map/) - Create maps with unlimited themes
+[Watch YouTube Tutorial](https://www.youtube.com/watch?v=kLx9O8ZoBv0)
+8. [Static Product](https://essential-addons.com/static-product/) - Present your static product just the way you want
+9. [Flip Carousel](https://essential-addons.com/flip-carousel/) - Feature your content using a unique carousel style
+10. [Interactive Cards](https://essential-addons.com/interactive-cards/) - Create fascinating effects for your content
+11. [Content Timeline](https://essential-addons.com/content-timeline/) - Create memory lane with animated scrolling
+12. [Advanced Menu](https://essential-addons.com/advanced-menu/) - Use advanced navigation menu anywhere
+13. [Twitter Feed Carousel](https://essential-addons.com/twitter-feed/) - Share Twitter posts in interactive styles
+14. [Dynamic Gallery](https://essential-addons.com/dynamic-gallery/) - Add filterable gallery for any content
+15. [Smart Post List](https://essential-addons.com/post-list/) - Design your blog page with modern post list
+16. [Mailchimp](https://essential-addons.com/mailchimp/) - Design your Mailchimp form with ease
+17. [Toggle](https://essential-addons.com/content-toggle/) - Share any content in less space with a toggle
+18. [One Page Navigation](https://essential-addons.com/one-page-nav/) - Create one page websites in Elementor
+19. [Price Menu](https://essential-addons.com/price-menu/) - Make a beautiful pricing menu for your brands
+20. [Image Hotspots](https://essential-addons.com/image-hotspots/) - Add hotspot icons with tooltips in an image
+21. [Divider](https://essential-addons.com/divider/) - Separate your section with fancy divider
+22. [Counter](https://essential-addons.com/counter/) - Highlight important data using the Counter element
+23. [Team Member Carousel](https://essential-addons.com/team-members-carousel/) - Display team members in a carousel
+24. [Post Carousel](https://essential-addons.com/post-carousel/) - Use a carousel to display multiple posts
+25. [Logo Carousel](https://essential-addons.com/logo-carousel/) - Highlight brands or product logos in a carousel
+26. [Protected Content](https://essential-addons.com/protected-content/) -  Lock your content with password protection
+27. [Offcanvas](https://essential-addons.com/offcanvas-content/) - Display content in offcanvas with one click
+28. [Image Scroller](https://essential-addons.com/image-scroller/) - Show long height images with image scroller
+29. [Woo Product Slider](https://essential-addons.com/woo-product-slider/) - Showcase your products in a stunning slider
+30. [Woo Product Collections](https://essential-addons.com/woocommerce-product-collections/)- Show product collections beautifully
+31. [LearnDash Course List](https://essential-addons.com/learndash-course-list/)- Share LearnDash course list on website
+32. [Advanced Search](https://essential-addons.com/advanced-search/)- Add a customizable, dynamic search bar
+33. [Woo Thank You](https://essential-addons.com/woo-thank-you)- Design a personalized thank you message on the WooCommerce order confirmation page
+34. [Woo Cross Sells](https://essential-addons.com/woo-cross-sells/)- Customize the display of cross-sell products to boost your sales potential
+35. [Woo Account Dashboard](https://essential-addons.com/woo-account-dashboard/)- Design a personalized WooCommerce Customer Account Dashboard
+36. [Fancy Chart](https://essential-addons.com/fancy-chart/)- Visualize important data with interactive charts and graphs on your website
+37. [Stacked Cards](https://essential-addons.com/stacked-cards/)- Showcase your website content in a distinctive and engaging way
+38. [360 Degree Photo Viewer](https://essential-addons.com/360-degree-photo-viewer)- Make your website image visible from every angle with adjustable controls
+39. [Multicolumn Pricing Table](https://essential-addons.com/multicolumn-pricing-table/)- Display pricing plans in multiple columns to compare features and choose the right option
+40. [Figma to Elementor Converter](https://essential-addons.com/figma-to-elementor-converter/)- Turn Figma designs into fully customizable Elementor Pages
+41. [Pricing Slider](https://essential-addons.com/pricing-slider/)- Showcase dynamic pricing plans with interactive slider control
+42. [Pinterest Feed](https://essential-addons.com/pinterest-feed/) – Showcase stunning Pinterest content on your website with beautiful layouts.
+
+
+Extensions (Pro):
+
+1. [Parallax](https://essential-addons.com/parallax-scrolling/) - Add creative parallax effects to your content
+2. [Particles](https://essential-addons.com/particle-effect/) - Add animated particle effects to your content
+3. [Advanced Tooltip](https://essential-addons.com/advanced-tooltip/) - Make any widget more informative with tooltip
+4. [Content Protection](https://essential-addons.com/content-protection/) - Hide your content with password protection
+5. [Conditional Display](https://essential-addons.com/conditional-display/)- Display your preferred content based on the logic conditions you have set
+6. [Dynamic Tags](https://essential-addons.com/dynamic-tags/)- Display content dynamically on your preferred section of the website
+7. [Interactive animations](https://essential-addons.com/interactive-animations/)- Create stunning animations & build a fully dynamic web page
+8. [Custom Cursor](https://essential-addons.com/custom-cursor/)-  Transform the default mouse pointer into a fully personalized design
+
+
+More features and improvements are coming on regular updates. Want to unlock the advanced elements? [Upgrade to our Pro version](https://essential-addons.com/upgrade-ea-pro)
+
+### Elementor WooCommerce Widgets From Essential Addons
+
+With Essential Addons, you get seamless WooCommerce compatibility to showcase products, categories, and filters with ease. There are 11+ beautiful **WooCommerce widgets** for your every need:
+
+- [Woo Product Carousel](https://essential-addons.com/docs/woo-product-carousel/) – interactive product showcase
+- [Woo Product Gallery](https://essential-addons.com/docs/woo-product-gallery/) – filterable product gallery
+- [Woo Product Grid](https://essential-addons.com/docs/woocommerce-product-grid/) – products in grid layouts
+- [Woo Product List](https://essential-addons.com/docs/ea-woo-product-list/) – products in a listicle format
+- [Woo Product Compare](https://essential-addons.com/docs/woo-product-compare/) – compare products anywhere
+- Single-product elements: [Price](https://essential-addons.com/docs/ea-woo-product-price/), [Rating](https://essential-addons.com/docs/ea-woo-product-rating/), [Images](https://essential-addons.com/docs/ea-woo-product-images/) & [Add to Cart](https://essential-addons.com/docs/ea-woo-add-to-cart/)
+- [Woo Cart](https://essential-addons.com/docs/woocommerce-cart/) & [Woo Checkout](https://essential-addons.com/docs/woo-checkout/) – design Cart & Checkout pages with no coding
+- **Pro:** [Product Slider](https://essential-addons.com/docs/woo-product-slider/), [Product Collections](https://essential-addons.com/docs/ea-woo-product-collections/), [Cross-Sells](https://essential-addons.com/docs/ea-woo-cross-sells/), [Account Dashboard](https://essential-addons.com/docs/ea-woo-account-dashboard/) & [Thank You](https://essential-addons.com/docs/ea-woo-thank-you/)
+
+
+### 🏆  FEATURED BY 100+ RENOWNED PUBLICATIONS
+
+**WP Pagebuilders:** “With 60+ additional widgets, Essential Addons is a great add-on to enhance your experience in building a website with WordPress+Elementor.”
+**MonsterPost:** “Essential Addons for Elementor has a huge number of active users among all third-party extensions on the market. The widgets are tested in all popular web browsers to ensure full browser compatibility for all elements.”
+**WPCrafter:** WordPress influencer Adam Preiser did a Speed Test & found Essential Addons for Elementor is the high-performance solution out there 👇
+
+https://youtu.be/K9BssSV-KC8
+
+### BACKED BY A TRUSTED TEAM
+Essential Addons is brought to you by [WPDeveloper](https://wpdeveloper.com/), a dedicated WordPress product company, trusted by 6 million+ happy users.
+
+### Documentation and Support
+
+- For documentation and tutorials go to our [Documentation](https://essential-addons.com/docs/).
+- If you have any more questions, visit our support on the [Plugin's Forum](https://wordpress.org/support/plugin/essential-addons-for-elementor-lite).
+- For more information about features, FAQs and documentation, check out our website at [Essential Addons](https://essential-addons.com/).
+
+### Happy User of Essential Addons?
+
+- Join our [Facebook Group](https://www.facebook.com/groups/essentialaddons/).
+- Learn from our tutorials on [YouTube Channel](https://wpdeveloper.com/go/youtube-channel).
+- Or rate us on [WordPress](https://wordpress.org/support/plugin/essential-addons-for-elementor-lite/reviews/?rate=5#new-post)
+
+### 🔥 WHAT’S NEXT
+If you like Essential Addons, then consider checking out our other WordPress Plugins:
+
+
+🔔 **[NotificationX](https://wordpress.org/plugins/notificationx/)** – Powerful Social Proof & FOMO Marketing Solution to boost conversions & design stunning WordPress notification bars in Elementor
+
+🗒️ **[BetterDocs](https://wordpress.org/plugins/betterdocs/)** – Advanced Documentation & Knowledge Base Plugin for WordPress, which also comes with ready doc templates for Elementor
+
+⏰ **[SchedulePress](https://wordpress.org/plugins/wp-scheduled-posts/)**  – Complete solution for managing WordPress content scheduling through an editorial calendar & Social Share
+
+🔗 **[EmbedPress](https://wordpress.org/plugins/embedpress/)** - Easy WordPress solution for embedding videos, images, posts, audio, maps and PDF, DOC, PPT & all other types of content into your website using Elementor, Gutenberg and more.
+
+🔎 **[easy.jobs](https://wordpress.org/plugins/easyjobs/)** -  Smart and easy recruitment and talent sourcing solution for hiring with AI-powered screening system, question sets, remote interviews, and designing branded career pages with Elementor.
+
+== Installation ==
+
+Note : This plugin works with Elementor. Make sure you have [Elementor](https://wordpress.org/plugins/elementor/) installed.
+
+
+1. Upload the plugin folder to the `/wp-content/plugins/` directory, or install the plugin through the WordPress plugins screen directly.
+2. Activate the plugin through the 'Plugins' screen in WordPress
+3. You can type "EA" on your element tabs within Elementor editor and all the available elements will appear.
+4. Also you can see them under the category "Essential Addons for Elementor" on your element/widget list.
+
+== Frequently Asked Questions ==
+
+= Do I need Elementor to use Essential Addons? =
+
+Yes. Essential Addons is built specifically for the Elementor page builder, so Elementor must be installed and activated on your WordPress website before you can use the widgets and extensions.
+
+= Will Essential Addons work with my WordPress theme? =
+
+Yes. Essential Addons works with any standard WordPress theme that supports Elementor. If Elementor works properly with your theme, you can use Essential Addons widgets on your pages.
+
+= What can I build with Essential Addons for Elementor? =
+
+You can build more flexible Elementor pages using creative widgets, content elements, marketing sections, WooCommerce layouts, navigation elements, accordions, tabs, headings, carousels, and other design-focused blocks for your website.
+
+= Does Essential Addons include Elementor templates and ready design elements? =
+
+Essential Addons helps you design faster with Elementor widgets, extensions, and ready design elements. You can use them to create landing pages, business websites, portfolios, WooCommerce sections, and content-rich pages without starting from scratch.
+
+= Can I use Essential Addons for WooCommerce websites? =
+
+Yes. Essential Addons includes WooCommerce-focused widgets and design elements that help you showcase products and create better shopping experiences with Elementor.
+
+= Will Essential Addons slow down my Elementor website? =
+
+Essential Addons is built to help you use only the elements you need. For the best performance, keep unused widgets disabled, optimize your images, and use a reliable hosting and caching setup.
+
+= Can I customize Essential Addons widgets without coding? =
+
+Yes. Essential Addons widgets are designed for no-code customization inside Elementor. You can adjust content, layout, colors, typography, spacing, and styling options visually from the Elementor editor.
+
+= What happens if I upgrade to Essential Addons Pro? =
+
+Your existing Essential Addons content will continue to work. Upgrading unlocks additional premium widgets, extensions, and advanced design options while keeping your existing Elementor pages intact.
+
+= Is Essential Addons suitable for beginners? =
+
+Yes. Essential Addons is beginner-friendly because it works inside Elementor's visual editor. You can drag, drop, customize, and publish sections without writing code.
+
+= Where can I get help with Essential Addons? =
+
+You can use the official documentation, tutorials, community resources, and support channels from WPDeveloper to learn how to set up widgets, troubleshoot issues, and get the most out of Essential Addons.
+
+= How do I turn off recommendations and promotional notices? =
+
+Any administrator can click "Never show me again" on a recommendation. That is site-wide and permanent: it hides that recommendation everywhere on the installation, for every user, including the WordPress Dashboard widget and the block editor panel. It is not a per-user dismissal.
+
+If you manage many sites and want every Essential Addons recommendation switched off up front, add this to `wp-config.php`:
+
+`define( 'EAEL_DISABLE_PROMOTIONS', true );`
+
+Or, from a plugin or mu-plugin:
+
+`add_filter( 'eael/disable_promotions', '__return_true' );`
+
+Either one disables all promotional surfaces for the whole installation, including seasonal campaign notices.
+
+= What data does Essential Addons collect? =
+
+Nothing is sent unless you explicitly opt in. If you do opt in, we send: your site URL and name; WordPress, PHP and server version; site language, charset and text direction; your list of **active** plugins and the **number** of inactive ones; your active theme and version; which Essential Addons elements you use; and your admin email address so we can send the discount coupon. We do not collect your visitors' data, your content, or the names of your inactive plugins. You can withdraw consent at any time from the plugin settings.
+
+== Screenshots ==
+
+1. Overview of few widgets
+2. Elements control panel
+3. Introducing EA 5.0
+4. Advanced Google Map Widget
+5. Advanced Tooltip Extension
+6. Advanced Tabs Widget
+7. Fancy Text Widget
+8. Filterable Gallery Widget
+9. Feature List Widget
+10. Image Hotspots Widget
+11. Woo Product Grid Widget
+12. Team Member Carousel Widget
+13. Smart Post List Widget
+14. One Page Navigation Widget
+15. Protected Content Widget
+16. Flip Box Widget
+17. Creative Buttons Widget
+
+
+== Changelog ==
+
+= 6.8.4 - 15/09/2026 =
+
+- Added: EA Mega Menu | Ready-made presets for easier menu customization
+- Fixed: EA Gravity Forms | File uploads were duplicated on form submission
+- Fixed: EA Gravity Forms | `gform_post_render` fired twice and caused duplicate JavaScript bindings
+- Fixed: EA Fancy Text | HTML tags such as `<br>` and `&nbsp;` displayed as literal text during Fade, Zoom and Bounce animations
+- Fixed: EA Filterable Gallery | Items repeated after using the search box with Load More enabled
+- Fixed: EA Advanced Data Table | Unsupported Ninja Tables appeared in the source picker
+- Fixed: EA Advanced Data Table | Image-only and icon-only cells were removed from the editor
+- Fixed: EA Post Timeline | Layout issues when using the External CSS print method
+- Fixed: EA Simple Menu | Background flashed and layout broke during page load
+- Fixed: EA Advanced Tabs | Nested tab clicks reset the Elementor horizontal tab scroll
+- Fixed: EA Woo Checkout | WPML translations were not applied correctly on the frontend
+- Fixed: EA Woo Product Gallery | Infinite Scroll and Load More stopped after the first page on WooCommerce archives
+- Fixed: EA Woo Product Grid | PHP warnings on archive templates
+- Fixed: EA Login/Register Form | Account status incorrectly showed as Active when Admin Approval is disabled
+- Fixed: Alt text was not applied to images loaded from external URLs
+- Fixed: Duplicate WPML widget keys caused translatable fields to be dropped
+- Fixed: Large extension control defaults caused HTTP 413 errors when saving Elementor content
+- Few minor bug fixes & improvements
+
+= 6.8.3 - 01/09/2026 =
+
+- Fixed: A fatal error that could break the site or the Elementor editor when Essential Addons Pro was active alongside the latest Lite update
+- Few minor bug fixes & improvements
+
+= 6.8.2 - 31/08/2026 =
+
+- Added: Angie AI Integration | Elementor's agentic AI can now discover Essential Addons widgets and their control schemas, so you can prompt Angie to build and customize EA widgets right inside the editor
+- Few minor bug fixes & improvements
+
+= 6.8.1 - 28/08/2026 =
+
+- Fixed: EA Gravity Forms | Submit and Next/Previous button styles stopped applying after the Gravity Forms 3.0 update
+- Improved: EA Login/Register Form | Strengthened nonce and CAPTCHA validation on login, registration and password reset - thanks to `Gaurav Popalghat` for the security research
+- Improved: EA Login/Register Form | Hardened Custom Profile Field handling during registration - thanks to `Jakub Herman` for the security research
+- Improved: EA Advanced Tabs | Strengthened URL fragment handling
+- Few minor bug fixes & improvements
+
+= 6.8.0 - 27/08/2026 =
+
+- Added: EA Theme Builder to create custom headers and footers, with 6 ready-to-use presets
+- Added: EA Mega Menu | Creating flexible and engaging mega menu layouts
+- Few minor bug fixes & improvements
+
+= 6.7.3 - 09/08/2026 =
+
+- Added: EA Advanced Accordion | Image display options (object-fit: Cover, Contain, Fill, Scale Down, None) for the Tab Content image
+- Added: EA Login/Register Form | Admin Approval option to hold new user registrations for admin review before they can log in
+- Added: EA Login/Register Form | Confirm Email field and [user_email] placeholder support in the registration success message
+- Improved: EA Woo Product Images | Added an image loader to prevent incorrect display on first load
+- Improved: EA Business Reviews | Added a rating decimal control and an option to hide reviews without text
+- Improved: EA Breadcrumbs | Made archive labels editable and added an option to wrap the title in quotes
+- Improved: Added ACF Repeater field support to more EA widgets
+- Improved: Security Enhancement
+- Few minor bug fixes & improvements
+
+= 6.7.2 - 29/07/2026 =
+
+- Improved: EA Login/Register Form | Strengthened user registration security - thanks to `Jakub Herman` for the security research
+- Few minor bug fixes & improvements
+
+= 6.7.1 - 28/07/2026 =
+
+- Improved: EA Woo Product Images | Added variation image support so the gallery updates when a product variation is selected
+- Fixed: EA Feature List | Icon Position control displayed incorrect icons for Left, Top and Right options
+- Few minor bug fixes & improvements
+
+= 6.7.0 - 16/07/2026 =
+
+- Added: New Widget | EA Woo Product Title
+- Added: New Widget | EA Woo Product Short Description
+- Added: New Widget | EA Woo Product Description
+- Added: New Widget | EA Woo Products Tabs
+- Improved: Security Enhancement
+- Improved: EA Login/Register Form | Enhanced OTP verification for more secure user registration
+- Improved: EA Reading Progress Bar | Enhanced global color settings security
+- Improved: EA Login/Register Form | Strengthened email handling security during user registration
+- Fixed: Restored compatibility with MultivendorX 5.0.0, ensuring vendor store pages correctly display vendor products
+- Few minor bug fixes & improvements
+
+= 6.6.11 - 08/07/2026 =
+
+- Improved: EA Post Grid | Improved AJAX request validation
+- Improved: Enhanced input validation and security checks
+- Improved: Security Enhancement
+- Fixed: EA Filterable Gallery | Filterable control is not working on edit page
+- Few minor bug fixes & improvements
+
+= 6.6.10 - 05/07/2026 =
+
+- Improved: EA Pricing Table | Improved security validation for the Title Tag setting
+- Improved: EA Woo Product Compare | Enhanced security measures
+- Fixed: Added WPML Media Translation support for all media-supported widgets
+- Fixed: EA Post Grid | Resolved an issue where Post Grid and widgets using Saved Templates displayed the wrong language on multilingual sites using Polylang
+- Fixed: EA Info Box | Resolved title and content overflow issue
+- Few minor bug fixes & improvements
+
+= 6.6.9 - 24/06/2026 =
+
+- Improved: EA Login/Register Form | Added validation for custom fields to prevent submission when the input is invalid
+- Improved: Added new Gradient Text Color controller
+- Fixed: EA Business Reviews | Reviews and timestamps always displayed in English regardless of the site language
+- Fixed: EA Gravity Forms | reCAPTCHA v3 submissions silently failed as the per-form render event was not dispatched
+- Fixed: EA Filterable Gallery | Video items triggered two lightboxes causing inconsistent popup behavior on mobile
+- Fixed: EA Filterable Gallery | Invalid markup generated for video gallery items in Card layout
+- Fixed: EA Simple Menu | Dropdown toggle not working on iOS mobile devices
+- Fixed: EA Login/Register Form | Submit button width and style controls not working
+- Few minor bug fixes & improvements
+
+= 6.6.8 - 22/06/2026 =
+
+- Fixed: EA Event Calendar | End time displayed incorrectly for The Events Calendar events on non-UTC sites
+- Fixed: EA Advanced Data Table | Resolved "elementor is not defined" error in standalone preview mode
+- Few minor bug fixes & improvements
+
+= 6.6.7 - 10/06/2026 =
+
+- Improved: EA Advanced Data Table | Added option to set default sorting column on initial load
+- Improved: EA Sticky Video | Video now pauses automatically when the modal window is closed
+- Improved: EA Woo Account Dashboard | Added dynamic option to display data from user details
+- Improved: EA Login/Register Form | Added option to set page redirect after signing out
+- Improved: EA Table of Contents | Enhanced user experience with additional improvements
+- Fixed: EA Sticky Video | Sticky video displayed with incorrect margins
+- Fixed: EA Filterable Gallery | Search results did not display all matching items properly
+- Few minor bug fixes & improvements
+
+= 6.6.6 - 08/06/2026 =
+
+- Improved: EA Woo Product Grid | Added Option to set image resolution
+- Fixed: EA Event Calendar | Timed Events Filtered Incorrectly
+- Fixed: Prevent fatal error during plugin update when a request initializes the setup wizard
+- Few minor bug fixes & improvements
+
+= 6.6.5 - 21/05/2026 =
+
+- Fixed: EA Creative Button | Resolved invisible default text color issue when enabling gradient background
+- Fixed: EA Dual Color Heading | Resolved typography gradient global color issue in editor and frontend
+- Fixed: EA Filterable Gallery | Fixed “Open in New Tab” issue after using the Load More button
+- Fixed: EA Woo Product Images | Fixed broken image behavior issue
+- Improved: EA Login/Register Form | Added email OTP verification for secure login and registration
+- Improved: EA Event Calendar | Added individual event style options for Google Calendar events
+- Improved: EA Woo Product Carousel | Added Buy Now button option for direct product purchase
+- Improved: Improved security validation for AJAX requests in EA Product Quick View
+- Few minor bug fixes & improvements
+
+= 6.6.4 - 13/05/2026 =
+
+- Fixed: Duplicate control registration for enable_webhook causes Elementor warning
+- Improved: Security Enhancement
+- Few minor bug fixes & improvements
+
+
+= 6.6.3 - 30/04/2026 =
+
+- Fixed: Certain pages are returning a 404 server error when EA is active
+- Fixed: Elementor editor not loading when Essential Addons is enabled
+- Fixed: EA Flip Box | WPML media translation not working for Flipbox images
+- Fixed: EA Breadcrumb | WooCommerce products empty category breadcrumb display error
+- Fixed: EA Event Calendar | Conflict with Contact Form 7 causing calendar filtering on form input
+- Fixed: EA Woo Checkout | Uncaught TypeError causing checkout script failure on WooCommerce pages
+- Fixed: EA Wrapper Link | Container wrapper links were not translated properly
+- Fixed: EA Dual Color Heading | Multiple heading not working with WPML
+- Improved: EA Woo Add to Cart | Added option to customize hover style for icon and border
+- Improved: EA Woo Add to Cart | Products can now be added to cart without page reload
+- Improved: Enhanced plugin compliance with WordPress Plugin Check (PCP) standards including performance, accessibility, and code quality improvements
+- Improved: Improved overall security and stability across the plugin
+- Few minor bug fixes & improvements
+
+= 6.6.2 - 16/04/2026 =
+
+- Improved: Security Enhancement
+- Few minor bug fixes & improvements
+
+= 6.6.1 - 15/04/2026 =
+
+- Few minor bug fixes & improvements
+
+= 6.6.0 - 06/04/2026 =
+
+- Added: Compatibility with Elementor v4.0 Atomic Editor
+- Fixed: sanitize_settings fatal error
+- Fixed: Authenticated author level privilege escalation via register_user
+- Fixed: EA Advanced Tabs | Conflict with TidyCal
+- Fixed: EA Filterable Gallery | iOS fullscreen video triggering unintended back navigation
+- Fixed: EA Filterable Gallery | Updated default video link behavior for video gallery
+- Fixed: EA Filterable Gallery | Vertical video ratio changing to 16:9 after clicking Load More
+- Fixed: EA Creative Button | Icon spacing not working for secondary text in Winona effect
+- Fixed: EA Simple Menu | Conflict with Element Pack Pro megamenu feature
+- Improved: EA Business Reviews | Updated integration to support new Places API and replaced legacy API usage
+- Improved: EA Filterable Gallery | Added mobile scroll to filtered items and search selection support
+- Improved: EA Event Calendar | Added search option to filter events by location, title, and category
+- Improved: Compatibility for PHP 8.4
+- Few minor bug fixes & improvements
+
+= 6.5.13 - 08/03/2026 =
+
+- Fixed: Duplicate tax_query argument
+- Fixed: Mismatched text domains across multiple files
+- Fixed: PHP fatal error when importing templates without EA Pro installed
+- Fixed: EA Filterable Gallery | Tags missing in DOM after update
+- Fixed: EA Interactive Circle | Styling not applying correctly
+- Fixed: EA Woo Product Carousel | Size increases when toggling
+- Fixed: EA Business Reviews | Query Monitor warning for eael_business_reviews_review_text_height
+- Improved: EA Interactive Circle | Added popup option for icons
+- Improved: EA Pricing Table | Added option to change the heading tag for the header title
+- Improved: EA Login/Register Form | Added option to restrict user roles for login
+- Few minor bug fixes & improvements
+
+= 6.5.12 - 22/02/2026 =
+
+- Fixed: EA Advanced Tabs | Shortcodes getting escaped and not working
+- Fixed: EA Ninja Forms | Required field <span> tag gets escaped when multiple forms are used on the same page
+- Fixed: EA Woo Product Price | Use the site’s active currency in the widget
+- Fixed: EA Advanced Data Table | Horizontal scrollbar issue on mobile devices
+- Fixed: EA Login/Register Form | Password reset link redirecting to default WP reset page
+- Fixed: EA Gravity Forms | Gravity Forms not working when used via EA widget
+- Improved: Added support for a Query ID option for all post-related elements.
+- Improved: EA Woo Product Gallery | Added option to hide categories and quantity input in the “Quick View” popup
+- Improved: EA Woo Product Carousel | Pause on hover for the Marquee style
+- Few minor bug fixes & improvements
+
+= 6.5.11 - 10/02/2026 =
+
+- Fixed: EA Advanced Accordion | Added pre tag support
+- Few minor bug fixes & improvements
+
+= 6.5.10 - 09/02/2026 =
+
+- Fixed: EA Login/Register Form | Form validation message is duplicated after updating to the latest EA version
+- Fixed: EA Woo Product Grid | Buttons are getting cropped on style preset 8
+- Fixed: Compatibility issues with the QI Elements masonry image gallery widget
+- Fixed: EA Info Box | Security Enhancement
+- Fixed: EA Login/Register Form | Undefined array key “position_for_login_form” warning
+- Fixed: EA Pricing Table | Ribbon style 4 gets broken after updating the EA plugin to version 6.5.9
+- Fixed: EA Facebook Feed | Undefined array key “title” warning
+- Fixed: EA Wrapper Link | WPML does not translate “Wrapper Link” URLs in multilingual pages
+- Improved: EA Woo Checkout| Enhanced compatibility with AvaTax
+- Improved: Added “Write with AI” support for Woo single product widgets
+- Improved: Garbage extension values in the Elementor object
+- Improved: EA Event Calendar | Added filter support for custom events
+- Improved: All widgets and extensions are included in the EA quick setup
+- Few minor bug fixes & improvements
+
+
+= 6.5.9 - 26/01/2026 =
+
+- Improved: Sort templates in ascending order in “Choose Template” dropdown
+- Improved: EA Business Reviews | Fixed height and scrollbar options moved to content tab
+- Improved: EA Login/Register Form | Added webhook support similar to Stripe webhooks
+- Improved: EA Gravity Forms | Sort form names by title in the widget
+- Improved: EA Woo Product Grid | Added additional filter support
+- Improved: EA Login/Register Form | Validation message position control added
+- Improved: EA Login/Register Form | Added email field autocomplete support
+- Improved: EA Feature List | Icon shape background control & shape view behavior
+- Improved: EA Advanced Data Table | Positioning fixes & default link update
+- Improved: EA Filterable Gallery | Added option to set thumbnail image size in filterable gallery
+- Few minor bug fixes & improvements
+
+
+= 6.5.8 - 20/01/2026 =
+
+- Fixed: EA Woo Widgets | Load More button not working properly
+- Few minor bug fixes & improvements
+
+= 6.5.7 - 13/01/2026 =
+
+- Fixed: EA Woo Widgets | Load more button not working properly
+- Few minor bug fixes & improvements
+
+= 6.5.6 - 12/01/2026 =
+
+- Fixed: EA Advanced Data Table | Extra spaces appear when editing table cells
+- Fixed: EA Advanced Tabs | Issue with Loop Carousels
+- Fixed: EA Login/Register Form | Cloudflare Turnstile is not working in popup
+- Fixed: EA Event Calendar | All-day Google Calendar event for current day not visible with "Hide Old Events – Till Current Date" in UTC-1
+- Improved: Security Enhancement
+- Few minor bug fixes & improvements
+
+= 6.5.5 - 01/01/2026 =
+
+- Fixed: EA Image Accordion | Image appears fully clickable but only text responds
+- Fixed: EA Feature List | Feature list items are not aligned properly
+- Fixed: EA Advanced Tabs | Advanced Tabs lose background color after updating from v6.3.1
+- Fixed: EA Facebook Feed | Access token doesn't work
+- Fixed: EA conflicts with Animation Addons
+- Fixed: EA Content Ticker | Tags not working properly with The Events Calendar events
+- Fixed: Plugin Check (PCP) warnings
+- Improved: EA Login/Register Form | Add icon on button
+- Improved: EA Creative Button | Duplicate code revamp
+- Improved: EA Woo Product List | Exclude out of stock products
+- Improved: EA Post Grid | Add unique category and tag classes to HTML structure
+- Improved: EA Woo Cart | Add product description as a custom item
+- Improved: EA Advanced Accordion | Add dynamic content settings
+- Few minor bug fixes & improvements
+
+= 6.5.4 - 14/12/2025 =
+
+- Improved: Security Enhancement
+- Fixed: Plugin Check (PCP) warnings
+- Few minor bug fixes & improvements
+
+= 6.5.3 - 27/11/2025 =
+
+- Few minor bug fixes & improvements
+
+= 6.5.2 - 25/11/2025 =
+
+- Fixed: Fixed checkout WooCommerce issues where shipping methods weren't updating correctly and prevented crashes when using the Mondial Relay shipping plugin
+- Few minor bug fixes & improvements
+
+= 6.5.1 - 19/11/2025 =
+
+- Fixed: EA Image Masking | mask-image URL not updating
+- Fixed: EA Image Masking | Throwing warning message if Debug log is enabled
+- Few minor bug fixes & improvements
+
+= 6.5.0 - 18/11/2025 =
+
+- Added: New Extension | Vertical Text Orientation
+- Improved: EA Liquid Glass Effects | Added new effects
+- Improved: Added Popular Theme Compatibility with Woo Widgets
+- Fixed: EA Advanced Tab | Hover and active tab styling issue
+- Fixed: EA Woo Checkout | Shipping options selection issue
+- Few minor bug fixes & improvements
+
+= 6.4.0 - 30/10/2025 =
+
+- Added: New Extension | Image Masking
+- Fixed: EA Advanced Tabs | Hover background color is not working
+- Fixed: EA Woo Cart | Uncaught TypeError in WooCommerce
+- Fixed: EA Liquid Glass Effects | Effects are not working
+- Fixed: EA Advanced Accordion | Schema problem when used in other than English language
+- Improved: EA Event Calendar | Show event featured image above Title and in details
+- Few minor bug fixes & improvements
+
+= 6.3.3 - 08/10/2025 =
+
+- Fixed: EA Content Ticker | Tags not working properly with The Events Calendar
+- Fixed: EA Advanced Tabs | Multiple saved templates causing design and responsiveness issues
+- Fixed: EA Woo Checkout | Conflict with WooPayments
+- Improved: EA Advanced Tab | Added Liquid Glass Effect
+- Improved: EA Feature List | Horizontal layout enhancements
+- Improved: EA Business Review | New design update
+- Improved: EA Dynamic Tags | Enhanced flexibility
+- Improved: EA Advanced Tabs | Added scheduling option for "Active as Default" controller
+- Improved: EA Event Calendar | Added location field in event popup
+- Few minor bug fixes & improvements
+
+= 6.3.2 - 18/09/2025 =
+
+- Fixed: EA Image Accordion | Horizontal layout not working on mobile
+- Fixed: EA Product Images | Zoom lens size not working
+- Fixed: EA Advanced Tabs | Tab title background color not working
+- Fixed: EA Add to Cart & Rating | Conflict with Cusrev causing layout issues
+- Fixed: EA Woo Product Compare | Header column styling issue
+- Fixed: EA Feature List | Icon size rendering incorrectly
+- Fixed: EA Woo Checkout | Styling issue with WooCommerce Subscriptions
+- Fixed: EA Woo Cart | Body color issue on Safari/iPhone
+- Improved: EA Advanced Tabs | Vertical layout offset now starts from content
+- Improved: EA Feature List | Layout enhancements
+- Improved: EA Pricing Table | Style & functional refinements
+- Improved: Woo Product Grid | Show secondary image on hover
+- Improved: Woo Product Grid | On Sale badge toggle added
+- Improved: EA Content Ticker | “Order By” custom field meta key support
+- Improved: EA Business Reviews | Google My Business API support
+- Improved: EA Business Reviews | Display selected reviews
+- Improved: EA Testimonial | New layout added
+- Improved: EA Post Grid | Text placed before image for accessibility
+- Improved: EA NFT Gallery | New source: Magic Eden
+- Few minor bug fixes & improvements
+
+[See changelog for all versions](https://essential-addons.com/changelog).
+
+
+== Upgrade Notice ==

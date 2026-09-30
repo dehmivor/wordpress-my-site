@@ -1,0 +1,29 @@
+name: Deploy WordPress to Server
+
+on:
+  push:
+    branches:
+      - main # Chạy action này khi bạn push code lên nhánh main
+
+jobs:
+  web-deploy:
+    name: Deploy to Server via FTP
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+      
+      - name: 📂 Sync files to Server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.3
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # server-dir: /public_html/ # Bỏ comment và sửa nếu thư mục web của bạn không ở gốc
+          # Bỏ qua không đồng bộ những file này lên server
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            .gitignore
+            README.md

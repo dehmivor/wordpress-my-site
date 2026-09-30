@@ -1,0 +1,122 @@
+@use "../../variables/colors" as colors;
+@use "../../variables/mixins" as mixins;
+@use "~@wordpress/base-styles/breakpoints" as breakpoints;
+
+.edd-form__discount {
+	background-color: #fff;
+	padding: 24px;
+	border: 1px solid colors.$wp-border;
+	border-radius: 4px;
+
+	.description {
+		display: block;
+
+		&:not(:last-child) {
+			margin-bottom: 2em;
+		}
+	}
+
+	input[type="text"] {
+		width: 300px;
+	}
+
+	textarea {
+		height: 100px;
+	}
+
+	select,
+	.edd-select-chosen {
+		width: 400px;
+		max-width: 100%;
+	}
+}
+
+.edd-code-wrapper {
+	display: flex;
+	align-items: stretch;
+	gap: 3px;
+}
+
+button.edd-popup-trigger {
+
+	body[class*="branch-6"] & {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	@media screen and (max-width: breakpoints.$break-medium) {
+		margin-bottom: 0 !important;
+	}
+
+	@media screen and (max-width: breakpoints.$break-mobile) {
+		span:not(.dashicons) {
+			display: none;
+		}
+	}
+}
+
+.edd-code-generator-popup {
+	@include mixins.edd-popup( $width: 250px, $transformX: 55px, $transformY: 0, $pointer-size: 15px, $pointer-position: top );
+
+	&:after {
+		left: 70%;
+	}
+
+	@media screen and (min-width: breakpoints.$break-medium) {
+		transform: translateY(45px) translateX(445px);
+
+		&:after {
+			left: 0;
+		}
+	}
+
+	.edd-form-group {
+		width: 100%;
+		margin-bottom: 10px;
+		padding-bottom: 10px;
+		box-sizing: border-box;
+		margin-top: 0;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-bottom: 1px solid colors.$wp-gray-5;
+		height: 40px;
+
+		&:last-of-type {
+			border-bottom: 0;
+		}
+
+		label {
+			padding: 5px 0;
+			width: 60px;
+			font-size: 12px;
+			margin-bottom: 0;
+			box-sizing: border-box;
+
+			@media screen and (max-width: breakpoints.$break-medium) {
+				line-height: 28px;
+			}
+		}
+
+		input:not([type="checkbox"]):not([type="radio"]) {
+			width: 120px !important;
+			min-height: 0;
+			height: 30px;
+
+			&:not(:focus) {
+				border: 1px solid colors.$wp-input-border-2;
+			}
+		}
+	}
+
+	#edd-generate-code {
+		width: 100%;
+
+		@media screen and (max-width: breakpoints.$break-medium) {
+			&:before {
+				margin-top: 8px;
+			}
+		}
+	}
+}

@@ -1,0 +1,35 @@
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+@use "../../variables/colors" as colors;
+@use "../../variables/mixins" as mixins;
+@use "../../components/editor-header";
+
+.edd-email-editor__description {
+	margin: 2em 0;
+}
+
+.edd-editor__header--actions {
+	position: relative;
+
+	.edd-email-status-badge {
+		position: absolute;
+		right: 0;
+		top: 53px;
+		margin-right: 20px;
+		border: 1px solid;
+		padding: 12px;
+	}
+}
+
+.edd-email-action-reset {
+	border-color: var(--edd-alert-red) !important;
+	color: var(--edd-alert-red) !important;
+
+	&:hover {
+		border-color: var(--edd-alert-red-hover) !important;
+		color: var(--edd-alert-red-hover) !important;
+	}
+}
+
+.edd-editor__actions--test + .notice {
+	margin-top: 2em;
+}

@@ -1,0 +1,59 @@
+@use '../../variables/colors';
+
+// Multi-select control.
+.ts-wrapper.multi .ts-control {
+	gap: 4px;
+
+	// Hide the dropdown arrow on multi-selects.
+	--edd-ts-control-bg-image: none;
+}
+
+// Active state with dropdown open.
+.ts-wrapper.multi.dropdown-active .ts-control {
+	--edd-ts-control-border-bottom-color: transparent;
+}
+
+// Selected items (tags).
+.ts-wrapper.multi .ts-control > .item {
+	padding: 8px 6px;
+	line-height: 1;
+	border: 1px solid colors.$wp-input-border-2;
+	max-width: 100%;
+	border-radius: 2px;
+	background: colors.$wp-alternate;
+	box-shadow: none;
+	color: colors.$wp-input-text;
+	cursor: default;
+	position: relative;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	&.active {
+		background: var(--edd-wp-admin-theme-color);
+		color: #fff;
+	}
+
+	body[class*="branch-6"] & {
+		padding: 4px 6px;
+	}
+
+	// Remove button on selected items.
+	.remove {
+		display: flex;
+		align-items: center;
+		border: none;
+		border-left: 1px solid colors.$wp-alternate;
+		background: none;
+		color: colors.$wp-input-text;
+		cursor: pointer;
+		font-size: 14px;
+		padding: 0 5px;
+		text-decoration: none;
+		margin-left: 4px;
+
+		&:hover {
+			color: #50575e;
+		}
+	}
+}

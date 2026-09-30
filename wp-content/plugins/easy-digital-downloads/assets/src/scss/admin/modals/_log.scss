@@ -1,0 +1,18 @@
+@use '../../variables/colors' as colors;
+
+// Log list table dialogs (gateway errors, API requests).
+.edd-modal--log {
+	.edd-modal__log {
+		margin: 0;
+		padding: 12px;
+		background: colors.$wp-alternate;
+		border: 1px solid colors.$wp-border;
+		border-radius: 4px;
+		font-family: Consolas, Monaco, monospace;
+		font-size: 13px;
+		line-height: 1.5;
+		white-space: pre-wrap;
+		word-break: break-word;
+		overflow-x: auto;
+	}
+}

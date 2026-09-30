@@ -1,0 +1,40 @@
+@use "~@wordpress/base-styles/breakpoints" as wp-breakpoints;
+@use "../../variables/colors" as colors;
+
+@media screen and (min-width: wp-breakpoints.$break-small) {
+	#edd-reports-charts-wrap {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(200px, 50%));
+		grid-gap: 2em;
+		margin: 0 20px;
+	}
+
+	.edd-reports-chart {
+		margin-bottom: 0;
+	}
+
+	.edd-reports-chart-line,
+	.edd-reports-chart-bar {
+		grid-column: 1 / span 2;
+	}
+}
+
+.edd-canvas__container {
+	margin: auto;
+	position: relative;
+	max-width: 100%;
+	max-height: 75vh;
+	width: calc(100% - 2px);
+	overflow: visible;
+
+	&.edd-canvas__type-line,
+	&.edd-canvas__type-bar {
+		height: 300px;
+	}
+}
+
+.chart-timezone {
+	font-size: .75rem;
+	color: colors.$wp-gray-10;
+	grid-column: 1 / span 2;
+}

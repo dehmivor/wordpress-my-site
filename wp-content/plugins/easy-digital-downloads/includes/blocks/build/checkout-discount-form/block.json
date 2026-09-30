@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "edd/checkout-discount-form",
+  "version": "1.0.0",
+  "title": "EDD Discount Form",
+  "category": "easy-digital-downloads",
+  "icon": "tag",
+  "description": "Discount code form for checkout.",
+  "keywords": [
+    "easy digital downloads",
+    "edd",
+    "discount",
+    "coupon"
+  ],
+  "ancestor": [
+    "edd/checkout"
+  ],
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "textdomain": "easy-digital-downloads",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css"
+}

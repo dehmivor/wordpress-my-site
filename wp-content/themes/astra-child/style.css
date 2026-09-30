@@ -1,0 +1,27 @@
+/*
+Theme Name: Astra Child
+Theme URI: https://wpastra.com/
+Template: astra
+Author: Brainstorm Force
+Author URI: https://wpastra.com/about/
+Description: Astra Child Theme
+Version: 1.0.0
+Text Domain: astra-child
+*/
+
+/* Thêm CSS tùy chỉnh của bạn vào bên dưới dòng này */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+body, h1, h2, h3, h4, h5, h6, p, a, span, div, li, td, th {
+    font-family: 'Pretendard', sans-serif !important;
+}
+
+/* Ẩn giỏ hàng (nếu đang dùng header mặc định của Astra) */
+.ast-header-cart {
+    display: none !important;
+}
+
+/* Ẩn WooCommerce cart */
+.widget_shopping_cart, .cart-contents {
+    display: none !important;
+}

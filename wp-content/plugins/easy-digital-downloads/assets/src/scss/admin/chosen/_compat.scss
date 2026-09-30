@@ -1,0 +1,53 @@
+// Defensive re-assertions against third-party Chosen v1.x stylesheets (#2622).
+// Re-uses CSS custom properties from base/state rules so theming remains intact.
+
+@use 'base';
+
+// Wrapper.
+.ts-wrapper.chosen-container {
+	display: block;
+	user-select: auto;
+}
+
+// Control — re-assert background longhands, borders, padding, sizing, shadow.
+.ts-wrapper.chosen-container .ts-control.chosen-single,
+.ts-wrapper.chosen-container .ts-control.chosen-choices {
+	@include base.control-chrome;
+	height: auto;
+	min-height: var(--edd-ts-control-min-height);
+	padding: 0 var(--edd-ts-control-pad-right) 0 var(--edd-ts-control-pad-left);
+	border-bottom-color: var(--edd-ts-control-border-bottom-color, var(--edd-ts-control-border-color));
+	border-radius: var(--edd-ts-control-radius);
+	background-color: var(--edd-ts-control-bg-color);
+	background-image: var(--edd-ts-control-bg-image);
+	background-clip: border-box;
+	box-shadow: var(--edd-ts-control-shadow);
+	color: var(--edd-ts-control-color);
+	cursor: pointer;
+	line-height: inherit;
+	white-space: normal;
+	text-decoration: none;
+}
+
+// Selected item.
+.ts-wrapper.chosen-container .ts-control.chosen-single > .item {
+	position: static;
+	top: auto;
+	right: auto;
+	width: auto;
+	height: auto;
+	display: inline-flex;
+}
+
+// Dropdown: un-hide across Chosen 1.x (left offset in 1.4-1.6, clip in 1.7, clip-path in 1.8+).
+.ts-wrapper.chosen-container .ts-dropdown.chosen-drop {
+	left: 0;
+	margin-top: 0;
+	border: 1px solid var(--edd-ts-dropdown-border-color);
+	border-top: 0;
+	border-radius: var(--edd-ts-dropdown-radius);
+	background: #fff;
+	box-shadow: var(--edd-ts-dropdown-shadow);
+	clip: auto;
+	clip-path: none;
+}

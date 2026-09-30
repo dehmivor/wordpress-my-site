@@ -1,0 +1,16 @@
+// Focus state — match WP admin input/select :focus.
+// WP 6.x: hardcoded #2271b1 color.
+.ts-wrapper.focus .ts-control {
+	--edd-ts-control-border-color: #2271b1;
+	--edd-ts-control-shadow: 0 0 0 1px #2271b1;
+	outline: 2px solid transparent;
+}
+
+// WordPress 7.0+ uses CSS custom properties for the focus color.
+body[class*="branch-7"] {
+
+	.ts-wrapper.focus .ts-control {
+		--edd-ts-control-border-color: var(--edd-wp-admin-theme-color);
+		--edd-ts-control-shadow: 0 0 0 var(--wp-admin-border-width-focus, 1.5px) var(--edd-wp-admin-theme-color);
+	}
+}

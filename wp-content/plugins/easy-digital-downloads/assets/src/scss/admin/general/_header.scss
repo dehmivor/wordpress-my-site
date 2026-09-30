@@ -1,0 +1,120 @@
+@use '../../variables/colors';
+
+#edd-header {
+	border-top: 5px solid var(--edd-light-blue);
+	border-bottom: 1px solid colors.$wp-border;
+	padding: 20px 0px;
+	margin-left: -20px;
+	background: #fff;
+
+	#edd-header-wrapper {
+		display: flex;
+		justify-content: space-between;
+		padding: 0 20px;
+		align-items: center;
+
+		#edd-header-branding {
+			.edd-header-logo {
+				display: block;
+				max-width: 300px;
+				margin: 0;
+				padding-right: 16px;
+			}
+		}
+
+		.edd-header-page-title-wrap {
+			font-size: 1.75em;
+			margin-right: auto;
+			padding-left: 16px;
+			border-left: 1px solid colors.$wp-gray-200;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.edd-header-page-title {
+			font-weight: 400;
+			font-size: 1em;
+			line-height: 1.3em;
+			margin: .67em 0;
+		}
+	}
+
+	.edd-round {
+		position: relative;
+		background-color: #f3f4f5;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: 10px;
+		cursor: pointer;
+		transition: background-color .2s ease;
+
+		&.edd-hidden {
+			display: none;
+		}
+	}
+
+	button {
+		&.edd-round {
+			border: none;
+
+			&:hover {
+				background-color: #e5e5e5;
+			}
+
+			&:active, &:focus {
+				outline: 2px solid var(--edd-light-blue);
+			}
+
+			svg {
+				width: 20px;
+				height: 20px;
+			}
+		}
+	}
+
+	.edd-number {
+		position: absolute;
+		background-color: var(--edd-alert-red);
+		width: 16px;
+		height: 16px;
+		font-weight: 600;
+		font-size: 10px;
+		color: #fff;
+		top: -8px;
+		left: 50%;
+		transform: translateX(-50%);
+		margin: 0;
+		-webkit-animation: bounce 2s 5;
+		animation: bounce 2s 5;
+
+		&.edd-hidden {
+			display: none !important;
+		}
+	}
+}
+
+.no-js #edd-header-actions {
+	display: none;
+}
+
+@media screen and (max-width: 840px) {
+	#edd-header {
+		#edd-header-wrapper {
+			#edd-header-branding {
+				.edd-header-logo {
+					display: none;
+				}
+			}
+
+			.edd-header-page-title-wrap {
+				padding-left: 0;
+				border-left: none !important;
+			}
+		}
+	}
+}
