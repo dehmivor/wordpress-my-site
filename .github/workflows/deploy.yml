@@ -19,7 +19,14 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /htdocs/
+          
+          # CHỈ ĐỊNH ĐÚNG THƯ MỤC CẦN ĐẨY LÊN (VÍ DỤ: THEME ASTRA-CHILD)
+          # local-dir là thư mục trên GitHub/máy tính của bạn
+          local-dir: ./wp-content/themes/astra-child/
+          
+          # server-dir là thư mục tương ứng trên InfinityFree
+          server-dir: /htdocs/wp-content/themes/astra-child/
+          
           # Bỏ qua không đồng bộ những file này lên server
           exclude: |
             **/.git*
